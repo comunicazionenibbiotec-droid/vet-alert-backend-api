@@ -104,4 +104,3 @@ jobs:
           WAHIS_CSV_URL: ${{ secrets.WAHIS_CSV_URL }}
           WAHIS_SYNC_TOKEN: ${{ secrets.WAHIS_SYNC_TOKEN }}
         run: python scripts/sync_wahis_csv.py
-        Add WAHIS daily sync workflow
