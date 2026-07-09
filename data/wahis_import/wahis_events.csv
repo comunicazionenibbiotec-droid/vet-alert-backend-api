@@ -1,0 +1,3 @@
+external_id,source,disease,disease_it,diagnosis_status,species,animal_group,observation_date,report_date,country,region,location,lat,lon,url_source,notes
+WAHIS-EXAMPLE-ASF-001,WAHIS,African swine fever,Peste suina africana,Confermato,Cinghiale,swine,2026-07-07,2026-07-08,Italy,Lombardia,Area Pavia,45.1847,9.1582,https://wahis.woah.org/,Esempio import WAHIS CSV
+WAHIS-EXAMPLE-HPAI-001,WAHIS,Highly pathogenic avian influenza,Influenza aviaria ad alta patogenicita,Confermato,Avicoli,poultry,2026-07-04,2026-07-05,Italy,Veneto,Area Verona,45.4384,10.9916,https://wahis.woah.org/,Esempio import WAHIS CSV
