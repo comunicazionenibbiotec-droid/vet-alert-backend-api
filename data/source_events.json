@@ -1,0 +1,4 @@
+[
+  {"external_id":"USER-DEMO-TO-LEPTO-001","disease":"Leptospirosi","diagnosis_status":"Sospetto","species":"Cane","animal_group":"companion","observation_date":"2026-07-06","lat":45.0600,"lon":7.6800,"location":"Torino","region":"Piemonte","country":"Italy","source":"Demo segnalazione utente","source_type":"user","report_type":"user_suspect"},
+  {"external_id":"USER-DEMO-MI-GIARDIA-001","disease":"Giardiasi","diagnosis_status":"Segnalato da utente","species":"Gatto","animal_group":"companion","observation_date":"2026-07-05","lat":45.4642,"lon":9.1900,"location":"Milano","region":"Lombardia","country":"Italy","source":"Demo test rapido utente","source_type":"user","report_type":"user_positive"}
+]
