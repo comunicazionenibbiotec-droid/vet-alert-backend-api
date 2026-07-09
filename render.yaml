@@ -1,7 +1,6 @@
 services:
   - type: web
-    name: vet-alert-poc-sync
+    name: vet-alert-api-v2
     env: python
-    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
