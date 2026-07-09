@@ -1,1 +1,107 @@
+name: vet.ector WAHIS daily sync
 
+on:
+  schedule:
+    # Every day at 03:15 UTC. In Italy this is 04:15 CET or 05:15 CEST.
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-wahis-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync WAHIS CSV into vet.ector backend
+        env:
+          VETECTOR_BACKEND_URL: ${{ secrets.VETECTOR_BACKEND_URL }}
+          WAHIS_CSV_URL: ${{ secrets.WAHIS_CSV_URL }}
+          WAHIS_SYNC_TOKEN: ${{ secrets.WAHIS_SYNC_TOKEN }}
+        run: python scripts/sync_wahis_csv.py
+
+name: vet.ector WAHIS daily sync
+
+on:
+  schedule:
+    # Every day at 03:15 UTC. In Italy this is 04:15 CET or 05:15 CEST.
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-wahis-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync WAHIS CSV into vet.ector backend
+        env:
+          VETECTOR_BACKEND_URL: ${{ secrets.VETECTOR_BACKEND_URL }}
+          WAHIS_CSV_URL: ${{ secrets.WAHIS_CSV_URL }}
+          WAHIS_SYNC_TOKEN: ${{ secrets.WAHIS_SYNC_TOKEN }}
+        run: python scripts/sync_wahis_csv.py
+
+        name: vet.ector WAHIS daily sync
+
+on:
+  schedule:
+    # Every day at 03:15 UTC. In Italy this is 04:15 CET or 05:15 CEST.
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-wahis-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync WAHIS CSV into vet.ector backend
+        env:
+          VETECTOR_BACKEND_URL: ${{ secrets.VETECTOR_BACKEND_URL }}
+          WAHIS_CSV_URL: ${{ secrets.WAHIS_CSV_URL }}
+          WAHIS_SYNC_TOKEN: ${{ secrets.WAHIS_SYNC_TOKEN }}
+        run: python scripts/sync_wahis_csv.py
+        name: vet.ector WAHIS daily sync
+
+on:
+  schedule:
+    # Every day at 03:15 UTC. In Italy this is 04:15 CET or 05:15 CEST.
+    - cron: "15 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync-wahis-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync WAHIS CSV into vet.ector backend
+        env:
+          VETECTOR_BACKEND_URL: ${{ secrets.VETECTOR_BACKEND_URL }}
+          WAHIS_CSV_URL: ${{ secrets.WAHIS_CSV_URL }}
+          WAHIS_SYNC_TOKEN: ${{ secrets.WAHIS_SYNC_TOKEN }}
+        run: python scripts/sync_wahis_csv.py
+        Add WAHIS daily sync workflow
