@@ -1,8 +1,97 @@
 [
-  {"external_id":"VET-TO-001","name":"Clinica Veterinaria Crocetta","type":"Piccoli animali","availability":"Disponibile oggi","phone":"011 000100","lat":45.055,"lon":7.665,"city":"Torino","region":"Piemonte","services":["cani","gatti","urgenze"]},
-  {"external_id":"VET-TO-002","name":"Ambulatorio Veterinario Dora","type":"Piccoli animali","availability":"Disponibile domani","phone":"011 000200","lat":45.087,"lon":7.692,"city":"Torino","region":"Piemonte","services":["cani","gatti","vaccini"]},
-  {"external_id":"VET-MI-001","name":"Clinica Veterinaria Milano Sud","type":"Piccoli animali","availability":"Disponibile oggi","phone":"02 000222","lat":45.4400,"lon":9.1900,"city":"Milano","region":"Lombardia","services":["cani","gatti","test rapidi"]},
-  {"external_id":"VET-AL-001","name":"Veterinario Aziendale Alessandria","type":"Allevamento / suini","availability":"Reperibilita 24h","phone":"0131 000400","lat":44.915,"lon":8.620,"city":"Alessandria","region":"Piemonte","services":["suini","cinghiali","biosicurezza"]},
-  {"external_id":"VET-VR-001","name":"Veterinario Avicolo Verona","type":"Avicoli","availability":"Disponibile oggi","phone":"045 000600","lat":45.435,"lon":10.995,"city":"Verona","region":"Veneto","services":["avicoli","volatili","sorveglianza"]},
-  {"external_id":"VET-FE-001","name":"Ambulatorio Equini Ferrara","type":"Equini","availability":"Disponibile domani","phone":"0532 000700","lat":44.835,"lon":11.625,"city":"Ferrara","region":"Emilia-Romagna","services":["equini","West Nile"]}
+  {
+    "external_id": "VET-TO-001",
+    "name": "Clinica Veterinaria Crocetta",
+    "type": "Piccoli animali",
+    "availability": "Disponibile oggi",
+    "phone": "011 000100",
+    "lat": 45.055,
+    "lon": 7.665,
+    "city": "Torino",
+    "region": "Piemonte",
+    "services": [
+      "cani",
+      "gatti",
+      "urgenze"
+    ]
+  },
+  {
+    "external_id": "VET-TO-002",
+    "name": "Ambulatorio Veterinario Dora",
+    "type": "Piccoli animali",
+    "availability": "Disponibile domani",
+    "phone": "011 000200",
+    "lat": 45.087,
+    "lon": 7.692,
+    "city": "Torino",
+    "region": "Piemonte",
+    "services": [
+      "cani",
+      "gatti",
+      "vaccini"
+    ]
+  },
+  {
+    "external_id": "VET-MI-001",
+    "name": "Clinica Veterinaria Milano Sud",
+    "type": "Piccoli animali",
+    "availability": "Disponibile oggi",
+    "phone": "02 000222",
+    "lat": 45.44,
+    "lon": 9.19,
+    "city": "Milano",
+    "region": "Lombardia",
+    "services": [
+      "cani",
+      "gatti",
+      "test rapidi"
+    ]
+  },
+  {
+    "external_id": "VET-AL-001",
+    "name": "Veterinario Aziendale Alessandria",
+    "type": "Allevamento / suini",
+    "availability": "Reperibilita 24h",
+    "phone": "0131 000400",
+    "lat": 44.915,
+    "lon": 8.62,
+    "city": "Alessandria",
+    "region": "Piemonte",
+    "services": [
+      "suini",
+      "cinghiali",
+      "biosicurezza"
+    ]
+  },
+  {
+    "external_id": "VET-VR-001",
+    "name": "Veterinario Avicolo Verona",
+    "type": "Avicoli",
+    "availability": "Disponibile oggi",
+    "phone": "045 000600",
+    "lat": 45.435,
+    "lon": 10.995,
+    "city": "Verona",
+    "region": "Veneto",
+    "services": [
+      "avicoli",
+      "volatili",
+      "sorveglianza"
+    ]
+  },
+  {
+    "external_id": "VET-FE-001",
+    "name": "Ambulatorio Equini Ferrara",
+    "type": "Equini",
+    "availability": "Disponibile domani",
+    "phone": "0532 000700",
+    "lat": 44.835,
+    "lon": 11.625,
+    "city": "Ferrara",
+    "region": "Emilia-Romagna",
+    "services": [
+      "equini",
+      "West Nile"
+    ]
+  }
 ]
