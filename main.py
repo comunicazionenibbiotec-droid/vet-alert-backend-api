@@ -14,11 +14,31 @@ from sync.adis_csv_connector import AdisCsvConnector
 from sync.normalizer import normalize_official_event
 from sync.deduplicator import deduplicate_public_events
 
+import re
+
+try:
+    from sync.demo_control import (
+        show_demo_events,
+        auto_populate_demo_365,
+        filter_demo_events,
+        demo_status,
+        purge_demo_events_sqlite,
+    )
+except Exception:
+    # Safe fallback: never break backend startup if demo_control is missing.
+    def show_demo_events(): return True
+    def auto_populate_demo_365(): return True
+    def filter_demo_events(events): return list(events)
+    def demo_status(): return {"show_demo_events": True, "auto_populate_demo_365": True}
+    def purge_demo_events_sqlite(conn, table_name="events", older_than_days=None):
+        return {"status": "disabled", "deleted": 0}
+
 DB_PATH=os.getenv("DB_PATH","vet_alert.db")
 ENABLE_SCHEDULER=os.getenv("ENABLE_SCHEDULER","true").lower()=="true"
 SYNC_INTERVAL_HOURS=int(os.getenv("SYNC_INTERVAL_HOURS","24"))
 WAHIS_SYNC_TOKEN=os.getenv("WAHIS_SYNC_TOKEN","")
-AUTO_POPULATE_DEMO_365=os.getenv("AUTO_POPULATE_DEMO_365","true").lower()=="true"
+AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
+SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
 app=FastAPI(title="vet.ector Veterinary Alert API", version="1.5.0-multisource-dedupe-italy")
@@ -101,7 +121,8 @@ def parse_date(value):
     try: return datetime.fromisoformat(str(value)[:10]).date()
     except Exception: return None
 
-import re
+
+
 
 def matches_animal_filter(row, animal_filter):
     if animal_filter in ("", "all", None):
