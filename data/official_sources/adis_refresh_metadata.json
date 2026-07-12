@@ -1,0 +1,14 @@
+{
+  "source": "ADIS",
+  "url": "https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report",
+  "country": "Italy",
+  "generated_at": "2026-07-12T21:19:46.360987+00:00",
+  "contexts_detected": 0,
+  "rows_generated": 0,
+  "existing_rows_before": 63,
+  "rows_skipped": 0,
+  "skipped_sample": [],
+  "action": "kept_existing_csv_zero_rows",
+  "warning": "No rows generated from public ADIS page; existing CSV kept. Use normalized source CSV or update parser/geocoding.",
+  "error": null
+}
