@@ -1,146 +1,18 @@
 {
-  "version": "v74-exact-animal-types",
+  "version": "v76-exact-animal-types",
   "species": [
-    {
-      "value": "dog",
-      "label": "Cane",
-      "aliases": [
-        "cane",
-        "cani",
-        "dog",
-        "dogs",
-        "canine"
-      ]
-    },
-    {
-      "value": "cat",
-      "label": "Gatto",
-      "aliases": [
-        "gatto",
-        "gatti",
-        "cat",
-        "cats",
-        "feline"
-      ]
-    },
-    {
-      "value": "bovine",
-      "label": "Bovino",
-      "aliases": [
-        "bovino",
-        "bovini",
-        "bovine",
-        "cattle",
-        "cow",
-        "cows"
-      ]
-    },
-    {
-      "value": "swine",
-      "label": "Suino / cinghiale",
-      "aliases": [
-        "suino",
-        "suini",
-        "cinghiale",
-        "cinghiali",
-        "swine",
-        "pig",
-        "pigs",
-        "wild boar",
-        "boar"
-      ]
-    },
-    {
-      "value": "ovine",
-      "label": "Ovino",
-      "aliases": [
-        "ovino",
-        "ovini",
-        "pecora",
-        "pecore",
-        "sheep",
-        "ovine"
-      ]
-    },
-    {
-      "value": "equine",
-      "label": "Equino",
-      "aliases": [
-        "equino",
-        "equini",
-        "cavallo",
-        "cavalli",
-        "horse",
-        "horses",
-        "equine"
-      ]
-    },
-    {
-      "value": "caprine",
-      "label": "Caprino",
-      "aliases": [
-        "caprino",
-        "caprini",
-        "capra",
-        "capre",
-        "goat",
-        "goats",
-        "caprine"
-      ]
-    },
-    {
-      "value": "poultry",
-      "label": "Avicoli / volatili",
-      "aliases": [
-        "avicoli",
-        "volatile",
-        "volatili",
-        "uccelli",
-        "pollo",
-        "polli",
-        "gallina",
-        "galline",
-        "poultry",
-        "avian",
-        "birds",
-        "bird"
-      ]
-    }
+    {"value": "dog", "label": "Cane", "aliases": ["cane", "cani", "dog", "dogs", "canine"]},
+    {"value": "cat", "label": "Gatto", "aliases": ["gatto", "gatti", "cat", "cats", "feline"]},
+    {"value": "bovine", "label": "Bovino", "aliases": ["bovino", "bovini", "bovine", "cattle", "cow", "cows"]},
+    {"value": "swine", "label": "Suino / cinghiale", "aliases": ["suino", "suini", "cinghiale", "cinghiali", "swine", "pig", "pigs", "wild boar", "boar"]},
+    {"value": "ovine", "label": "Ovino", "aliases": ["ovino", "ovini", "pecora", "pecore", "sheep", "ovine"]},
+    {"value": "equine", "label": "Equino", "aliases": ["equino", "equini", "cavallo", "cavalli", "horse", "horses", "equine"]},
+    {"value": "caprine", "label": "Caprino", "aliases": ["caprino", "caprini", "capra", "capre", "goat", "goats", "caprine"]},
+    {"value": "poultry", "label": "Avicoli / volatili", "aliases": ["avicoli", "volatile", "volatili", "uccelli", "poultry", "avian", "birds", "bird"]}
   ],
   "macro_categories": [
-    {
-      "value": "all",
-      "label": "Tutti gli animali",
-      "groups": [
-        "dog",
-        "cat",
-        "bovine",
-        "swine",
-        "ovine",
-        "equine",
-        "caprine",
-        "poultry"
-      ]
-    },
-    {
-      "value": "companion",
-      "label": "Animali da compagnia",
-      "groups": [
-        "dog",
-        "cat"
-      ]
-    },
-    {
-      "value": "livestock",
-      "label": "Animali da reddito",
-      "groups": [
-        "bovine",
-        "swine",
-        "ovine",
-        "equine",
-        "caprine",
-        "poultry"
-      ]
-    }
+    {"value": "all", "label": "Tutti gli animali", "groups": ["dog", "cat", "bovine", "swine", "ovine", "equine", "caprine", "poultry"]},
+    {"value": "companion", "label": "Animali da compagnia", "groups": ["dog", "cat"]},
+    {"value": "livestock", "label": "Animali da reddito", "groups": ["bovine", "swine", "ovine", "equine", "caprine", "poultry"]}
   ]
 }
