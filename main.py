@@ -13,6 +13,9 @@ from sync.normalizer import normalize_official_event
 from sync.deduplicator import deduplicate_public_events
 from sync.event_enrichment import enrich_public_events
 from sync.source_schema import REQUIRED_COLUMNS, OPTIONAL_COLUMNS, read_csv_text, validate_rows
+from sync.bdn_connector import BdnDensityConnector, normalize_density_row
+from sync.efsa_risk_connector import EfsaRiskLayerConnector, normalize_risk_layer
+from sync.risk_summary import summarize_area_risk
 
 try:
     from sync.demo_control import (
@@ -38,7 +41,7 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="1.7.0-wahis-adis-source-connectors-v91")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="1.8.0-info-sources-v92")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -61,6 +64,14 @@ def load_json(path):
     try:
         with open(path,"r",encoding="utf-8") as f: return json.load(f)
     except Exception: return []
+
+def get_bdn_density_items():
+    connector = BdnDensityConnector()
+    return [normalize_density_row(r) for r in connector.fetch()]
+
+def get_efsa_risk_layers():
+    connector = EfsaRiskLayerConnector()
+    return [normalize_risk_layer(r) for r in connector.fetch()]
 
 def log_sync(source,status,message,received,inserted,updated,started_at):
     with connect() as conn:
@@ -249,12 +260,58 @@ def get_sync_status():
             out[source]=None if row is None else dict(row)
     return {"version":app.version,"sync_interval_hours":SYNC_INTERVAL_HOURS,"sources":out}
 @app.get("/risk/livestock-density")
-def get_livestock_density(country:str=Query("Italy"), species:str=Query("all")):
-    data=load_json("data/bdn/livestock_density_it.json")
-    if not isinstance(data,list): return {"count":0,"items":[]}
-    species_filter=str(species).lower().strip()
-    if species_filter and species_filter != "all": data=[r for r in data if species_filter in str(r.get("species","")).lower()]
-    return {"count":len(data),"items":data}
+def get_livestock_density(country:str=Query("Italy"), species:str=Query("all"), region:str|None=Query(None), province:str|None=Query(None)):
+    data=get_bdn_density_items()
+    country_l=str(country or "").lower().strip()
+    species_l=str(species or "all").lower().strip()
+    region_l=str(region or "").lower().strip()
+    province_l=str(province or "").lower().strip()
+    out=[]
+    for row in data:
+        if country_l and str(row.get("country","")).lower()!=country_l: continue
+        if species_l and species_l!="all" and species_l not in str(row.get("species","")).lower(): continue
+        if region_l and region_l not in str(row.get("region","")).lower(): continue
+        if province_l and province_l not in str(row.get("province","")).lower(): continue
+        out.append(row)
+    return {"count":len(out),"items":out}
+
+@app.get("/risk/efsa-layers")
+def get_efsa_layers(species:str=Query("all"), disease:str|None=Query(None)):
+    data=get_efsa_risk_layers()
+    species_l=str(species or "all").lower().strip()
+    disease_l=str(disease or "").lower().strip()
+    out=[]
+    for row in data:
+        if disease_l and disease_l not in f"{row.get('disease','')} {row.get('disease_key','')}".lower(): continue
+        if species_l and species_l!="all":
+            if not any(species_l in str(sp).lower() for sp in row.get("species",[])): continue
+        out.append(row)
+    return {"count":len(out),"items":out}
+
+@app.get("/risk/area-summary")
+def get_area_summary(lat:float=Query(...), lon:float=Query(...), radius_km:float=Query(50,ge=1,le=2000), days:int=Query(180,ge=1,le=3650), animal_filter:str=Query("all")):
+    events_response=get_events(lat=lat, lon=lon, radius_km=radius_km, days=days, animal_filter=animal_filter, disease=None, include_official=True, include_user=True)
+    events=events_response.get("events",[])
+    density=get_bdn_density_items()
+    layers=get_efsa_risk_layers()
+    return summarize_area_risk(events,density,layers,species=animal_filter)
+
+@app.get("/sources/registry")
+def get_sources_registry():
+    return {
+        "event_sources":[
+            {"key":"WAHIS","type":"official","role":"global official animal disease events"},
+            {"key":"ADIS","type":"official","role":"EU official animal disease events"},
+            {"key":"user_report","type":"user","role":"suspect reports from platform users"},
+            {"key":"rapid_test","type":"user","role":"rapid test positive reports"},
+            {"key":"veterinarian","type":"professional","role":"veterinarian validated reports"},
+            {"key":"Demo 365 giorni","type":"demo","role":"temporary prototype data"}
+        ],
+        "context_sources":[
+            {"key":"BDN","type":"risk_context","role":"Italian livestock density/exposure context"},
+            {"key":"EFSA","type":"risk_context","role":"risk/trend/scientific context, not point events"}
+        ]
+    }
 @app.post("/demo/populate-365")
 def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_365(count)
 @app.post("/demo/purge")
