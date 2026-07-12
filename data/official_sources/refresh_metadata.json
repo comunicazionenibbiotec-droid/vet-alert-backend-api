@@ -1,0 +1,19 @@
+{
+  "refreshed_at": "2026-07-12T20:03:22.083260+00:00",
+  "max_visible_days": 365,
+  "outputs": [
+    {
+      "source": "WAHIS",
+      "mode": "kept_existing_no_url",
+      "records": 2,
+      "output": "data/official_sources/wahis_events.csv"
+    },
+    {
+      "source": "ADIS",
+      "mode": "kept_existing_no_url",
+      "records": 2,
+      "output": "data/official_sources/adis_events.csv"
+    }
+  ],
+  "note": "Backend map visibility is controlled by the days filter, for example 365 days."
+}
