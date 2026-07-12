@@ -1,116 +1,234 @@
-from __future__ import annotations
-import re
-from datetime import datetime
-from math import radians, sin, cos, asin, sqrt
-from typing import Any, Dict, List, Tuple
+"""
+vet.ector backend v85 - safer public-event deduplication.
 
-EARTH_RADIUS_KM = 6371.0
+Purpose
+-------
+Deduplicate ONLY when doing so is safe for map display:
+- official + official: deduplicate with normal thresholds
+- official + user/demo/test/vet: deduplicate only when very close and same/similar date
+- user + user / demo + demo / non-official + non-official: do NOT deduplicate
+
+This module is designed as a drop-in replacement if main.py already imports
+`deduplicate_events` from `sync.deduplicator`.
+"""
+from __future__ import annotations
+
+from datetime import datetime, date
+from math import radians, sin, cos, asin, sqrt
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+Event = Dict[str, Any]
 
 
 def _norm(value: Any) -> str:
-    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
+    return str(value or "").strip().lower()
 
 
-def _date(value: Any):
+def _norm_disease(event: Event) -> str:
+    return _norm(event.get("disease_normalized") or event.get("disease") or event.get("disease_it") or event.get("disease_original"))
+
+
+def _norm_animal_group(event: Event) -> str:
+    return _norm(event.get("animal_group") or event.get("species"))
+
+
+def _source_type(event: Event) -> str:
+    return _norm(event.get("source_type") or event.get("report_type") or event.get("source"))
+
+
+def _is_official(event: Event) -> bool:
+    source_type = _source_type(event)
+    source = _norm(event.get("source"))
+    report_type = _norm(event.get("report_type"))
+    return (
+        "official" in source_type
+        or "official" in report_type
+        or source in {"wahis", "adis", "woah", "official_demo"}
+        or source.startswith("wahis")
+        or source.startswith("adis")
+    )
+
+
+def _is_non_official_demo_or_user(event: Event) -> bool:
+    source_type = _source_type(event)
+    source = _norm(event.get("source"))
+    report_type = _norm(event.get("report_type"))
+    return (
+        "user" in source_type
+        or "user" in report_type
+        or "demo" in source
+        or source in {"demo 365 giorni", "demo365"}
+        or "test" in report_type
+        or "vet" in source_type
+    )
+
+
+def _parse_date(value: Any) -> Optional[date]:
     if not value:
         return None
+    text = str(value).strip()
+    for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S%z"):
+        try:
+            return datetime.strptime(text[:19] if "T" in text else text, fmt).date()
+        except Exception:
+            pass
     try:
-        return datetime.fromisoformat(str(value)[:10]).date()
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).date()
     except Exception:
         return None
 
 
-def _distance_km(a: Dict[str, Any], b: Dict[str, Any]) -> float:
+def _event_date(event: Event) -> Optional[date]:
+    return _parse_date(event.get("observation_date") or event.get("event_date") or event.get("report_date"))
+
+
+def _date_diff_days(a: Event, b: Event) -> Optional[int]:
+    da = _event_date(a)
+    db = _event_date(b)
+    if not da or not db:
+        return None
+    return abs((da - db).days)
+
+
+def _float_or_none(value: Any) -> Optional[float]:
     try:
-        lat1, lon1 = float(a.get("lat")), float(a.get("lon"))
-        lat2, lon2 = float(b.get("lat")), float(b.get("lon"))
+        if value in (None, ""):
+            return None
+        return float(value)
     except Exception:
-        return 999999.0
+        return None
+
+
+def _distance_km(a: Event, b: Event) -> Optional[float]:
+    lat1 = _float_or_none(a.get("lat"))
+    lon1 = _float_or_none(a.get("lon"))
+    lat2 = _float_or_none(b.get("lat"))
+    lon2 = _float_or_none(b.get("lon"))
+    if None in (lat1, lon1, lat2, lon2):
+        return None
+    r = 6371.0
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-    rlat1 = radians(lat1)
-    rlat2 = radians(lat2)
-    h = sin(dlat / 2) ** 2 + cos(rlat1) * cos(rlat2) * sin(dlon / 2) ** 2
-    return 2 * EARTH_RADIUS_KM * asin(sqrt(h))
+    h = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    return 2 * r * asin(sqrt(h))
 
 
-def _is_official(event: Dict[str, Any]) -> bool:
-    return str(event.get("source_type", "")).lower() == "official" or "official" in str(event.get("report_type", "")).lower()
+def _same_area(a: Event, b: Event) -> bool:
+    # Prefer administrative fields when available.
+    for key in ("country", "region", "province", "location"):
+        av = _norm(a.get(key))
+        bv = _norm(b.get(key))
+        if av and bv and av == bv:
+            return True
+    d = _distance_km(a, b)
+    return d is not None and d <= 25.0
 
 
-def _is_same_event(a: Dict[str, Any], b: Dict[str, Any]) -> bool:
-    # Same / similar disease
-    da = _norm(a.get("disease_original") or a.get("disease"))
-    db = _norm(b.get("disease_original") or b.get("disease"))
-    if not da or not db or da != db:
+def _same_species_or_group(a: Event, b: Event) -> bool:
+    ga = _norm_animal_group(a)
+    gb = _norm_animal_group(b)
+    if ga and gb and ga == gb:
+        return True
+    sa = _norm(a.get("species"))
+    sb = _norm(b.get("species"))
+    return bool(sa and sb and sa == sb)
+
+
+def _can_merge(a: Event, b: Event) -> bool:
+    # Must be the same disease and compatible species/group.
+    if not _norm_disease(a) or _norm_disease(a) != _norm_disease(b):
+        return False
+    if not _same_species_or_group(a, b):
         return False
 
-    # Same animal group if available
-    ga = _norm(a.get("animal_group") or a.get("species"))
-    gb = _norm(b.get("animal_group") or b.get("species"))
-    if ga and gb and ga != gb:
+    a_off = _is_official(a)
+    b_off = _is_official(b)
+
+    # Never merge non-official with non-official. Multiple user/demo reports may be independent cases.
+    if not a_off and not b_off:
         return False
 
-    # Near in time
-    ad = _date(a.get("observation_date") or a.get("report_date"))
-    bd = _date(b.get("observation_date") or b.get("report_date"))
-    if ad and bd and abs((ad - bd).days) > 14:
-        return False
+    date_gap = _date_diff_days(a, b)
+    dist = _distance_km(a, b)
 
-    # Near in space. We keep this intentionally conservative.
-    if _distance_km(a, b) > 25:
-        return False
+    # Official + official: normal threshold.
+    if a_off and b_off:
+        if date_gap is not None and date_gap > 14:
+            return False
+        if dist is not None and dist > 50:
+            return False
+        return _same_area(a, b) or dist is None
 
+    # Official + non-official: only merge when very likely the same event.
+    # Very close geographically AND close in time.
+    if date_gap is not None and date_gap > 3:
+        return False
+    if dist is not None and dist > 10:
+        return False
     return True
 
 
-def _merge_events(primary: Dict[str, Any], secondary: Dict[str, Any]) -> Dict[str, Any]:
-    merged = dict(primary)
-    sources = set()
-    for ev in (primary, secondary):
-        raw_sources = ev.get("sources_merged") or []
-        if isinstance(raw_sources, list):
-            sources.update(str(x) for x in raw_sources if x)
-        if ev.get("source"):
-            sources.add(str(ev.get("source")))
-    merged["sources_merged"] = sorted(sources)
+def _event_sort_key(event: Event) -> Tuple[int, float, str]:
+    # Prefer official, then higher risk, then newer date.
+    official_rank = 0 if _is_official(event) else 1
+    risk = _float_or_none(event.get("risk_score")) or 0.0
+    date_str = str(event.get("observation_date") or event.get("report_date") or "")
+    return (official_rank, -risk, date_str)
+
+
+def _merge_cluster(cluster: List[Event]) -> Event:
+    if not cluster:
+        return {}
+    cluster_sorted = sorted(cluster, key=_event_sort_key)
+    primary = dict(cluster_sorted[0])
+
+    sources: List[str] = []
+    source_event_ids: List[str] = []
+    for ev in cluster_sorted:
+        source = str(ev.get("source") or "").strip()
+        if source and source not in sources:
+            sources.append(source)
+        external_id = str(ev.get("external_id") or ev.get("id") or "").strip()
+        if external_id and external_id not in source_event_ids:
+            source_event_ids.append(external_id)
+
+    primary["sources_merged"] = sources or [str(primary.get("source") or "")]
+    primary["source_event_ids_merged"] = source_event_ids
+    primary["duplicate_count"] = len(cluster_sorted)
+    primary["deduplication_applied"] = len(cluster_sorted) > 1
+
     if len(sources) > 1:
-        merged["source"] = " + ".join(sorted(sources))
+        primary["source"] = " + ".join(sources)
 
-    # Use the strongest status if either event is official/confirmed.
-    status_text = f"{primary.get('diagnosis_status','')} {secondary.get('diagnosis_status','')} {primary.get('report_type','')} {secondary.get('report_type','')}".lower()
-    if "conferm" in status_text or "confirm" in status_text or _is_official(primary) or _is_official(secondary):
-        merged["diagnosis_status"] = primary.get("diagnosis_status") or secondary.get("diagnosis_status") or "Confermato"
-        if _is_official(primary) or _is_official(secondary):
-            merged["source_type"] = "official"
-            merged["report_type"] = "official_confirmed"
-    merged["duplicate_count"] = int(primary.get("duplicate_count", 1)) + int(secondary.get("duplicate_count", 1))
-    return merged
+    return primary
 
 
-def deduplicate_public_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Merge probable duplicates from WAHIS, ADIS and internal demo/user layers.
+def deduplicate_events(events: Iterable[Event]) -> List[Event]:
+    """Return public-display events with safer deduplication.
 
-    This runs on the public response only, so it does not delete source records.
-    Raw records remain available in the database and in sync logs.
+    This function does not delete or mutate database rows. It only prepares the API response.
     """
-    merged: List[Dict[str, Any]] = []
-    for event in events:
-        current = dict(event)
-        current.setdefault("sources_merged", [current.get("source")] if current.get("source") else [])
-        current.setdefault("duplicate_count", 1)
-        matched_index = None
-        for idx, existing in enumerate(merged):
-            if _is_same_event(existing, current):
-                matched_index = idx
-                break
-        if matched_index is None:
-            merged.append(current)
-        else:
-            a = merged[matched_index]
-            # Prefer official events as primary when merging.
-            primary, secondary = (a, current)
-            if _is_official(current) and not _is_official(a):
-                primary, secondary = current, a
-            merged[matched_index] = _merge_events(primary, secondary)
+    remaining = [dict(e) for e in events]
+    clusters: List[List[Event]] = []
+
+    while remaining:
+        current = remaining.pop(0)
+        cluster = [current]
+        keep: List[Event] = []
+        for candidate in remaining:
+            if any(_can_merge(member, candidate) for member in cluster):
+                cluster.append(candidate)
+            else:
+                keep.append(candidate)
+        clusters.append(cluster)
+        remaining = keep
+
+    merged = [_merge_cluster(cluster) for cluster in clusters]
+    # Keep the same rough ordering expected by the frontend.
+    merged.sort(key=lambda e: -(_float_or_none(e.get("risk_score")) or 0.0))
     return merged
+
+
+# Backward-compatible alias for possible previous imports.
+def deduplicate_public_events(events: Iterable[Event]) -> List[Event]:
+    return deduplicate_events(events)
