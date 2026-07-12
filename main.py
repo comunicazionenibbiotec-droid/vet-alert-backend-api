@@ -12,6 +12,7 @@ from sync.adis_csv_connector import AdisCsvConnector
 from sync.normalizer import normalize_official_event
 from sync.deduplicator import deduplicate_public_events
 from sync.event_enrichment import enrich_public_events
+from sync.source_schema import REQUIRED_COLUMNS, OPTIONAL_COLUMNS, read_csv_text, validate_rows
 
 try:
     from sync.demo_control import (
@@ -37,7 +38,7 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="1.6.0-source-normalization-v89")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="1.7.0-wahis-adis-source-connectors-v91")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -116,6 +117,8 @@ def sync_adis_events():
     c=AdisCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"ADIS")
 def sync_wahis_csv_text(csv_text, source_name="WAHIS_CSV_UPLOAD"):
     return _sync_rows(source_name,WahisCsvConnector.parse_csv_text(csv_text),"WAHIS")
+def sync_adis_csv_text(csv_text, source_name="ADIS_CSV_UPLOAD"):
+    return _sync_rows(source_name,AdisCsvConnector.parse_csv_text(csv_text),"ADIS")
 def require_sync_token(token):
     if WAHIS_SYNC_TOKEN and token != WAHIS_SYNC_TOKEN: raise HTTPException(status_code=401, detail="Invalid or missing sync token")
 def haversine_km(lat1,lon1,lat2,lon2):
@@ -215,6 +218,9 @@ def run_wahis_sync(): return sync_wahis_events()
 @app.post("/sync/wahis/upload")
 async def upload_wahis_csv(request:Request,x_sync_token:str|None=Header(default=None)):
     require_sync_token(x_sync_token); body=await request.body(); return sync_wahis_csv_text(body.decode("utf-8-sig"),source_name="WAHIS_CSV_UPLOAD")
+@app.post("/sync/adis/upload")
+async def upload_adis_csv(request:Request,x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token); body=await request.body(); return sync_adis_csv_text(body.decode("utf-8-sig"),source_name="ADIS_CSV_UPLOAD")
 @app.get("/sync/wahis/status")
 def get_wahis_status():
     with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'WAHIS%' ORDER BY id DESC LIMIT 1").fetchone()
@@ -227,6 +233,12 @@ def get_adis_status():
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
 @app.post("/sync/all/run")
 def run_all_syncs(): return {"seed": sync_seed_data(),"official_demo": sync_official_events(),"wahis": sync_wahis_events(),"adis": sync_adis_events()}
+@app.get("/sync/sources/schema")
+def get_sync_sources_schema():
+    return {"required_columns": sorted(REQUIRED_COLUMNS), "optional_columns": sorted(OPTIONAL_COLUMNS), "sources": ["WAHIS", "ADIS"]}
+@app.post("/sync/csv/validate")
+async def validate_source_csv(request:Request,x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token); body=await request.body(); rows=read_csv_text(body.decode("utf-8-sig")); valid, errors=validate_rows(rows); return {"received":len(rows),"valid":len(valid),"errors":errors[:50],"error_count":len(errors)}
 @app.get("/sync/status")
 def get_sync_status():
     sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","demo_365"]
