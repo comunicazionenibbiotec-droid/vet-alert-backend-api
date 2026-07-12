@@ -1,0 +1,40 @@
+name: vet.ector official sources refresh
+
+on:
+  schedule:
+    # Every day at 02:20 UTC.
+    - cron: "20 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-official-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download and validate normalized WAHIS/ADIS CSV files
+        env:
+          WAHIS_SOURCE_CSV_URL: ${{ secrets.WAHIS_SOURCE_CSV_URL }}
+          ADIS_SOURCE_CSV_URL: ${{ secrets.ADIS_SOURCE_CSV_URL }}
+        run: python scripts/download_and_validate_sources.py
+
+      - name: Commit updated official source files
+        run: |
+          if [[ -n "$(git status --porcelain data/official_sources)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/official_sources/*.csv
+            git commit -m "Refresh WAHIS/ADIS normalized source CSVs"
+            git push
+          else
+            echo "No source changes to commit."
+          fi
