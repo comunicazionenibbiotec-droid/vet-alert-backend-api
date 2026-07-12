@@ -256,7 +256,22 @@ def startup():
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
 @app.get("/health")
-def health(): return {"status":"ok","time":now_iso(),"version":app.version,"sync_interval_hours":SYNC_INTERVAL_HOURS,"auto_populate_demo_365":AUTO_POPULATE_DEMO_365}
+
+def health():
+    return {
+        "status": "ok",
+        "time": now_iso(),
+        "version": app.version,
+        "sync_interval_hours": SYNC_INTERVAL_HOURS,
+        "auto_populate_demo_365": AUTO_POPULATE_DEMO_365,
+        "show_demo_events": SHOW_DEMO_EVENTS,
+    }
+
+@app.get("/demo/status")
+def get_demo_status():
+    return demo_status()
+
+
 @app.get("/cities")
 def get_cities(): return {"cities":load_json("data/source_cities.json")}
 @app.get("/sync/log")
@@ -314,6 +329,10 @@ def get_livestock_density(country:str=Query("Italy"), species:str=Query("all")):
 
 @app.post("/demo/populate-365")
 def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_365(count)
+@app.post("/demo/purge")
+def demo_purge(older_than_days: int | None = Query(None, ge=1, le=3650)):
+    with connect() as conn:
+        return purge_demo_events_sqlite(conn, table_name="events", older_than_days=older_than_days)
 @app.get("/official-events")
 def get_official_events(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(200,ge=1,le=2000),days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),source:str|None=Query(None)):
     with connect() as conn: rows=[dict(r) for r in conn.execute("SELECT * FROM official_events ORDER BY observation_date DESC").fetchall()]
@@ -329,6 +348,7 @@ def get_official_events(lat:float|None=Query(None),lon:float|None=Query(None),ra
             if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
     out=deduplicate_public_events(out)
+    out=filter_demo_events(out)
     return {"count":len(out),"events":out}
 @app.get("/events")
 def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(50,ge=1,le=2000),days:int=Query(180,ge=1,le=3650),animal_filter:str=Query("all"),disease:str|None=Query(None),include_official:bool=Query(True),include_user:bool=Query(True)):
@@ -347,11 +367,13 @@ def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(5
         if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
     out=deduplicate_public_events(out)
+    out=filter_demo_events(out)
     out.sort(key=lambda x:(-x.get("risk_score",0),x.get("distance_km",9999)))
     return {"count":len(out),"events":out}
 @app.get("/events/export")
 def export_events(days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),format:str=Query("csv")):
     rows=deduplicate_public_events(filtered_rows_for_export(days,animal_filter))
+    rows=filter_demo_events(rows)
     if format.lower()=="json": return {"count":len(rows),"events":rows}
     fields=["id","external_id","disease","diagnosis_status","species","animal_group","observation_date","report_date","location","region","country","source","source_type","report_type","lat","lon","url_source"]
     output=io.StringIO(); writer=csv.DictWriter(output,fieldnames=fields,extrasaction="ignore"); writer.writeheader(); writer.writerows(rows); output.seek(0)
