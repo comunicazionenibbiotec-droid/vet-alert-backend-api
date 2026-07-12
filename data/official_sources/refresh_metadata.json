@@ -1,5 +1,5 @@
 {
-  "refreshed_at": "2026-07-12T21:48:38.480007+00:00",
+  "refreshed_at": "2026-07-12T21:58:07.973183+00:00",
   "max_visible_days": 365,
   "outputs": [
     {
@@ -11,7 +11,7 @@
     {
       "source": "ADIS",
       "mode": "kept_existing_no_url",
-      "records": 233,
+      "records": 474,
       "output": "data/official_sources/adis_events.csv"
     }
   ],
