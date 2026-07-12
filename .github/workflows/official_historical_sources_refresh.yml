@@ -2,39 +2,42 @@ name: vet.ector official historical sources refresh
 
 on:
   schedule:
-    # Daily at 02:20 UTC
     - cron: "20 2 * * *"
   workflow_dispatch:
 
-permissions:
+permission*:
   contents: write
 
+env:
+  OFFICI*L_SOURCES_DIR: data/official_sourc*s
+
 jobs:
-  refresh-official-sources:
+  refresh-official-source*:
     runs-on: ubuntu-latest
-    env:
-      OFFICIAL_SOURCES_DIR: data/official_sources
-      WAHIS_SOURCE_CSV_URL: ${{ secrets.WAHIS_SOURCE_CSV_URL }}
-      ADIS_SOURCE_CSV_URL: ${{ secrets.ADIS_SOURCE_CSV_URL }}
-      MAX_VISIBLE_DAYS: "365"
-      KEEP_ARCHIVE: "true"
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+
+    *teps:
+      - name: Checkout repos*tory
+        uses: actions/checkou*@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+ *      uses: actions/setup-python@v*
         with:
-          python-version: "3.11"
+          python-ve*sion: "3.11"
 
-      - name: Refresh WAHIS/ADIS official historical sources
-        run: python scripts/official_historical_sources_pipeline.py
+      - name: Run of*icial historical sources pipeline
+*       env:
+          WAHIS_SOURCE*CSV_URL: ${{ secrets.WAHIS_SOURCE_*SV_URL }}
+          ADIS_SOURCE_CS*_URL: ${{ secrets.ADIS_SOURCE_CSV_*RL }}
+          OFFICIAL_SOURCES_D*R: ${{ env.OFFICIAL_SOURCES_DIR }}
+        run: |
+          python scripts/official_historical_sources_pipeline.py --dir "$OFFICIAL_SOURCES_DIR"
 
       - name: Validate official source CSVs
-        run: python scripts/validate_official_sources.py --dir "$OFFICIAL_SOURCES_DIR"
+        run: |
+          python scripts/validate_official_sources.py --dir "$OFFICIAL_SOURCES_DIR"
 
-      - name: Commit updated official sources
+      - name: Commit updated official source CSVs
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update official WAHIS/ADIS historical sources"
-          file_pattern: "backend/data/official_sources/*.csv backend/data/official_sources/*.json backend/data/official_sources/archive/*.csv"
+          commit_message: "Refresh official historical source CSVs"
+          file_pattern: data/official_sources/*.csv data/official_sources/*.json
