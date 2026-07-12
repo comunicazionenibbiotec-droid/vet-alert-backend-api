@@ -1,11 +1,10 @@
-ADIS CSV import for vet.ector
+ADIS import for vet.ector
 
-Use adis_events.csv for real/exported data. If adis_events.csv is absent, the backend falls back to adis_events_template.csv.
+Use data/adis_import/adis_events.csv for real normalized ADIS rows.
+If this file is not present, adis_events_template.csv is used for demo/testing.
 
-Expected columns:
-external_id,source,disease,disease_it,diagnosis_status,species,animal_group,observation_date,report_date,country,region,location,lat,lon,url_source,notes
+Required columns:
+external_id,disease,species,animal_group,observation_date,lat,lon
 
-Recommended values:
-source = ADIS
-source_type = official (set by connector)
-report_type = official_confirmed (set by connector)
+Recommended columns:
+source,disease_it,diagnosis_status,report_date,country,region,location,url_source,notes
