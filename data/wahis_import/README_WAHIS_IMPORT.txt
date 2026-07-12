@@ -1,12 +1,10 @@
-Carica qui il file CSV esportato/normalizzato da WAHIS.
+WAHIS import for vet.ector
 
-Nome file atteso dal backend:
-wahis_events.csv
+Use data/wahis_import/wahis_events.csv for real normalized WAHIS rows.
+If this file is not present, wahis_events_template.csv is used for demo/testing.
 
-Se il file wahis_events.csv non esiste, il backend usa wahis_events_template.csv come esempio.
+Required columns:
+external_id,disease,species,animal_group,observation_date,lat,lon
 
-Colonne supportate:
-external_id, source, disease, disease_it, diagnosis_status, species, animal_group,
-observation_date, report_date, country, region, location, lat, lon, url_source, notes
-
-Nota: per uso reale, l'export WAHIS deve essere ottenuto nel rispetto dei termini d'uso della fonte.
+Recommended columns:
+source,disease_it,diagnosis_status,report_date,country,region,location,url_source,notes
