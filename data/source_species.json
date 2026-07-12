@@ -1,5 +1,112 @@
 {
-  "version": "v73-step1",
+  "version": "v74-exact-animal-types",
+  "species": [
+    {
+      "value": "dog",
+      "label": "Cane",
+      "aliases": [
+        "cane",
+        "cani",
+        "dog",
+        "dogs",
+        "canine"
+      ]
+    },
+    {
+      "value": "cat",
+      "label": "Gatto",
+      "aliases": [
+        "gatto",
+        "gatti",
+        "cat",
+        "cats",
+        "feline"
+      ]
+    },
+    {
+      "value": "bovine",
+      "label": "Bovino",
+      "aliases": [
+        "bovino",
+        "bovini",
+        "bovine",
+        "cattle",
+        "cow",
+        "cows"
+      ]
+    },
+    {
+      "value": "swine",
+      "label": "Suino / cinghiale",
+      "aliases": [
+        "suino",
+        "suini",
+        "cinghiale",
+        "cinghiali",
+        "swine",
+        "pig",
+        "pigs",
+        "wild boar",
+        "boar"
+      ]
+    },
+    {
+      "value": "ovine",
+      "label": "Ovino",
+      "aliases": [
+        "ovino",
+        "ovini",
+        "pecora",
+        "pecore",
+        "sheep",
+        "ovine"
+      ]
+    },
+    {
+      "value": "equine",
+      "label": "Equino",
+      "aliases": [
+        "equino",
+        "equini",
+        "cavallo",
+        "cavalli",
+        "horse",
+        "horses",
+        "equine"
+      ]
+    },
+    {
+      "value": "caprine",
+      "label": "Caprino",
+      "aliases": [
+        "caprino",
+        "caprini",
+        "capra",
+        "capre",
+        "goat",
+        "goats",
+        "caprine"
+      ]
+    },
+    {
+      "value": "poultry",
+      "label": "Avicoli / volatili",
+      "aliases": [
+        "avicoli",
+        "volatile",
+        "volatili",
+        "uccelli",
+        "pollo",
+        "polli",
+        "gallina",
+        "galline",
+        "poultry",
+        "avian",
+        "birds",
+        "bird"
+      ]
+    }
+  ],
   "macro_categories": [
     {
       "value": "all",
@@ -9,12 +116,10 @@
         "cat",
         "bovine",
         "swine",
-        "equine",
         "ovine",
+        "equine",
         "caprine",
-        "poultry",
-        "wildlife",
-        "other"
+        "poultry"
       ]
     },
     {
@@ -31,136 +136,10 @@
       "groups": [
         "bovine",
         "swine",
-        "equine",
         "ovine",
+        "equine",
         "caprine",
         "poultry"
-      ]
-    },
-    {
-      "value": "wildlife",
-      "label": "Fauna selvatica",
-      "groups": [
-        "wildlife"
-      ]
-    }
-  ],
-  "species": [
-    {
-      "value": "dog",
-      "label": "Cani",
-      "aliases": [
-        "cane",
-        "cani",
-        "dog",
-        "dogs",
-        "canine"
-      ]
-    },
-    {
-      "value": "cat",
-      "label": "Gatti",
-      "aliases": [
-        "gatto",
-        "gatti",
-        "cat",
-        "cats",
-        "feline"
-      ]
-    },
-    {
-      "value": "bovine",
-      "label": "Bovini",
-      "aliases": [
-        "bovino",
-        "bovini",
-        "bovine",
-        "cattle",
-        "cow",
-        "cows"
-      ]
-    },
-    {
-      "value": "swine",
-      "label": "Suini / cinghiali",
-      "aliases": [
-        "suino",
-        "suini",
-        "cinghiale",
-        "cinghiali",
-        "swine",
-        "pig",
-        "pigs",
-        "wild boar"
-      ]
-    },
-    {
-      "value": "equine",
-      "label": "Equini",
-      "aliases": [
-        "equino",
-        "equini",
-        "horse",
-        "horses",
-        "equine"
-      ]
-    },
-    {
-      "value": "ovine",
-      "label": "Ovini",
-      "aliases": [
-        "ovino",
-        "ovini",
-        "pecora",
-        "pecore",
-        "sheep",
-        "ovine"
-      ]
-    },
-    {
-      "value": "caprine",
-      "label": "Caprini",
-      "aliases": [
-        "caprino",
-        "caprini",
-        "capra",
-        "capre",
-        "goat",
-        "goats",
-        "caprine"
-      ]
-    },
-    {
-      "value": "poultry",
-      "label": "Avicoli",
-      "aliases": [
-        "avicoli",
-        "pollo",
-        "polli",
-        "gallina",
-        "galline",
-        "poultry",
-        "avian",
-        "birds"
-      ]
-    },
-    {
-      "value": "wildlife",
-      "label": "Fauna selvatica",
-      "aliases": [
-        "selvatico",
-        "selvatica",
-        "fauna selvatica",
-        "wildlife",
-        "wild animal"
-      ]
-    },
-    {
-      "value": "other",
-      "label": "Altro",
-      "aliases": [
-        "altro",
-        "other"
       ]
     }
   ]
