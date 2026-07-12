@@ -13,7 +13,7 @@ jobs:
   refresh-official-sources:
     runs-on: ubuntu-latest
     env:
-      OFFICIAL_SOURCES_DIR: backend/data/official_sources
+      OFFICIAL_SOURCES_DIR: data/official_sources
       WAHIS_SOURCE_CSV_URL: ${{ secrets.WAHIS_SOURCE_CSV_URL }}
       ADIS_SOURCE_CSV_URL: ${{ secrets.ADIS_SOURCE_CSV_URL }}
       MAX_VISIBLE_DAYS: "365"
