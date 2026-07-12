@@ -97,11 +97,16 @@ def parse_date(value):
     try: return datetime.fromisoformat(str(value)[:10]).date()
     except Exception: return None
 
+import re
+
 def matches_animal_filter(row, animal_filter):
     if animal_filter in ("", "all", None):
         return True
 
     animal_filter = str(animal_filter).lower().strip()
+
+    animal_group = str(row.get("animal_group", "")).lower().strip()
+    species = str(row.get("species", "")).lower().strip()
 
     text = f"""
     {row.get('species', '')}
@@ -111,21 +116,20 @@ def matches_animal_filter(row, animal_filter):
     """.lower()
 
     filters = {
-        # Macro-categorie
         "companion": [
             "dog", "cane", "canine",
             "cat", "gatto", "feline"
         ],
         "livestock": [
             "bovine", "bovino", "bovini", "cattle",
-            "swine", "suino", "suini", "pig", "cinghiale", "cinghiali",
+            "swine", "suino", "suini", "pig", "pigs", "cinghiale", "cinghiali",
             "ovine", "ovino", "ovini", "sheep", "pecora", "pecore",
-            "equine", "equino", "equini", "horse", "cavallo", "cavalli",
-            "caprine", "caprino", "caprini", "goat", "capra", "capre",
-            "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds"
+            "equine", "equino", "equini", "horse", "horses", "cavallo", "cavalli",
+            "caprine", "caprino", "caprini", "goat", "goats", "capra", "capre",
+            "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds",
+            "pollo", "polli", "gallina", "galline"
         ],
 
-        # Specie singole
         "dog": [
             "dog", "cane", "canine"
         ],
@@ -152,7 +156,7 @@ def matches_animal_filter(row, animal_filter):
             "pollo", "polli", "gallina", "galline"
         ],
 
-        # Compatibilità con vecchi valori eventualmente ancora usati dal frontend
+        # compatibilità con vecchi valori
         "dogs": [
             "dog", "cane", "canine"
         ],
@@ -161,10 +165,10 @@ def matches_animal_filter(row, animal_filter):
         ],
         "farm": [
             "bovine", "bovino", "bovini", "cattle",
-            "swine", "suino", "suini", "pig", "cinghiale", "cinghiali",
+            "swine", "suino", "suini", "pig", "pigs", "cinghiale", "cinghiali",
             "ovine", "ovino", "ovini", "sheep", "pecora", "pecore",
-            "equine", "equino", "equini", "horse", "cavallo", "cavalli",
-            "caprine", "caprino", "caprini", "goat", "capra", "capre",
+            "equine", "equino", "equini", "horse", "horses", "cavallo", "cavalli",
+            "caprine", "caprino", "caprini", "goat", "goats", "capra", "capre",
             "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds"
         ]
     }
@@ -174,7 +178,21 @@ def matches_animal_filter(row, animal_filter):
     if not terms:
         return True
 
-    return any(term in text for term in terms)
+    # 1. Prima controlla animal_group e species con uguaglianza esatta
+    if animal_group in terms:
+        return True
+
+    if species in terms:
+        return True
+
+    # 2. Poi controlla nel testo, ma solo come parola intera
+    for term in terms:
+        pattern = r"(?<![a-zA-Z])" + re.escape(term) + r"(?![a-zA-Z])"
+        if re.search(pattern, text):
+            return True
+
+    return False
+`
 
 def compute_risk_score(status,distance_km,observation_date):
     s=(status or "").lower(); status_score=1.0 if "conferm" in s or "confirm" in s else 0.65 if "sosp" in s or "suspect" in s else .4; obs=parse_date(observation_date); days_old=max(0,(datetime.now(timezone.utc).date()-obs).days) if obs else 15; distance_score=max(0,1-min(distance_km,100)/100); recency_score=max(0,1-min(days_old,30)/30); return round((.45*status_score+.30*distance_score+.25*recency_score)*100,1)
