@@ -2,22 +2,22 @@ name: vet.ector ADIS current-year automation
 
 on:
   schedule:
-    # Daily at 02:45 UTC
-    - cron: "45 2 * * *"
+    - cron: "35 2 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  OFFICIAL_SOURCES_DIR: data/official_sources
+  ADIS_PUBLIC_REPORT_URL: https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report
+  ADIS_COUNTRY: Italy
+  ADIS_FAIL_ON_ZERO_ROWS: "false"
+
 jobs:
   refresh-adis-current-year:
     runs-on: ubuntu-latest
-    env:
-      OFFICIAL_SOURCES_DIR: data/official_sources
-      ADIS_CURRENT_YEAR_URL: https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report
-      ADIS_COUNTRY: Italy
-      GEOCODING_FILE: data/official_sources/geocoding_it.csv
-      ADIS_ALLOW_COUNTRY_CENTROID: "false"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,14 +27,24 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Generate normalized ADIS CSV from public current-year report
-        run: python scripts/adis_current_year_to_vetector_csv.py
+      - name: Generate ADIS CSV from current-year report
+        env:
+          OFFICIAL_SOURCES_DIR: ${{ env.OFFICIAL_SOURCES_DIR }}
+          ADIS_PUBLIC_REPORT_URL: ${{ vars.ADIS_PUBLIC_REPORT_URL || env.ADIS_PUBLIC_REPORT_URL }}
+          ADIS_COUNTRY: ${{ env.ADIS_COUNTRY }}
+          ADIS_FAIL_ON_ZERO_ROWS: ${{ env.ADIS_FAIL_ON_ZERO_ROWS }}
+        run: |
+          python scripts/adis_current_year_to_vetector_csv.py \
+            --dir "$OFFICIAL_SOURCES_DIR" \
+            --url "$ADIS_PUBLIC_REPORT_URL" \
+            --country "$ADIS_COUNTRY"
 
-      - name: Validate normalized ADIS CSV
-        run: python scripts/validate_official_sources.py --file data/official_sources/adis_events.csv
+      - name: Validate official source CSVs
+        run: |
+          python scripts/validate_official_sources.py --dir "$OFFICIAL_SOURCES_DIR"
 
       - name: Commit updated ADIS CSV and metadata
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Refresh ADIS current-year normalized events"
-          file_pattern: "data/official_sources/adis_events.csv data/official_sources/adis_refresh_metadata.json"
+          commit_message: "Refresh ADIS current-year source CSV"
+          file_pattern: data/official_sources/adis_events.csv data/official_sources/adis_refresh_metadata.json data/official_sources/adis_last_response_preview.txt
