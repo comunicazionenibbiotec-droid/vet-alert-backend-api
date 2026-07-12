@@ -1,0 +1,40 @@
+name: vet.ector ADIS current-year automation
+
+on:
+  schedule:
+    # Daily at 02:45 UTC
+    - cron: "45 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-adis-current-year:
+    runs-on: ubuntu-latest
+    env:
+      OFFICIAL_SOURCES_DIR: data/official_sources
+      ADIS_CURRENT_YEAR_URL: https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report
+      ADIS_COUNTRY: Italy
+      GEOCODING_FILE: data/official_sources/geocoding_it.csv
+      ADIS_ALLOW_COUNTRY_CENTROID: "false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate normalized ADIS CSV from public current-year report
+        run: python scripts/adis_current_year_to_vetector_csv.py
+
+      - name: Validate normalized ADIS CSV
+        run: python scripts/validate_official_sources.py --file data/official_sources/adis_events.csv
+
+      - name: Commit updated ADIS CSV and metadata
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh ADIS current-year normalized events"
+          file_pattern: "data/official_sources/adis_events.csv data/official_sources/adis_refresh_metadata.json"
