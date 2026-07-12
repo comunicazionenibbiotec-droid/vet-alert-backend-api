@@ -41,7 +41,7 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.0.0-official-remote-sync-v94")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.1.0-dedupe-official-fix-v99")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
