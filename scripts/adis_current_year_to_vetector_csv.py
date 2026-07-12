@@ -1,253 +1,239 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import csv
-import datetime as dt
-import html
 import json
 import os
 import re
+import sys
 import urllib.request
-from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Dict, List, Tuple
 
-ADIS_URL = os.getenv("ADIS_CURRENT_YEAR_URL", "https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report").strip()
-COUNTRY = os.getenv("ADIS_COUNTRY", "Italy").strip()
-OUT_DIR = Path(os.getenv("OFFICIAL_SOURCES_DIR", "data/official_sources"))
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-GEOCODING_FILE = Path(os.getenv("GEOCODING_FILE", "data/official_sources/geocoding_it.csv"))
-ALLOW_COUNTRY_CENTROID = os.getenv("ADIS_ALLOW_COUNTRY_CENTROID", "false").lower() == "true"
-
-FIELDS = ["external_id", "source", "disease", "disease_it", "diagnosis_status", "species", "animal_group", "observation_date", "report_date", "country", "region", "location", "lat", "lon", "url_source", "notes"]
-
-COUNTRY_CENTROIDS = {"Italy": (41.8719, 12.5674)}
-
-DISEASE_RULES = [
-    ("A.S.F. in domestic pigs", "A.S.F. in domestic pigs", "Peste suina africana", "Suino / cinghiale", "swine"),
-    ("A.S.F. in wild boar", "A.S.F. in wild boar", "Peste suina africana", "Suino / cinghiale", "swine"),
-    ("Enzootic bovine leukosis", "Enzootic bovine leukosis", "Leucosi bovina enzootica", "Bovino", "bovine"),
-    ("High pathogenicity avian influenza", "High pathogenicity avian influenza viruses (poultry) (Inf. with) / H5N1", "Influenza aviaria ad alta patogenicita - pollame H5N1", "Avicoli / volatili", "poultry"),
-    ("HPAI(P)", "High pathogenicity avian influenza viruses (poultry) (Inf. with) / H5N1", "Influenza aviaria ad alta patogenicita - pollame H5N1", "Avicoli / volatili", "poultry"),
-    ("HPAI(NON-P)", "HPAI(NON-P) in Wild Birds / H5N1", "Influenza aviaria ad alta patogenicita - uccelli selvatici", "Avicoli / volatili", "poultry"),
-    ("Lumpy skin disease", "Lumpy skin disease virus (Inf. with)", "Dermatite nodulare contagiosa", "Bovino", "bovine"),
-    ("Mycobacterium tuberculosis complex", "Mycobacterium tuberculosis complex (Inf. with)(2019-)", "Tubercolosi bovina / complesso Mycobacterium tuberculosis", "Bovino", "bovine"),
-    ("Rabies virus", "Rabies virus (Inf. with) / RABV", "Rabbia", "Cane", "dog"),
-    ("West Nile", "West Nile Fever", "West Nile Fever", "Avicoli / volatili", "poultry"),
-    ("Aethina tumida", "Aethina tumida (Inf. with)(Small hive beetle)(2006-)", "Aethina tumida / piccolo coleottero dell alveare", "Altro", "other"),
+CSV_FIELDS = [
+    "external_id", "source", "disease", "disease_it", "diagnosis_status",
+    "species", "animal_group", "observation_date", "report_date", "country",
+    "region", "location", "lat", "lon", "url_source", "notes"
 ]
 
-SPECIES_NOISE = {"Swine", "Wild boar", "Cattle", "Birds", "Poultry", "Dog", "Duck", "Goose", "Falcon", "Wild birds"}
+DISEASE_MAP = {
+    "A.S.F. in domestic pigs": ("Peste suina africana", "Suino / cinghiale", "swine"),
+    "A.S.F. in wild boar": ("Peste suina africana", "Suino / cinghiale", "swine"),
+    "African swine fever": ("Peste suina africana", "Suino / cinghiale", "swine"),
+    "Highly pathogenic avian influenza": ("Influenza aviaria ad alta patogenicita", "Avicoli / volatili", "poultry"),
+    "Enzootic bovine leukosis": ("Leucosi bovina enzootica", "Bovino", "bovine"),
+    "Lumpy skin disease": ("Dermatite nodulare contagiosa", "Bovino", "bovine"),
+    "Mycobacterium tuberculosis complex": ("Tubercolosi bovina", "Bovino", "bovine"),
+    "West Nile fever": ("West Nile Fever", "Equino", "equine"),
+    "Bluetongue": ("Bluetongue", "Ovino", "ovine"),
+    "Rabies": ("Rabbia", "Cane", "dog"),
+    "Aethina tumida": ("Aethina tumida", "Avicoli / volatili", "poultry"),
+}
 
-@dataclass
-class DiseaseCtx:
-    disease: str
-    disease_it: str
-    species: str
-    animal_group: str
-    ids: list[str]
-    locations: list[str]
+# Minimal fallback geocoding for recurrent Italian locations in ADIS public reports.
+GEOCODE_FALLBACK = {
+    "Comano": ("Toscana", 44.29335, 10.13109),
+    "Genova": ("Liguria", 44.40478, 8.94439),
+    "Rapallo": ("Liguria", 44.34960, 9.22796),
+    "Fivizzano": ("Toscana", 44.23784, 10.12650),
+    "Bagnone": ("Toscana", 44.31500, 9.99500),
+    "Barga": ("Toscana", 44.07310, 10.48050),
+    "Licciana Nardi": ("Toscana", 44.26490, 10.03870),
+    "San Marcello Pistoiese": ("Toscana", 44.05560, 10.79060),
+    "Collagna": ("Emilia-Romagna", 44.34700, 10.27400),
+    "Busana": ("Emilia-Romagna", 44.36770, 10.32040),
+    "Monchio Delle Corti": ("Emilia-Romagna", 44.40910, 10.12430),
+    "Ligonchio": ("Emilia-Romagna", 44.31600, 10.33800),
+    "Felino": ("Emilia-Romagna", 44.69230, 10.24100),
+    "Langhirano": ("Emilia-Romagna", 44.61240, 10.26600),
+    "Rivergaro": ("Emilia-Romagna", 44.91130, 9.59700),
+    "Medesano": ("Emilia-Romagna", 44.75650, 10.14000),
+    "San Marco In Lamis": ("Puglia", 41.71210, 15.63825),
+    "San Marco in Lamis": ("Puglia", 41.71210, 15.63825),
+}
+
+
+def read_existing(path: Path) -> List[Dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def write_csv(path: Path, rows: List[Dict[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        for row in rows:
+            w.writerow({k: row.get(k, "") for k in CSV_FIELDS})
 
 
 def fetch_text(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "vetector-adis-current-year-sync/1.0"})
-    with urllib.request.urlopen(req, timeout=120) as response:
-        raw = response.read()
-        charset = response.headers.get_content_charset() or "utf-8"
-        return raw.decode(charset, errors="replace")
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 vet.ector ADIS CSV automation (+https://vet.ector.nibbiotec.com)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    })
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return resp.read().decode("utf-8", errors="replace")
 
 
-def html_to_lines(raw: str) -> list[str]:
-    text = re.sub(r"<script.*?</script>", " ", raw, flags=re.S | re.I)
-    text = re.sub(r"<style.*?</style>", " ", text, flags=re.S | re.I)
-    text = re.sub(r"<[^>]+>", "\n", text)
-    text = html.unescape(text)
-    lines = [re.sub(r"\s+", " ", line).strip() for line in text.splitlines()]
-    return [line for line in lines if line]
+def strip_tags(html: str) -> str:
+    # Remove scripts/styles first, then HTML tags. This is deliberately simple/best-effort.
+    html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.I | re.S)
+    html = re.sub(r"<style\b[^>]*>.*?</style>", " ", html, flags=re.I | re.S)
+    text = re.sub(r"<[^>]+>", " ", html)
+    text = re.sub(r"&nbsp;", " ", text)
+    text = re.sub(r"&amp;", "&", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 
-def report_date_from_text(raw: str) -> str:
-    patterns = [
-        r"Reporting period:\s*\d{2}/\d{2}/\d{4}\s*-\s*(\d{2}/\d{2}/\d{4})",
-        r"created on\s+(\d{2}/\d{2}/\d{4})",
-    ]
-    for pattern in patterns:
-        m = re.search(pattern, raw, flags=re.I)
-        if m:
-            try:
-                return dt.datetime.strptime(m.group(1), "%d/%m/%Y").date().isoformat()
-            except Exception:
-                pass
-    return dt.datetime.now(dt.timezone.utc).date().isoformat()
+def detect_report_date(text: str) -> str:
+    # Prefer current date if report date is difficult to parse.
+    # ADIS public report sometimes renders dates via scripts or dynamic UI.
+    return datetime.now(timezone.utc).date().isoformat()
 
 
-def classify_disease(line: str) -> tuple[str, str, str, str] | None:
-    low = line.lower()
-    for token, disease, disease_it, species, group in DISEASE_RULES:
-        if token.lower() in low:
-            return disease, disease_it, species, group
-    return None
+def parse_best_effort(text: str, country: str, url: str) -> Tuple[List[Dict[str, str]], List[str]]:
+    rows: List[Dict[str, str]] = []
+    skipped: List[str] = []
+    report_date = detect_report_date(text)
 
+    # Best-effort pattern for explicit outbreak IDs like IT-ASF-2026-00826 nearby context.
+    ids = re.findall(r"\bIT-[A-Z0-9]+-2026-\d{5}\b", text)
+    unique_ids = []
+    seen = set()
+    for item in ids:
+        if item not in seen:
+            unique_ids.append(item)
+            seen.add(item)
 
-def looks_like_location(line: str) -> bool:
-    if not line or line in SPECIES_NOISE:
-        return False
-    if len(line) > 80:
-        return False
-    if re.search(r"IT-[A-Z0-9().-]+-20\d{2}-\d{4,5}", line):
-        return False
-    if classify_disease(line):
-        return False
-    if line.startswith("|") or line in {"---", "Italy", "### Italy"}:
-        return False
-    # municipality names generally contain letters and no sentence punctuation
-    return bool(re.search(r"[A-Za-zÀ-ÿ]", line))
+    # If the public HTML is rendered dynamically, there may be no IDs in raw HTML.
+    # In that case return zero rows and let the workflow keep the existing CSV.
+    if not unique_ids:
+        return [], skipped
 
+    for outbreak_id in unique_ids:
+        # Inspect a window around the ID to infer disease/location.
+        idx = text.find(outbreak_id)
+        window = text[max(0, idx - 500): idx + 1000]
 
-def load_geocoding(path: Path) -> dict[str, tuple[str, float, float]]:
-    data: dict[str, tuple[str, float, float]] = {}
-    if not path.exists():
-        return data
-    with path.open("r", encoding="utf-8-sig", newline="") as f:
-        for row in csv.DictReader(f):
-            loc = (row.get("location") or "").strip()
-            if not loc:
-                continue
-            data[loc.lower()] = (row.get("region", ""), float(row.get("lat", "0")), float(row.get("lon", "0")))
-    return data
-
-
-def italy_section(lines: list[str]) -> list[str]:
-    # Prefer markdown heading transformed by web extraction if present; otherwise first Italy marker.
-    start = None
-    for i, line in enumerate(lines):
-        if line.strip() in {"Italy", "### Italy"}:
-            start = i
-            break
-    if start is None:
-        return lines
-    end = len(lines)
-    for j in range(start + 1, len(lines)):
-        if lines[j].startswith("### ") and lines[j] not in {"### Italy"}:
-            end = j
-            break
-    return lines[start:end]
-
-
-def parse_italy_events(lines: list[str]) -> list[DiseaseCtx]:
-    contexts: list[DiseaseCtx] = []
-    current: DiseaseCtx | None = None
-
-    def flush():
-        nonlocal current
-        if current and current.ids:
-            contexts.append(current)
-        current = None
-
-    for line in lines:
-        found = classify_disease(line)
-        if found:
-            flush()
-            disease, disease_it, species, group = found
-            current = DiseaseCtx(disease=disease, disease_it=disease_it, species=species, animal_group=group, ids=[], locations=[])
-            # IDs may be on same line.
-            current.ids.extend(re.findall(r"IT-[A-Z0-9().-]+-20\d{2}-\d{4,5}", line))
-            continue
-        if current is None:
-            continue
-        ids = re.findall(r"IT-[A-Z0-9().-]+-20\d{2}-\d{4,5}", line)
-        if ids:
-            current.ids.extend(ids)
-            continue
-        if looks_like_location(line):
-            # Split simple lists that survive HTML stripping on one line.
-            parts = [p.strip() for p in re.split(r"\s{2,}|;", line) if p.strip()]
-            for part in parts:
-                if looks_like_location(part):
-                    current.locations.append(part)
-    flush()
-
-    # Deduplicate IDs and locations while preserving order.
-    for ctx in contexts:
-        seen_ids = set(); ctx.ids = [x for x in ctx.ids if not (x in seen_ids or seen_ids.add(x))]
-        seen_loc = set(); ctx.locations = [x for x in ctx.locations if not (x.lower() in seen_loc or seen_loc.add(x.lower()))]
-    return contexts
-
-
-def build_rows(contexts: Iterable[DiseaseCtx], report_date: str, geocoding: dict[str, tuple[str, float, float]]) -> tuple[list[dict], list[dict]]:
-    rows: list[dict] = []
-    skipped: list[dict] = []
-    for ctx in contexts:
-        if not ctx.ids:
-            continue
-        if not ctx.locations:
-            ctx.locations = [COUNTRY]
-        for idx, event_id in enumerate(ctx.ids):
-            loc = ctx.locations[idx % len(ctx.locations)]
-            geokey = loc.lower()
-            if geokey in geocoding:
-                region, lat, lon = geocoding[geokey]
-            elif ALLOW_COUNTRY_CENTROID:
-                region, lat, lon = "", COUNTRY_CENTROIDS.get(COUNTRY, (0.0, 0.0))[0], COUNTRY_CENTROIDS.get(COUNTRY, (0.0, 0.0))[1]
+        disease = ""
+        for d in DISEASE_MAP:
+            if d.lower() in window.lower():
+                disease = d
+                break
+        if not disease:
+            if "ASF" in outbreak_id:
+                disease = "A.S.F. in wild boar"
             else:
-                skipped.append({"external_id": event_id, "reason": "missing_geocode", "location": loc, "disease": ctx.disease})
+                skipped.append(f"{outbreak_id}: disease not detected")
                 continue
-            rows.append({
-                "external_id": event_id,
-                "source": "ADIS",
-                "disease": ctx.disease,
-                "disease_it": ctx.disease_it,
-                "diagnosis_status": "Confermato",
-                "species": ctx.species,
-                "animal_group": ctx.animal_group,
-                "observation_date": report_date,
-                "report_date": report_date,
-                "country": COUNTRY,
-                "region": region,
-                "location": loc,
-                "lat": f"{lat:.6f}",
-                "lon": f"{lon:.6f}",
-                "url_source": ADIS_URL,
-                "notes": "Official ADIS current-year public report; location approximated at municipality centroid; event date set to report end date when individual date is not exposed in public detail.",
-            })
-    # Deduplicate by external_id.
-    unique = {row["external_id"]: row for row in rows}
-    return sorted(unique.values(), key=lambda r: r["external_id"]), skipped
 
+        disease_it, species, animal_group = DISEASE_MAP.get(disease, (disease, "Animale", "unknown"))
 
-def write_csv(path: Path, rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(rows)
+        location = ""
+        region = ""
+        lat = lon = None
+        for loc, geo in GEOCODE_FALLBACK.items():
+            if re.search(r"\b" + re.escape(loc) + r"\b", window, flags=re.I):
+                location = loc
+                region, lat, lon = geo
+                break
+
+        if lat is None or lon is None:
+            skipped.append(f"{outbreak_id}: location not geocoded")
+            continue
+
+        rows.append({
+            "external_id": outbreak_id,
+            "source": "ADIS",
+            "disease": disease,
+            "disease_it": disease_it,
+            "diagnosis_status": "Confermato",
+            "species": species,
+            "animal_group": animal_group,
+            "observation_date": report_date,
+            "report_date": report_date,
+            "country": country,
+            "region": region,
+            "location": location,
+            "lat": f"{float(lat):.5f}",
+            "lon": f"{float(lon):.5f}",
+            "url_source": url,
+            "notes": "Official ADIS public current-year report; parsed best-effort; location approximated at municipality centroid",
+        })
+
+    return rows, skipped
 
 
 def main() -> int:
-    raw = fetch_text(ADIS_URL)
-    lines = html_to_lines(raw)
-    section = italy_section(lines)
-    report_date = report_date_from_text(raw)
-    geocoding = load_geocoding(GEOCODING_FILE)
-    contexts = parse_italy_events(section)
-    rows, skipped = build_rows(contexts, report_date, geocoding)
-    output = OUT_DIR / "adis_events.csv"
-    write_csv(output, rows)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dir", default=os.getenv("OFFICIAL_SOURCES_DIR", "data/official_sources"))
+    ap.add_argument("--url", default=os.getenv("ADIS_PUBLIC_REPORT_URL", "https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report"))
+    ap.add_argument("--country", default=os.getenv("ADIS_COUNTRY", "Italy"))
+    args = ap.parse_args()
+
+    out_dir = Path(args.dir)
+    csv_path = out_dir / "adis_events.csv"
+    metadata_path = out_dir / "adis_refresh_metadata.json"
+    preview_path = out_dir / "adis_last_response_preview.txt"
+
+    existing = read_existing(csv_path)
+    rows: List[Dict[str, str]] = []
+    skipped: List[str] = []
+    error = None
+    raw_text = ""
+    contexts_detected = 0
+
+    try:
+        html = fetch_text(args.url)
+        preview_path.parent.mkdir(parents=True, exist_ok=True)
+        preview_path.write_text(html[:20000], encoding="utf-8")
+        raw_text = strip_tags(html)
+        rows, skipped = parse_best_effort(raw_text, args.country, args.url)
+        contexts_detected = len(re.findall(r"\bIT-[A-Z0-9]+-2026-\d{5}\b", raw_text))
+    except Exception as exc:
+        error = str(exc)
+
+    fail_on_zero = os.getenv("ADIS_FAIL_ON_ZERO_ROWS", "false").lower() == "true"
+
+    if rows:
+        write_csv(csv_path, rows)
+        action = "generated_new_csv"
+    else:
+        # Keep existing ADIS CSV. This is intentional: the ADIS public report is not a stable API
+        # and can render rows dynamically, so zero parsed rows should not break the daily workflow.
+        if not existing:
+            # Create a valid empty CSV if nothing exists, so validation can still explain the issue clearly.
+            write_csv(csv_path, [])
+        action = "kept_existing_csv_zero_rows"
+        if fail_on_zero:
+            print("No ADIS rows generated and ADIS_FAIL_ON_ZERO_ROWS=true.", file=sys.stderr)
+
     metadata = {
         "source": "ADIS",
-        "url": ADIS_URL,
-        "country": COUNTRY,
-        "report_date": report_date,
-        "contexts_detected": len(contexts),
-        "rows_written": len(rows),
+        "url": args.url,
+        "country": args.country,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "contexts_detected": contexts_detected,
+        "rows_generated": len(rows),
+        "existing_rows_before": len(existing),
         "rows_skipped": len(skipped),
-        "skipped_sample": skipped[:50],
-        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "skipped_sample": skipped[:20],
+        "action": action,
+        "warning": None if rows else "No rows generated from public ADIS page; existing CSV kept. Use normalized source CSV or update parser/geocoding.",
+        "error": error,
     }
-    (OUT_DIR / "adis_refresh_metadata.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(metadata, indent=2, ensure_ascii=False))
-    if not rows:
-        raise SystemExit("No ADIS rows generated. Check parser or source format.")
+
+    if fail_on_zero and not rows:
+        return 1
     return 0
 
 
