@@ -41,16 +41,109 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="1.8.0-info-sources-v92")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="1.9.0-internal-report-sources-v93")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
 class UserReport(BaseModel):
     disease:str; diagnosis_status:str="Sospetto"; species:str="Animale"; animal_group:str="unknown"; observation_date:str|None=None; lat:float; lon:float; location:str=""; region:str=""; country:str="Italy"; source:str="user_report"; report_type:str="user_suspect"
 
+class ReportBase(BaseModel):
+    reporter_type: str = "private"
+    disease: str
+    species: str = "Animale"
+    animal_group: str = "unknown"
+    observation_date: str | None = None
+    lat: float
+    lon: float
+    location: str = ""
+    region: str = ""
+    country: str = "Italy"
+    notes: str = ""
+
+class SuspectReport(ReportBase):
+    source: str | None = None
+
+class RapidTestPositiveReport(ReportBase):
+    test_name: str = ""
+    test_result: str = "positive"
+    source: str | None = None
+
+class VetValidatedReport(ReportBase):
+    vet_name: str = ""
+    validation_status: str = "confirmed_by_vet"
+    related_external_id: str | None = None
+
+class ReportStatusUpdate(BaseModel):
+    external_id: str
+    diagnosis_status: str
+    report_type: str | None = None
+    source: str | None = None
+    source_type: str | None = None
+
 def now_iso(): return datetime.now(timezone.utc).isoformat()
 def connect():
     conn=sqlite3.connect(DB_PATH); conn.row_factory=sqlite3.Row; return conn
+
+def normalize_reporter_type(reporter_type: str | None) -> str:
+    value = str(reporter_type or "private").lower().strip()
+    aliases = {
+        "privato": "private",
+        "user": "private",
+        "utente": "private",
+        "azienda": "company",
+        "farm": "company",
+        "allevamento": "company",
+        "associazione": "association",
+        "assoc": "association",
+        "volunteer": "association",
+        "triage": "triage",
+        "ai": "triage",
+        "veterinario": "veterinarian",
+        "vet": "veterinarian",
+    }
+    return aliases.get(value, value if value in {"private", "company", "association", "triage", "veterinarian"} else "private")
+
+def reporter_source_and_type(reporter_type: str | None):
+    rt = normalize_reporter_type(reporter_type)
+    if rt == "company":
+        return "Azienda", "company", "company_suspect"
+    if rt == "association":
+        return "Associazione", "association", "association_suspect"
+    if rt == "triage":
+        return "Triage AI", "user", "ai_triage_suspect"
+    if rt == "veterinarian":
+        return "Veterinario", "veterinarian", "vet_validated"
+    return "Utente", "user", "user_suspect"
+
+def new_report_external_id(prefix: str) -> str:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+    return f"{prefix}-{stamp}-{random.randint(1000,9999)}"
+
+def report_to_event_payload(report: ReportBase, *, external_prefix: str, diagnosis_status: str, source: str, source_type: str, report_type: str) -> Dict[str, Any]:
+    data = report.model_dump()
+    payload = {
+        "external_id": new_report_external_id(external_prefix),
+        "disease": data.get("disease", ""),
+        "diagnosis_status": diagnosis_status,
+        "species": data.get("species", "Animale"),
+        "animal_group": data.get("animal_group", "unknown"),
+        "observation_date": data.get("observation_date") or datetime.now(timezone.utc).date().isoformat(),
+        "lat": data.get("lat"),
+        "lon": data.get("lon"),
+        "location": data.get("location", ""),
+        "region": data.get("region", ""),
+        "country": data.get("country", "Italy"),
+        "source": source,
+        "source_type": source_type,
+        "report_type": report_type,
+    }
+    return payload
+
+def get_event_by_external_id(external_id: str):
+    with connect() as conn:
+        row = conn.execute("SELECT * FROM events WHERE external_id=?", (external_id,)).fetchone()
+    return None if row is None else dict(row)
 
 def init_db():
     with connect() as conn:
@@ -378,6 +471,89 @@ def get_veterinarians(lat:float=Query(...),lon:float=Query(...),radius_km:float=
         except Exception: row["services"]=[]
         row["distance_km"]=round(distance,2); out.append(row)
     out.sort(key=lambda x:x["distance_km"]); return {"count":len(out),"veterinarians":out}
+@app.post("/reports/suspect")
+def create_report_suspect(report: SuspectReport):
+    source, source_type, report_type = reporter_source_and_type(report.reporter_type)
+    if report.source:
+        source = report.source
+    payload = report_to_event_payload(report, external_prefix="REPORT-SUSPECT", diagnosis_status="Sospetto", source=source, source_type=source_type, report_type=report_type)
+    status = upsert_event(payload)
+    public = enrich_public_events([row_to_public_event(payload, 0.0)])[0]
+    return {"status": status, "event": public}
+
+@app.post("/reports/rapid-test-positive")
+def create_report_rapid_test_positive(report: RapidTestPositiveReport):
+    rt = normalize_reporter_type(report.reporter_type)
+    if rt == "company":
+        source_type = "company"
+    elif rt == "association":
+        source_type = "association"
+    else:
+        source_type = "user"
+    source = report.source or "Leggi test rapido"
+    payload = report_to_event_payload(report, external_prefix="REPORT-RAPID-POSITIVE", diagnosis_status="Test rapido positivo", source=source, source_type=source_type, report_type="rapid_test_positive")
+    status = upsert_event(payload)
+    public = enrich_public_events([row_to_public_event(payload, 0.0)])[0]
+    return {"status": status, "event": public}
+
+@app.post("/reports/vet-validated")
+def create_report_vet_validated(report: VetValidatedReport):
+    source = "Veterinario"
+    if report.vet_name:
+        source = f"Veterinario - {report.vet_name}"
+    payload = report_to_event_payload(report, external_prefix="REPORT-VET-VALIDATED", diagnosis_status="Validato da veterinario", source=source, source_type="veterinarian", report_type="vet_validated")
+    status = upsert_event(payload)
+    public = enrich_public_events([row_to_public_event(payload, 0.0)])[0]
+    return {"status": status, "event": public}
+
+@app.post("/reports/status-update")
+def update_report_status(update: ReportStatusUpdate):
+    with connect() as conn:
+        existing = conn.execute("SELECT * FROM events WHERE external_id=?", (update.external_id,)).fetchone()
+        if existing is None:
+            raise HTTPException(status_code=404, detail="Report not found")
+        current = dict(existing)
+        diagnosis_status = update.diagnosis_status or current.get("diagnosis_status")
+        report_type = update.report_type or current.get("report_type")
+        source = update.source or current.get("source")
+        source_type = update.source_type or current.get("source_type")
+        conn.execute(
+            "UPDATE events SET diagnosis_status=?, report_type=?, source=?, source_type=?, updated_at=CURRENT_TIMESTAMP WHERE external_id=?",
+            (diagnosis_status, report_type, source, source_type, update.external_id),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM events WHERE external_id=?", (update.external_id,)).fetchone()
+    item = row_to_public_event(dict(row), 0.0)
+    item = enrich_public_events([item])[0]
+    return {"status": "updated", "event": item}
+
+@app.get("/reports")
+def get_reports(lat: float | None = Query(None), lon: float | None = Query(None), radius_km: float = Query(200, ge=1, le=2000), days: int = Query(365, ge=1, le=3650), animal_filter: str = Query("all"), report_type: str | None = Query(None), source_type: str | None = Query(None)):
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=days)
+    out = []
+    with connect() as conn:
+        rows = [dict(r) for r in conn.execute("SELECT * FROM events ORDER BY observation_date DESC").fetchall()]
+    for row in rows:
+        obs = parse_date(row.get("observation_date"))
+        if obs and obs < cutoff:
+            continue
+        if report_type and str(row.get("report_type", "")).lower() != report_type.lower().strip():
+            continue
+        if source_type and str(row.get("source_type", "")).lower() != source_type.lower().strip():
+            continue
+        if not matches_animal_filter(row, animal_filter):
+            continue
+        distance = 0.0
+        if lat is not None and lon is not None and row.get("lat") is not None and row.get("lon") is not None:
+            distance = haversine_km(lat, lon, float(row["lat"]), float(row["lon"]))
+            if distance > radius_km:
+                continue
+        out.append(row_to_public_event(row, distance))
+    out = filter_demo_events(out)
+    out = enrich_public_events(out)
+    out.sort(key=lambda x: (-x.get("risk_score", 0), x.get("distance_km", 9999)))
+    return {"count": len(out), "reports": out}
+
 @app.post("/user-reports/suspect")
 def create_user_suspect(report:UserReport):
     payload=report.model_dump(); payload["external_id"]=f"USER-SUSPECT-{int(datetime.now(timezone.utc).timestamp())}"; payload["diagnosis_status"]="Sospetto"; payload["source_type"]="user"; payload["report_type"]="user_suspect"; payload["observation_date"]=payload.get("observation_date") or datetime.now(timezone.utc).date().isoformat(); r=upsert_event(payload); return {"status":r,"event":payload}
