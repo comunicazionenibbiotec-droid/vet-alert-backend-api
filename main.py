@@ -10,7 +10,9 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sync.official_connector import OfficialDemoConnector
 from sync.wahis_csv_connector import WahisCsvConnector
+from sync.adis_csv_connector import AdisCsvConnector
 from sync.normalizer import normalize_official_event
+from sync.deduplicator import deduplicate_public_events
 
 DB_PATH=os.getenv("DB_PATH","vet_alert.db")
 ENABLE_SCHEDULER=os.getenv("ENABLE_SCHEDULER","true").lower()=="true"
@@ -19,7 +21,7 @@ WAHIS_SYNC_TOKEN=os.getenv("WAHIS_SYNC_TOKEN","")
 AUTO_POPULATE_DEMO_365=os.getenv("AUTO_POPULATE_DEMO_365","true").lower()=="true"
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="1.4.0-export-365-animal-filter")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="1.5.0-multisource-dedupe-italy")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 class UserReport(BaseModel):
@@ -86,6 +88,8 @@ def sync_official_events():
     c=OfficialDemoConnector(); return _sync_rows(c.source_name,c.fetch(),"OFFICIAL_DEMO")
 def sync_wahis_events():
     c=WahisCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"WAHIS_CSV")
+def sync_adis_events():
+    c=AdisCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"ADIS")
 def sync_wahis_csv_text(csv_text, source_name="WAHIS_CSV_UPLOAD"):
     return _sync_rows(source_name,WahisCsvConnector.parse_csv_text(csv_text),"WAHIS")
 def require_sync_token(token):
@@ -213,7 +217,7 @@ def filtered_rows_for_export(days=365, animal_filter="all"):
     out.sort(key=lambda x: x.get("observation_date") or "", reverse=True); return out
 
 def populate_demo_365(count=280):
-    cities=load_json("data/source_cities.json"); random.seed(42); disease_pool=[("Giardiasi","Gatto","companion"),("Parvovirosi canina","Cane","companion"),("Leptospirosi","Cane","companion"),("Tosse infettiva canina","Cane","companion"),("Mastite bovina","Bovino","bovine"),("Sindrome respiratoria bovina","Bovino","bovine"),("Peste suina africana","Cinghiale","swine"),("Influenza aviaria ad alta patogenicita","Avicoli","poultry"),("West Nile fever","Equini","equine")]
+    cities=load_json("data/source_cities.json"); random.seed(42); disease_pool=[("Giardiasi","Gatto","companion"),("Parvovirosi canina","Cane","companion"),("Leptospirosi","Cane","companion"),("Tosse infettiva canina","Cane","companion"),("Mastite bovina","Bovino","bovine"),("Sindrome respiratoria bovina","Bovino","bovine"),("Peste suina africana","Cinghiale","swine"),("Influenza aviaria ad alta patogenicita","Avicoli","poultry"),("West Nile fever","Equini","equine"),("Bluetongue","Ovino","ovine"),("Peste dei piccoli ruminanti","Caprino","caprine"),("Mastite ovina/caprina","Caprino","caprine"),("Coccidiosi ovina/caprina","Ovino","ovine")]
     today=datetime.now(timezone.utc).date(); ins=upd=0
     for i in range(count):
         c=random.choice(cities); d,species,grp=random.choice(disease_pool); days_ago=random.randint(0,364); status=random.choices(["Sospetto","Segnalato da utente","Confermato"],[.55,.30,.15])[0]; lat=float(c['lat'])+(random.random()-.5)*.35; lon=float(c['lon'])+(random.random()-.5)*.35
@@ -223,10 +227,10 @@ def populate_demo_365(count=280):
 
 @app.on_event("startup")
 def startup():
-    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events();
+    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events();
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
-        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.start()
+        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.start()
 @app.on_event("shutdown")
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
@@ -251,6 +255,42 @@ async def upload_wahis_csv(request:Request,x_sync_token:str|None=Header(default=
 def get_wahis_status():
     with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'WAHIS%' ORDER BY id DESC LIMIT 1").fetchone()
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
+@app.post("/sync/adis/run")
+def run_adis_sync(): return sync_adis_events()
+
+@app.get("/sync/adis/status")
+def get_adis_status():
+    with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'ADIS%' ORDER BY id DESC LIMIT 1").fetchone()
+    return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
+
+@app.post("/sync/all/run")
+def run_all_syncs():
+    return {
+        "seed": sync_seed_data(),
+        "official_demo": sync_official_events(),
+        "wahis": sync_wahis_events(),
+        "adis": sync_adis_events()
+    }
+
+@app.get("/sync/status")
+def get_sync_status():
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","demo_365"]
+    out={}
+    with connect() as conn:
+        for source in sources:
+            row=conn.execute("SELECT * FROM sync_log WHERE source=? ORDER BY id DESC LIMIT 1",(source,)).fetchone()
+            out[source]=None if row is None else dict(row)
+    return {"version":app.version,"sync_interval_hours":SYNC_INTERVAL_HOURS,"sources":out}
+
+@app.get("/risk/livestock-density")
+def get_livestock_density(country:str=Query("Italy"), species:str=Query("all")):
+    data=load_json("data/bdn/livestock_density_it.json")
+    if not isinstance(data,list): return {"count":0,"items":[]}
+    species_filter=str(species).lower().strip()
+    if species_filter and species_filter != "all":
+        data=[r for r in data if species_filter in str(r.get("species","" )).lower()]
+    return {"count":len(data),"items":data}
+
 @app.post("/demo/populate-365")
 def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_365(count)
 @app.get("/official-events")
@@ -267,6 +307,7 @@ def get_official_events(lat:float|None=Query(None),lon:float|None=Query(None),ra
             distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]));
             if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
+    out=deduplicate_public_events(out)
     return {"count":len(out),"events":out}
 @app.get("/events")
 def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(50,ge=1,le=2000),days:int=Query(180,ge=1,le=3650),animal_filter:str=Query("all"),disease:str|None=Query(None),include_official:bool=Query(True),include_user:bool=Query(True)):
@@ -284,10 +325,12 @@ def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(5
         distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]));
         if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
-    out.sort(key=lambda x:(-x.get("risk_score",0),x.get("distance_km",9999))); return {"count":len(out),"events":out}
+    out=deduplicate_public_events(out)
+    out.sort(key=lambda x:(-x.get("risk_score",0),x.get("distance_km",9999)))
+    return {"count":len(out),"events":out}
 @app.get("/events/export")
 def export_events(days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),format:str=Query("csv")):
-    rows=filtered_rows_for_export(days,animal_filter)
+    rows=deduplicate_public_events(filtered_rows_for_export(days,animal_filter))
     if format.lower()=="json": return {"count":len(rows),"events":rows}
     fields=["id","external_id","disease","diagnosis_status","species","animal_group","observation_date","report_date","location","region","country","source","source_type","report_type","lat","lon","url_source"]
     output=io.StringIO(); writer=csv.DictWriter(output,fieldnames=fields,extrasaction="ignore"); writer.writeheader(); writer.writerows(rows); output.seek(0)
