@@ -1,13 +1,10 @@
 [
-  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"bovine","density_level":"high","priority":"pilot","notes":"Area prioritaria bovini e Razza Piemontese"},
-  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"ovine","density_level":"medium","priority":"pilot","notes":"Layer dimostrativo piccoli ruminanti"},
-  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"caprine","density_level":"medium","priority":"pilot","notes":"Layer dimostrativo piccoli ruminanti"},
-  {"country":"Italy","region":"Lombardia","province":"Cremona","species":"bovine","density_level":"high","priority":"livestock","notes":"Area rilevante per bovini da latte"},
-  {"country":"Italy","region":"Lombardia","province":"Brescia","species":"swine","density_level":"high","priority":"livestock","notes":"Area rilevante per suini e bovini"},
-  {"country":"Italy","region":"Lombardia","province":"Mantova","species":"swine","density_level":"high","priority":"livestock","notes":"Area rilevante per suini e filiere agroalimentari"},
-  {"country":"Italy","region":"Veneto","province":"Verona","species":"poultry","density_level":"high","priority":"livestock","notes":"Area rilevante per avicoli"},
-  {"country":"Italy","region":"Sardegna","province":"Sassari","species":"ovine","density_level":"high","priority":"small_ruminants","notes":"Area rilevante per ovini"},
-  {"country":"Italy","region":"Sardegna","province":"Nuoro","species":"ovine","density_level":"high","priority":"small_ruminants","notes":"Area rilevante per ovini"},
-  {"country":"Italy","region":"Puglia","province":"Foggia","species":"ovine","density_level":"medium","priority":"small_ruminants","notes":"Area rilevante per ovini/caprini"},
-  {"country":"Italy","region":"Puglia","province":"Foggia","species":"caprine","density_level":"medium","priority":"small_ruminants","notes":"Area rilevante per ovini/caprini"}
+  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"bovine","species_label":"Bovino","farms_count":null,"heads_count":null,"density_level":"high","risk_relevance":"public pilot","notes":"Area prioritaria per bovini e Razza Piemontese; dati demo da sostituire con BDN aggregata autorizzata.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"ovine","species_label":"Ovino","farms_count":null,"heads_count":null,"density_level":"medium","risk_relevance":"small ruminants pilot","notes":"Layer demo per piccoli ruminanti.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Piemonte","province":"Cuneo","species":"caprine","species_label":"Caprino","farms_count":null,"heads_count":null,"density_level":"medium","risk_relevance":"small ruminants pilot","notes":"Layer demo per piccoli ruminanti.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Lombardia","province":"Cremona","species":"bovine","species_label":"Bovino","farms_count":null,"heads_count":null,"density_level":"high","risk_relevance":"dairy cattle","notes":"Area prioritaria per bovini da latte.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Lombardia","province":"Brescia","species":"swine","species_label":"Suino/cinghiale","farms_count":null,"heads_count":null,"density_level":"high","risk_relevance":"swine sector","notes":"Area prioritaria per suini.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Veneto","province":"Verona","species":"poultry","species_label":"Avicoli/volatili","farms_count":null,"heads_count":null,"density_level":"high","risk_relevance":"poultry sector","notes":"Area prioritaria per avicoli.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Sardegna","province":"Sassari","species":"ovine","species_label":"Ovino","farms_count":null,"heads_count":null,"density_level":"high","risk_relevance":"small ruminants","notes":"Area rilevante per ovini; dati demo da sostituire con BDN aggregata.","source":"BDN aggregated/prototype"},
+  {"country":"Italy","region":"Sardegna","province":"Nuoro","species":"caprine","species_label":"Caprino","farms_count":null,"heads_count":null,"density_level":"medium","risk_relevance":"small ruminants","notes":"Area rilevante per caprini; dati demo da sostituire con BDN aggregata.","source":"BDN aggregated/prototype"}
 ]

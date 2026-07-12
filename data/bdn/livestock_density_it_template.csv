@@ -1,0 +1,3 @@
+country,region,province,species,species_label,farms_count,heads_count,density_level,risk_relevance,notes,source
+Italy,Piemonte,Cuneo,bovine,Bovino,,,high,public pilot,Replace with authorized aggregated BDN data,BDN aggregated/prototype
+Italy,Sardegna,Sassari,ovine,Ovino,,,high,small ruminants,Replace with authorized aggregated BDN data,BDN aggregated/prototype
