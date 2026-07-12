@@ -1,20 +1,17 @@
-
 from __future__ import annotations
-import csv, io, json, math, os, random, sqlite3
+import csv, io, json, math, os, random, sqlite3, re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sync.official_connector import OfficialDemoConnector
 from sync.wahis_csv_connector import WahisCsvConnector
 from sync.adis_csv_connector import AdisCsvConnector
 from sync.normalizer import normalize_official_event
 from sync.deduplicator import deduplicate_public_events
-
-import re
+from sync.event_enrichment import enrich_public_events
 
 try:
     from sync.demo_control import (
@@ -25,7 +22,6 @@ try:
         purge_demo_events_sqlite,
     )
 except Exception:
-    # Safe fallback: never break backend startup if demo_control is missing.
     def show_demo_events(): return True
     def auto_populate_demo_365(): return True
     def filter_demo_events(events): return list(events)
@@ -41,11 +37,13 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="1.5.0-multisource-dedupe-italy")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="1.6.0-source-normalization-v89")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
+
 class UserReport(BaseModel):
     disease:str; diagnosis_status:str="Sospetto"; species:str="Animale"; animal_group:str="unknown"; observation_date:str|None=None; lat:float; lon:float; location:str=""; region:str=""; country:str="Italy"; source:str="user_report"; report_type:str="user_suspect"
+
 def now_iso(): return datetime.now(timezone.utc).isoformat()
 def connect():
     conn=sqlite3.connect(DB_PATH); conn.row_factory=sqlite3.Row; return conn
@@ -62,6 +60,7 @@ def load_json(path):
     try:
         with open(path,"r",encoding="utf-8") as f: return json.load(f)
     except Exception: return []
+
 def log_sync(source,status,message,received,inserted,updated,started_at):
     with connect() as conn:
         conn.execute("INSERT INTO sync_log(source,status,message,records_received,records_inserted,records_updated,started_at,finished_at) VALUES (?,?,?,?,?,?,?,?)",(source,status,message,received,inserted,updated,started_at,now_iso())); conn.commit()
@@ -73,6 +72,7 @@ def upsert_event(row):
         conn.execute("""INSERT INTO events(external_id,disease,diagnosis_status,species,animal_group,observation_date,lat,lon,location,region,country,source,source_type,report_type,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(external_id) DO UPDATE SET disease=excluded.disease,diagnosis_status=excluded.diagnosis_status,species=excluded.species,animal_group=excluded.animal_group,observation_date=excluded.observation_date,lat=excluded.lat,lon=excluded.lon,location=excluded.location,region=excluded.region,country=excluded.country,source=excluded.source,source_type=excluded.source_type,report_type=excluded.report_type,updated_at=CURRENT_TIMESTAMP""",(external_id,row.get("disease"),row.get("diagnosis_status","Sospetto"),row.get("species",""),row.get("animal_group","unknown"),row.get("observation_date",""),float(row.get("lat")),float(row.get("lon")),row.get("location",""),row.get("region",""),row.get("country","Italy"),row.get("source","user_report"),row.get("source_type","user"),row.get("report_type","user_suspect")))
         conn.commit()
     return "updated" if existing else "inserted"
+
 def upsert_veterinarian(row):
     external_id=row.get("external_id") or row.get("id") or row.get("name")
     with connect() as conn:
@@ -80,6 +80,7 @@ def upsert_veterinarian(row):
         conn.execute("""INSERT INTO veterinarians(external_id,name,type,availability,phone,lat,lon,city,region,services,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(external_id) DO UPDATE SET name=excluded.name,type=excluded.type,availability=excluded.availability,phone=excluded.phone,lat=excluded.lat,lon=excluded.lon,city=excluded.city,region=excluded.region,services=excluded.services,updated_at=CURRENT_TIMESTAMP""",(external_id,row.get("name"),row.get("type","Veterinario"),row.get("availability",""),row.get("phone",""),float(row.get("lat")),float(row.get("lon")),row.get("city",""),row.get("region",""),json.dumps(row.get("services",[]),ensure_ascii=False)))
         conn.commit()
     return "updated" if existing else "inserted"
+
 def upsert_official_event(row):
     if not row.get("external_id"): row["external_id"]=f"{row.get('source','OFFICIAL')}-{row.get('disease','disease')}-{row.get('observation_date','date')}-{row.get('location','location')}"
     if row.get("lat") is None or row.get("lon") is None: raise ValueError(f"Official event {row.get('external_id')} missing lat/lon")
@@ -88,6 +89,7 @@ def upsert_official_event(row):
         conn.execute("""INSERT INTO official_events(external_id,source,source_type,report_type,disease,disease_it,diagnosis_status,species,animal_group,observation_date,report_date,country,region,location,lat,lon,url_source,notes,raw_payload,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(external_id) DO UPDATE SET source=excluded.source,source_type=excluded.source_type,report_type=excluded.report_type,disease=excluded.disease,disease_it=excluded.disease_it,diagnosis_status=excluded.diagnosis_status,species=excluded.species,animal_group=excluded.animal_group,observation_date=excluded.observation_date,report_date=excluded.report_date,country=excluded.country,region=excluded.region,location=excluded.location,lat=excluded.lat,lon=excluded.lon,url_source=excluded.url_source,notes=excluded.notes,raw_payload=excluded.raw_payload,updated_at=CURRENT_TIMESTAMP""",(row["external_id"],row.get("source","OFFICIAL_UNKNOWN"),row.get("source_type","official"),row.get("report_type","official_confirmed"),row.get("disease",""),row.get("disease_it",""),row.get("diagnosis_status","Confermato"),row.get("species",""),row.get("animal_group","unknown"),row.get("observation_date",""),row.get("report_date",""),row.get("country","Italy"),row.get("region",""),row.get("location",""),float(row.get("lat")),float(row.get("lon")),row.get("url_source",""),row.get("notes",""),json.dumps(row.get("raw_payload",{}),ensure_ascii=False)))
         conn.commit()
     return "updated" if existing else "inserted"
+
 def _sync_rows(source_name, rows, default_source):
     started=now_iso(); ins=upd=skip=0
     for raw in rows:
@@ -98,12 +100,14 @@ def _sync_rows(source_name, rows, default_source):
             skip+=1; print("Skipped official event",e)
     log_sync(source_name,"success",f"{source_name} sync completed; skipped={skip}",len(rows),ins,upd,started)
     return {"status":"success","source":source_name,"received":len(rows),"inserted":ins,"updated":upd,"skipped":skip}
+
 def sync_seed_data():
     started=now_iso(); ins=upd=0
     for row in load_json("data/source_events.json"):
         r=upsert_event(row); ins+=r=="inserted"; upd+=r=="updated"
     for row in load_json("data/source_veterinarians.json"): upsert_veterinarian(row)
     log_sync("seed_data","success","Seed data sync completed",ins+upd,ins,upd,started); return {"status":"success","inserted":ins,"updated":upd}
+
 def sync_official_events():
     c=OfficialDemoConnector(); return _sync_rows(c.source_name,c.fetch(),"OFFICIAL_DEMO")
 def sync_wahis_events():
@@ -121,101 +125,38 @@ def parse_date(value):
     try: return datetime.fromisoformat(str(value)[:10]).date()
     except Exception: return None
 
-
-
-
 def matches_animal_filter(row, animal_filter):
-    if animal_filter in ("", "all", None):
-        return True
-
+    if animal_filter in ("", "all", None): return True
     animal_filter = str(animal_filter).lower().strip()
-
     animal_group = str(row.get("animal_group", "")).lower().strip()
     species = str(row.get("species", "")).lower().strip()
-
     text = f"""
     {row.get('species', '')}
     {row.get('animal_group', '')}
     {row.get('disease', '')}
     {row.get('disease_it', '')}
     """.lower()
-
     filters = {
-        "companion": [
-            "dog", "cane", "canine",
-            "cat", "gatto", "feline"
-        ],
-        "livestock": [
-            "bovine", "bovino", "bovini", "cattle",
-            "swine", "suino", "suini", "pig", "pigs", "cinghiale", "cinghiali",
-            "ovine", "ovino", "ovini", "sheep", "pecora", "pecore",
-            "equine", "equino", "equini", "horse", "horses", "cavallo", "cavalli",
-            "caprine", "caprino", "caprini", "goat", "goats", "capra", "capre",
-            "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds",
-            "pollo", "polli", "gallina", "galline"
-        ],
-
-        "dog": [
-            "dog", "cane", "canine"
-        ],
-        "cat": [
-            "cat", "gatto", "feline"
-        ],
-        "bovine": [
-            "bovine", "bovino", "bovini", "cattle", "cow", "cows"
-        ],
-        "swine": [
-            "swine", "suino", "suini", "pig", "pigs", "cinghiale", "cinghiali", "wild boar"
-        ],
-        "ovine": [
-            "ovine", "ovino", "ovini", "sheep", "pecora", "pecore"
-        ],
-        "equine": [
-            "equine", "equino", "equini", "horse", "horses", "cavallo", "cavalli"
-        ],
-        "caprine": [
-            "caprine", "caprino", "caprini", "goat", "goats", "capra", "capre"
-        ],
-        "poultry": [
-            "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds",
-            "pollo", "polli", "gallina", "galline"
-        ],
-
-        # compatibilità con vecchi valori
-        "dogs": [
-            "dog", "cane", "canine"
-        ],
-        "cats": [
-            "cat", "gatto", "feline"
-        ],
-        "farm": [
-            "bovine", "bovino", "bovini", "cattle",
-            "swine", "suino", "suini", "pig", "pigs", "cinghiale", "cinghiali",
-            "ovine", "ovino", "ovini", "sheep", "pecora", "pecore",
-            "equine", "equino", "equini", "horse", "horses", "cavallo", "cavalli",
-            "caprine", "caprino", "caprini", "goat", "goats", "capra", "capre",
-            "poultry", "avicoli", "volatile", "volatili", "avian", "bird", "birds"
-        ]
+        "companion": ["dog","cane","canine","cat","gatto","feline"],
+        "livestock": ["bovine","bovino","bovini","cattle","swine","suino","suini","pig","pigs","cinghiale","cinghiali","ovine","ovino","ovini","sheep","pecora","pecore","equine","equino","equini","horse","horses","cavallo","cavalli","caprine","caprino","caprini","goat","goats","capra","capre","poultry","avicoli","volatile","volatili","avian","bird","birds","pollo","polli","gallina","galline"],
+        "dog": ["dog","cane","canine"],
+        "cat": ["cat","gatto","feline"],
+        "bovine": ["bovine","bovino","bovini","cattle","cow","cows"],
+        "swine": ["swine","suino","suini","pig","pigs","cinghiale","cinghiali","wild boar"],
+        "ovine": ["ovine","ovino","ovini","sheep","pecora","pecore"],
+        "equine": ["equine","equino","equini","horse","horses","cavallo","cavalli"],
+        "caprine": ["caprine","caprino","caprini","goat","goats","capra","capre"],
+        "poultry": ["poultry","avicoli","volatile","volatili","avian","bird","birds","pollo","polli","gallina","galline"],
+        "dogs": ["dog","cane","canine"],
+        "cats": ["cat","gatto","feline"],
+        "farm": ["bovine","bovino","bovini","cattle","swine","suino","suini","pig","pigs","cinghiale","cinghiali","ovine","ovino","ovini","sheep","pecora","pecore","equine","equino","equini","horse","horses","cavallo","cavalli","caprine","caprino","caprini","goat","goats","capra","capre","poultry","avicoli","volatile","volatili","avian","bird","birds"],
     }
-
     terms = filters.get(animal_filter, [])
-
-    if not terms:
-        return True
-
-    # 1. Prima controlla animal_group e species con uguaglianza esatta
-    if animal_group in terms:
-        return True
-
-    if species in terms:
-        return True
-
-    # 2. Poi controlla nel testo, ma solo come parola intera
+    if not terms: return True
+    if animal_group in terms or species in terms: return True
     for term in terms:
         pattern = r"(?<![a-zA-Z])" + re.escape(term) + r"(?![a-zA-Z])"
-        if re.search(pattern, text):
-            return True
-
+        if re.search(pattern, text): return True
     return False
 
 def compute_risk_score(status,distance_km,observation_date):
@@ -231,7 +172,7 @@ def all_event_rows():
 def filtered_rows_for_export(days=365, animal_filter="all"):
     cutoff=datetime.now(timezone.utc).date()-timedelta(days=days); out=[]
     for row in all_event_rows():
-        obs=parse_date(row.get("observation_date"));
+        obs=parse_date(row.get("observation_date"))
         if obs and obs < cutoff: continue
         if not matches_animal_filter(row,animal_filter): continue
         out.append(row_to_public_event(row,0.0))
@@ -248,7 +189,7 @@ def populate_demo_365(count=280):
 
 @app.on_event("startup")
 def startup():
-    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events();
+    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events()
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
         scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.start()
@@ -256,22 +197,9 @@ def startup():
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
 @app.get("/health")
-
-def health():
-    return {
-        "status": "ok",
-        "time": now_iso(),
-        "version": app.version,
-        "sync_interval_hours": SYNC_INTERVAL_HOURS,
-        "auto_populate_demo_365": AUTO_POPULATE_DEMO_365,
-        "show_demo_events": SHOW_DEMO_EVENTS,
-    }
-
+def health(): return {"status":"ok","time":now_iso(),"version":app.version,"sync_interval_hours":SYNC_INTERVAL_HOURS,"auto_populate_demo_365":AUTO_POPULATE_DEMO_365,"show_demo_events":SHOW_DEMO_EVENTS}
 @app.get("/demo/status")
-def get_demo_status():
-    return demo_status()
-
-
+def get_demo_status(): return demo_status()
 @app.get("/cities")
 def get_cities(): return {"cities":load_json("data/source_cities.json")}
 @app.get("/sync/log")
@@ -293,21 +221,12 @@ def get_wahis_status():
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
 @app.post("/sync/adis/run")
 def run_adis_sync(): return sync_adis_events()
-
 @app.get("/sync/adis/status")
 def get_adis_status():
     with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'ADIS%' ORDER BY id DESC LIMIT 1").fetchone()
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
-
 @app.post("/sync/all/run")
-def run_all_syncs():
-    return {
-        "seed": sync_seed_data(),
-        "official_demo": sync_official_events(),
-        "wahis": sync_wahis_events(),
-        "adis": sync_adis_events()
-    }
-
+def run_all_syncs(): return {"seed": sync_seed_data(),"official_demo": sync_official_events(),"wahis": sync_wahis_events(),"adis": sync_adis_events()}
 @app.get("/sync/status")
 def get_sync_status():
     sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","demo_365"]
@@ -317,38 +236,36 @@ def get_sync_status():
             row=conn.execute("SELECT * FROM sync_log WHERE source=? ORDER BY id DESC LIMIT 1",(source,)).fetchone()
             out[source]=None if row is None else dict(row)
     return {"version":app.version,"sync_interval_hours":SYNC_INTERVAL_HOURS,"sources":out}
-
 @app.get("/risk/livestock-density")
 def get_livestock_density(country:str=Query("Italy"), species:str=Query("all")):
     data=load_json("data/bdn/livestock_density_it.json")
     if not isinstance(data,list): return {"count":0,"items":[]}
     species_filter=str(species).lower().strip()
-    if species_filter and species_filter != "all":
-        data=[r for r in data if species_filter in str(r.get("species","" )).lower()]
+    if species_filter and species_filter != "all": data=[r for r in data if species_filter in str(r.get("species","")).lower()]
     return {"count":len(data),"items":data}
-
 @app.post("/demo/populate-365")
 def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_365(count)
 @app.post("/demo/purge")
 def demo_purge(older_than_days: int | None = Query(None, ge=1, le=3650)):
-    with connect() as conn:
-        return purge_demo_events_sqlite(conn, table_name="events", older_than_days=older_than_days)
+    with connect() as conn: return purge_demo_events_sqlite(conn, table_name="events", older_than_days=older_than_days)
+
 @app.get("/official-events")
 def get_official_events(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(200,ge=1,le=2000),days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),source:str|None=Query(None)):
     with connect() as conn: rows=[dict(r) for r in conn.execute("SELECT * FROM official_events ORDER BY observation_date DESC").fetchall()]
     cutoff=datetime.now(timezone.utc).date()-timedelta(days=days); out=[]
     for row in rows:
         if source and row.get("source")!=source: continue
-        obs=parse_date(row.get("observation_date"));
+        obs=parse_date(row.get("observation_date"))
         if obs and obs<cutoff: continue
         if not matches_animal_filter(row,animal_filter): continue
         distance=0.0
         if lat is not None and lon is not None and row.get("lat") is not None and row.get("lon") is not None:
-            distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]));
+            distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]))
             if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
     out=deduplicate_public_events(out)
     out=filter_demo_events(out)
+    out=enrich_public_events(out)
     return {"count":len(out),"events":out}
 @app.get("/events")
 def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(50,ge=1,le=2000),days:int=Query(180,ge=1,le=3650),animal_filter:str=Query("all"),disease:str|None=Query(None),include_official:bool=Query(True),include_user:bool=Query(True)):
@@ -359,23 +276,25 @@ def get_events(lat:float=Query(...),lon:float=Query(...),radius_km:float=Query(5
     out=[]
     for row in rows:
         if row.get("lat") is None or row.get("lon") is None: continue
-        obs=parse_date(row.get("observation_date"));
+        obs=parse_date(row.get("observation_date"))
         if obs and obs<cutoff: continue
         if disease_filter and disease_filter not in f"{row.get('disease','')} {row.get('disease_it','')} {row.get('species','')} {row.get('location','')}".lower(): continue
         if not matches_animal_filter(row,animal_filter): continue
-        distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]));
+        distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]))
         if distance>radius_km: continue
         out.append(row_to_public_event(row,distance))
     out=deduplicate_public_events(out)
     out=filter_demo_events(out)
+    out=enrich_public_events(out)
     out.sort(key=lambda x:(-x.get("risk_score",0),x.get("distance_km",9999)))
     return {"count":len(out),"events":out}
 @app.get("/events/export")
 def export_events(days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),format:str=Query("csv")):
     rows=deduplicate_public_events(filtered_rows_for_export(days,animal_filter))
     rows=filter_demo_events(rows)
+    rows=enrich_public_events(rows)
     if format.lower()=="json": return {"count":len(rows),"events":rows}
-    fields=["id","external_id","disease","diagnosis_status","species","animal_group","observation_date","report_date","location","region","country","source","source_type","report_type","lat","lon","url_source"]
+    fields=["id","external_id","disease","diagnosis_status","display_status","display_source","confidence_label","species","animal_group","observation_date","report_date","location","region","country","source","source_type","report_type","lat","lon","url_source"]
     output=io.StringIO(); writer=csv.DictWriter(output,fieldnames=fields,extrasaction="ignore"); writer.writeheader(); writer.writerows(rows); output.seek(0)
     headers={"Content-Disposition":f"attachment; filename=vetector_events_last_{days}_days.csv"}
     return Response(content=output.getvalue(),media_type="text/csv; charset=utf-8",headers=headers)
@@ -384,7 +303,7 @@ def get_veterinarians(lat:float=Query(...),lon:float=Query(...),radius_km:float=
     with connect() as conn: rows=[dict(r) for r in conn.execute("SELECT * FROM veterinarians ORDER BY name ASC").fetchall()]
     out=[]
     for row in rows:
-        distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]));
+        distance=haversine_km(lat,lon,float(row["lat"]),float(row["lon"]))
         if distance>radius_km: continue
         try: row["services"]=json.loads(row.get("services") or "[]")
         except Exception: row["services"]=[]
@@ -395,4 +314,4 @@ def create_user_suspect(report:UserReport):
     payload=report.model_dump(); payload["external_id"]=f"USER-SUSPECT-{int(datetime.now(timezone.utc).timestamp())}"; payload["diagnosis_status"]="Sospetto"; payload["source_type"]="user"; payload["report_type"]="user_suspect"; payload["observation_date"]=payload.get("observation_date") or datetime.now(timezone.utc).date().isoformat(); r=upsert_event(payload); return {"status":r,"event":payload}
 @app.post("/user-reports/positive")
 def create_user_positive(report:UserReport):
-    payload=report.model_dump(); payload["external_id"]=f"USER-POSITIVE-{int(datetime.now(timezone.utc).timestamp())}"; payload["diagnosis_status"]="Segnalato da utente"; payload["source_type"]="user"; payload["report_type"]="user_positive"; payload["observation_date"]=payload.get("observation_date") or datetime.now(timezone.utc).date().isoformat(); r=upsert_event(payload); return {"status":r,"event":payload}
+    payload=report.model_dump(); payload["external_id"]=f"USER-POSITIVE-{int(datetime.now(timezone.utc).timestamp())}"; payload["diagnosis_status"]="Test rapido positivo"; payload["source_type"]="user"; payload["report_type"]="user_positive"; payload["source"]=payload.get("source") or "Leggi test rapido"; payload["observation_date"]=payload.get("observation_date") or datetime.now(timezone.utc).date().isoformat(); r=upsert_event(payload); return {"status":r,"event":payload}
