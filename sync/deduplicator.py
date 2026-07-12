@@ -1,15 +1,18 @@
 """
-vet.ector backend v85 - safer public-event deduplication.
+vet.ector backend v99 - conservative official-event deduplication.
 
 Purpose
 -------
-Deduplicate ONLY when doing so is safe for map display:
-- official + official: deduplicate with normal thresholds
-- official + user/demo/test/vet: deduplicate only when very close and same/similar date
-- user + user / demo + demo / non-official + non-official: do NOT deduplicate
+This module deduplicates only when doing so is safe for public map display.
 
-This module is designed as a drop-in replacement if main.py already imports
-`deduplicate_events` from `sync.deduplicator`.
+Rules implemented in v99:
+- Never merge demo/prototype records with real official records.
+- Never merge ADIS with ADIS: each ADIS external_id remains a distinct event.
+- Never merge WAHIS with WAHIS: each WAHIS external_id remains a distinct event.
+- Merge ADIS + WAHIS only when they are very likely the same outbreak
+  (same disease, same animal group, very close date, very close location).
+- Never merge user/demo reports with other user/demo reports.
+- This function does not mutate or delete database rows. It only prepares the API response.
 """
 from __future__ import annotations
 
@@ -25,57 +28,78 @@ def _norm(value: Any) -> str:
 
 
 def _norm_disease(event: Event) -> str:
-    return _norm(event.get("disease_normalized") or event.get("disease") or event.get("disease_it") or event.get("disease_original"))
+    return _norm(
+        event.get("disease_normalized")
+        or event.get("disease")
+        or event.get("disease_it")
+        or event.get("disease_original")
+    )
 
 
 def _norm_animal_group(event: Event) -> str:
     return _norm(event.get("animal_group") or event.get("species"))
 
 
-def _source_type(event: Event) -> str:
-    return _norm(event.get("source_type") or event.get("report_type") or event.get("source"))
+def _source_text(event: Event) -> str:
+    parts: List[str] = []
+    for key in ("source", "source_type", "report_type"):
+        value = event.get(key)
+        if value:
+            parts.append(str(value))
+    merged = event.get("sources_merged")
+    if isinstance(merged, list):
+        parts.extend(str(x) for x in merged if x)
+    return " ".join(parts).lower()
 
 
-def _is_official(event: Event) -> bool:
-    source_type = _source_type(event)
+def _source_family(event: Event) -> str:
+    """Return a normalized broad source family."""
+    text = _source_text(event)
     source = _norm(event.get("source"))
-    report_type = _norm(event.get("report_type"))
-    return (
-        "official" in source_type
-        or "official" in report_type
-        or source in {"wahis", "adis", "woah", "official_demo"}
-        or source.startswith("wahis")
-        or source.startswith("adis")
-    )
+
+    if "demo 365" in text or "official_demo" in text or "seed_demo" in text or source in {"demo", "demo365", "demo 365 giorni", "official_demo"}:
+        return "demo"
+    if "adis" in text:
+        return "adis"
+    if "wahis" in text or "woah" in text:
+        return "wahis"
+    if "veterin" in text or " vet" in f" {text}" or "vet_" in text:
+        return "vet"
+    if "rapid" in text or "leggi test" in text or "test" in _norm(event.get("report_type")):
+        return "rapid_test"
+    if "user" in text or "utente" in text:
+        return "user"
+    if "company" in text or "azienda" in text:
+        return "company"
+    if "association" in text or "associazione" in text:
+        return "association"
+    if "official" in text:
+        return "other_official"
+    return "other"
 
 
-def _is_non_official_demo_or_user(event: Event) -> bool:
-    source_type = _source_type(event)
-    source = _norm(event.get("source"))
-    report_type = _norm(event.get("report_type"))
-    return (
-        "user" in source_type
-        or "user" in report_type
-        or "demo" in source
-        or source in {"demo 365 giorni", "demo365"}
-        or "test" in report_type
-        or "vet" in source_type
-    )
+def _is_demo(event: Event) -> bool:
+    return _source_family(event) == "demo"
+
+
+def _is_real_official(event: Event) -> bool:
+    return _source_family(event) in {"adis", "wahis", "other_official"}
 
 
 def _parse_date(value: Any) -> Optional[date]:
     if not value:
         return None
     text = str(value).strip()
-    for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S%z"):
-        try:
-            return datetime.strptime(text[:19] if "T" in text else text, fmt).date()
-        except Exception:
-            pass
     try:
-        return datetime.fromisoformat(text.replace("Z", "+00:00")).date()
+        return datetime.fromisoformat(text.replace("Z", "+00:00")[:10]).date()
     except Exception:
-        return None
+        pass
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(text[:10], fmt).date()
+        except Exception:
+            continue
+    return None
 
 
 def _event_date(event: Event) -> Optional[date]:
@@ -113,17 +137,6 @@ def _distance_km(a: Event, b: Event) -> Optional[float]:
     return 2 * r * asin(sqrt(h))
 
 
-def _same_area(a: Event, b: Event) -> bool:
-    # Prefer administrative fields when available.
-    for key in ("country", "region", "province", "location"):
-        av = _norm(a.get(key))
-        bv = _norm(b.get(key))
-        if av and bv and av == bv:
-            return True
-    d = _distance_km(a, b)
-    return d is not None and d <= 25.0
-
-
 def _same_species_or_group(a: Event, b: Event) -> bool:
     ga = _norm_animal_group(a)
     gb = _norm_animal_group(b)
@@ -135,42 +148,53 @@ def _same_species_or_group(a: Event, b: Event) -> bool:
 
 
 def _can_merge(a: Event, b: Event) -> bool:
-    # Must be the same disease and compatible species/group.
+    """Return True only when two public events should be represented as one marker."""
     if not _norm_disease(a) or _norm_disease(a) != _norm_disease(b):
         return False
     if not _same_species_or_group(a, b):
         return False
 
-    a_off = _is_official(a)
-    b_off = _is_official(b)
+    family_a = _source_family(a)
+    family_b = _source_family(b)
 
-    # Never merge non-official with non-official. Multiple user/demo reports may be independent cases.
-    if not a_off and not b_off:
+    # Demo/prototype data must never collapse real ADIS/WAHIS records.
+    if family_a == "demo" or family_b == "demo":
+        return False
+
+    # Preserve ADIS outbreak granularity: each external_id is a distinct notification.
+    if family_a == family_b and family_a in {"adis", "wahis"}:
+        return False
+
+    # Do not merge non-official/community events together.
+    if not _is_real_official(a) and not _is_real_official(b):
         return False
 
     date_gap = _date_diff_days(a, b)
     dist = _distance_km(a, b)
 
-    # Official + official: normal threshold.
-    if a_off and b_off:
-        if date_gap is not None and date_gap > 14:
+    # ADIS + WAHIS can be merged, but only with strict criteria.
+    if {family_a, family_b} == {"adis", "wahis"}:
+        if date_gap is not None and date_gap > 7:
             return False
-        if dist is not None and dist > 50:
+        if dist is None:
             return False
-        return _same_area(a, b) or dist is None
+        return dist <= 5.0
 
-    # Official + non-official: only merge when very likely the same event.
-    # Very close geographically AND close in time.
-    if date_gap is not None and date_gap > 3:
-        return False
-    if dist is not None and dist > 10:
-        return False
-    return True
+    # Other official cross-source merge: conservative.
+    if _is_real_official(a) and _is_real_official(b):
+        if date_gap is not None and date_gap > 7:
+            return False
+        if dist is None:
+            return False
+        return dist <= 5.0
+
+    # Official + user/test/vet: do not merge in v99. Keep evidence layers visible.
+    return False
 
 
 def _event_sort_key(event: Event) -> Tuple[int, float, str]:
-    # Prefer official, then higher risk, then newer date.
-    official_rank = 0 if _is_official(event) else 1
+    family = _source_family(event)
+    official_rank = 0 if family in {"adis", "wahis", "other_official"} else 1
     risk = _float_or_none(event.get("risk_score")) or 0.0
     date_str = str(event.get("observation_date") or event.get("report_date") or "")
     return (official_rank, -risk, date_str)
@@ -204,10 +228,6 @@ def _merge_cluster(cluster: List[Event]) -> Event:
 
 
 def deduplicate_events(events: Iterable[Event]) -> List[Event]:
-    """Return public-display events with safer deduplication.
-
-    This function does not delete or mutate database rows. It only prepares the API response.
-    """
     remaining = [dict(e) for e in events]
     clusters: List[List[Event]] = []
 
@@ -224,11 +244,9 @@ def deduplicate_events(events: Iterable[Event]) -> List[Event]:
         remaining = keep
 
     merged = [_merge_cluster(cluster) for cluster in clusters]
-    # Keep the same rough ordering expected by the frontend.
     merged.sort(key=lambda e: -(_float_or_none(e.get("risk_score")) or 0.0))
     return merged
 
 
-# Backward-compatible alias for possible previous imports.
 def deduplicate_public_events(events: Iterable[Event]) -> List[Event]:
     return deduplicate_events(events)

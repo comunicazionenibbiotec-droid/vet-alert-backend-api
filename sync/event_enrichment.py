@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List
 
-OFFICIAL_SOURCES = {"WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD", "ADIS", "ADIS_CSV"}
+REAL_OFFICIAL_SOURCES = {"WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD", "ADIS", "ADIS_CSV", "WOAH"}
 DEMO_SOURCES = {"Demo 365 giorni", "OFFICIAL_DEMO", "DEMO", "seed_demo"}
 
 
@@ -29,17 +29,26 @@ def _is_demo_source(source: str) -> bool:
     return "demo" in source_l or source in DEMO_SOURCES
 
 
+def _is_real_official_source(source: str) -> bool:
+    if not source:
+        return False
+    source_l = source.lower()
+    if _is_demo_source(source):
+        return False
+    return source in REAL_OFFICIAL_SOURCES or "adis" in source_l or "wahis" in source_l or "woah" in source_l
+
+
 def _display_source(event: Dict[str, Any]) -> str:
     sources = _merged_sources(event)
     if not sources:
         return "Fonte non indicata"
 
-    display = []
+    display: List[str] = []
     for src in sources:
         src_l = src.lower()
-        if src in ("WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD") or "wahis" in src_l:
+        if _is_real_official_source(src) and ("wahis" in src_l or "woah" in src_l or src in ("WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD")):
             label = "WAHIS"
-        elif src in ("ADIS", "ADIS_CSV") or "adis" in src_l:
+        elif _is_real_official_source(src) and ("adis" in src_l or src in ("ADIS", "ADIS_CSV")):
             label = "ADIS"
         elif "veterin" in src_l or src_l == "vet":
             label = "Veterinario"
@@ -64,7 +73,9 @@ def _display_source(event: Dict[str, Any]) -> str:
 def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
     """Add frontend-friendly status/source/confidence fields to a public event.
 
-    This does not remove or rename existing fields, so current frontend code remains compatible.
+    In v99, real official sources always take precedence over demo labels if a merged
+    event contains both. The deduplicator should normally prevent official+demo merges,
+    but this priority makes the response robust.
     """
     item = dict(event)
 
@@ -74,19 +85,21 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
     report_type = _lower(item.get("report_type"))
     diagnosis_status = _lower(item.get("diagnosis_status"))
     merged_sources = _merged_sources(item)
-    merged_l = " ".join(merged_sources).lower()
 
-    is_demo = _is_demo_source(source) or any(_is_demo_source(s) for s in merged_sources)
-    is_official = (
-        not is_demo
-        and (
+    has_real_official_source = any(_is_real_official_source(s) for s in merged_sources) or _is_real_official_source(source)
+    has_demo_source = any(_is_demo_source(s) for s in merged_sources) or _is_demo_source(source)
+
+    is_official = bool(
+        has_real_official_source
+        or (
             source_type == "official"
-            or "official" in report_type
-            or source in OFFICIAL_SOURCES
-            or "wahis" in merged_l
-            or "adis" in merged_l
+            and not has_demo_source
+            and "official_demo" not in source_l
         )
+        or ("official" in report_type and not has_demo_source)
     )
+    is_demo = bool(has_demo_source and not is_official)
+
     is_vet_validated = (
         "vet" in report_type
         or "veterin" in report_type
@@ -100,7 +113,7 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
         or "rapid" in report_type
         or "test" in report_type
         or "test rapido" in diagnosis_status
-        or "positivo" in diagnosis_status and "test" in diagnosis_status
+        or ("positivo" in diagnosis_status and "test" in diagnosis_status)
         or "leggi test" in source_l
     )
     is_suspect = (
@@ -110,11 +123,7 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
         or source_type in {"user", "company", "association"}
     )
 
-    if is_demo:
-        display_status = "Demo"
-        confidence_label = "Dato dimostrativo temporaneo"
-        confidence_rank = 0
-    elif is_official:
+    if is_official:
         display_status = "Confermato ufficiale"
         confidence_label = "Affidabilita alta"
         confidence_rank = 5
@@ -130,6 +139,10 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
         display_status = "Sospetto"
         confidence_label = "Da confermare"
         confidence_rank = 2
+    elif is_demo:
+        display_status = "Demo"
+        confidence_label = "Dato dimostrativo temporaneo"
+        confidence_rank = 0
     else:
         display_status = _norm(item.get("diagnosis_status")) or "Da classificare"
         confidence_label = "Da verificare"
