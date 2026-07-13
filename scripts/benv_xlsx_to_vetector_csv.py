@@ -178,13 +178,22 @@ def parse_date(value: Any) -> str:
     return text
 
 
+def clean_disease_stem(raw: str) -> str:
+    text = str(raw or "")
+    text = text.replace("_", " ").replace("-", " ")
+    text = re.sub(r"\b20\d{2}\b", " ", text)
+    text = re.sub(r"\b(italia|italy|it|nazionale|tabella|focolai|focolaio|export|benv)\b", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text or str(raw or "").strip()
+
 def infer_disease(path: Path, override: Optional[str]) -> Tuple[str, str, str]:
     raw = override or path.stem
-    raw_l = raw.lower().replace("-", "_")
+    cleaned_stem = clean_disease_stem(raw)
+    raw_l = cleaned_stem.lower().replace("-", "_").replace(" ", "_")
     for k, val in DISEASE_MAP.items():
         if k.lower().replace(" ", "_") in raw_l:
             return val[0], val[1], val[1]
-    cleaned = raw.replace("_", " ").replace("-", " ").strip().title()
+    cleaned = cleaned_stem.strip().title()
     return cleaned, cleaned, cleaned
 
 
