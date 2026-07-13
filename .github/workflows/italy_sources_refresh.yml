@@ -1,0 +1,31 @@
+name: vet.ector Italy data sources validation
+
+on:
+  schedule:
+    - cron: "35 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-italy-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate Italy data source CSVs
+        run: |
+          python scripts/validate_italy_sources.py
+
+      - name: Commit updated metadata if any
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Validate Italy data source CSVs"
+          file_pattern: data/official_sources/*.csv data/sentinel/*.csv data/official_sources/*.json data/sentinel/*.json
