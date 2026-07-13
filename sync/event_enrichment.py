@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List
 
-REAL_OFFICIAL_SOURCES = {"WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD", "ADIS", "ADIS_CSV", "WOAH"}
+REAL_OFFICIAL_SOURCES = {"WAHIS", "WAHIS_CSV", "WAHIS_CSV_UPLOAD", "ADIS", "ADIS_CSV", "WOAH", "IZS_BENV", "BENV", "IZS"}
 DEMO_SOURCES = {"Demo 365 giorni", "OFFICIAL_DEMO", "DEMO", "seed_demo"}
+SENTINEL_SOURCES = {"MYVBDMAP"}
 
 
 def _norm(value: Any) -> str:
@@ -50,6 +51,10 @@ def _display_source(event: Dict[str, Any]) -> str:
             label = "WAHIS"
         elif _is_real_official_source(src) and ("adis" in src_l or src in ("ADIS", "ADIS_CSV")):
             label = "ADIS"
+        elif src in ("IZS_BENV", "BENV", "IZS") or "benv" in src_l or "izs" in src_l:
+            label = "BENV / IZS"
+        elif src in SENTINEL_SOURCES or "myvbd" in src_l:
+            label = "MyVBDMap"
         elif "veterin" in src_l or src_l == "vet":
             label = "Veterinario"
         elif "rapid" in src_l or "leggi test" in src_l or "test" in src_l:
@@ -123,7 +128,11 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
         or source_type in {"user", "company", "association"}
     )
 
-    if is_official:
+    if is_sentinel:
+        display_status = "Dato sentinella"
+        confidence_label = "Dato epidemiologico veterinario"
+        confidence_rank = 3
+    elif is_official:
         display_status = "Confermato ufficiale"
         confidence_label = "Affidabilita alta"
         confidence_rank = 5
@@ -157,7 +166,8 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
     item["is_user_generated"] = bool(source_type in {"user", "company", "association"} or "user" in source_l or "utente" in source_l)
     item["is_vet_validated"] = bool(is_vet_validated)
     item["is_rapid_test"] = bool(is_rapid_test)
-    item["is_suspect"] = bool(is_suspect and not is_demo and not is_official and not is_vet_validated and not is_rapid_test)
+    item["is_suspect"] = bool(is_suspect and not is_demo and not is_official and not is_vet_validated and not is_rapid_test and not is_sentinel)
+    item["is_sentinel"] = bool(is_sentinel)
 
     return item
 
