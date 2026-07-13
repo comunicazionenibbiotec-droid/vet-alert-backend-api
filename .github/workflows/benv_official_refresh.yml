@@ -1,0 +1,43 @@
+name: BENV official source refresh
+
+on:
+  schedule:
+    - cron: "20 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize-benv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl
+
+      - name: Normalize BENV XLSX exports
+        run: |
+          python scripts/benv_xlsx_to_vetector_csv.py \
+            --input-dir data/raw/benv_exports \
+            --output data/official_sources/izs_benv_events.csv \
+            --centroids data/reference/italia_comuni_centroids.csv
+
+      - name: Validate generated BENV CSV
+        run: |
+          python scripts/validate_italy_sources.py data/official_sources/izs_benv_events.csv
+
+      - name: Commit refreshed BENV CSV
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh BENV official events CSV"
+          file_pattern: data/official_sources/izs_benv_events.csv
