@@ -179,22 +179,22 @@ def enrich_public_event(event: Dict[str, Any]) -> Dict[str, Any]:
         display_status = "Validato da veterinario"
         confidence_label = "Affidabilita professionale"
         confidence_rank = 4
-    elif is_rapid_test:
-        display_status = "Test rapido positivo"
-        confidence_label = "Affidabilita intermedia"
-        confidence_rank = 3
     elif is_sentinel:
         display_status = "Dato sentinella"
         confidence_label = "Dato epidemiologico veterinario"
         confidence_rank = 3
+    elif is_rapid_test:
+        display_status = "Test rapido positivo"
+        confidence_label = "Affidabilita intermedia"
+        confidence_rank = 2
+    elif is_suspect:
+        display_status = "Sospetto"
+        confidence_label = "Da confermare"
+        confidence_rank = 1
     elif is_demo:
         display_status = "Demo"
         confidence_label = "Dato dimostrativo temporaneo"
         confidence_rank = 0
-    elif is_suspect:
-        display_status = "Sospetto"
-        confidence_label = "Da confermare"
-        confidence_rank = 2
     else:
         display_status = _norm(item.get("diagnosis_status")) or "Da classificare"
         confidence_label = "Da verificare"
