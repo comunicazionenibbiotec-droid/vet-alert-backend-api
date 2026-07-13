@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from sync.official_connector import OfficialDemoConnector
 from sync.wahis_csv_connector import WahisCsvConnector
 from sync.adis_csv_connector import AdisCsvConnector
+from sync.izs_benv_csv_connector import IzsBenvCsvConnector
+from sync.myvbdmap_csv_connector import MyVbdMapCsvConnector
 from sync.normalizer import normalize_official_event
 from sync.deduplicator import deduplicate_public_events
 from sync.event_enrichment import enrich_public_events
@@ -41,7 +43,7 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.1.0-dedupe-official-fix-v99")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.2.0-italy-sources-v101A")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -126,6 +128,22 @@ def sync_wahis_events():
     c=WahisCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"WAHIS_CSV")
 def sync_adis_events():
     c=AdisCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"ADIS")
+def sync_izs_benv_events():
+    c=IzsBenvCsvConnector(); return _sync_rows(c.source_name,c.fetch(),"IZS_BENV")
+
+def sync_myvbdmap_events():
+    c=MyVbdMapCsvConnector(); started=now_iso(); ins=upd=skip=0; rows=c.fetch()
+    for row in rows:
+        try:
+            row["source"] = row.get("source") or "MYVBDMAP"
+            row["source_type"] = row.get("source_type") or "sentinel"
+            row["report_type"] = row.get("report_type") or "veterinary_sentinel"
+            row["diagnosis_status"] = row.get("diagnosis_status") or "Dato sentinella"
+            r=upsert_event(row); ins+=r=="inserted"; upd+=r=="updated"
+        except Exception as e:
+            skip+=1; print("Skipped MyVBDMap sentinel event", e)
+    log_sync(c.source_name,"success",f"{c.source_name} sync completed; skipped={skip}",len(rows),ins,upd,started)
+    return {"status":"success","source":c.source_name,"received":len(rows),"inserted":ins,"updated":upd,"skipped":skip}
 def sync_wahis_csv_text(csv_text, source_name="WAHIS_CSV_UPLOAD"):
     return _sync_rows(source_name,WahisCsvConnector.parse_csv_text(csv_text),"WAHIS")
 def sync_adis_csv_text(csv_text, source_name="ADIS_CSV_UPLOAD"):
@@ -203,10 +221,10 @@ def populate_demo_365(count=280):
 
 @app.on_event("startup")
 def startup():
-    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events()
+    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events(); sync_myvbdmap_events()
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
-        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.start()
+        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.start()
 @app.on_event("shutdown")
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
@@ -242,11 +260,26 @@ def run_adis_sync(): return sync_adis_events()
 def get_adis_status():
     with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'ADIS%' ORDER BY id DESC LIMIT 1").fetchone()
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
+@app.post("/sync/izs-benv/run")
+def run_izs_benv_sync(): return sync_izs_benv_events()
+
+@app.get("/sync/izs-benv/status")
+def get_izs_benv_status():
+    with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'IZS_BENV%' ORDER BY id DESC LIMIT 1").fetchone()
+    return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
+
+@app.post("/sync/myvbdmap/run")
+def run_myvbdmap_sync(): return sync_myvbdmap_events()
+
+@app.get("/sync/myvbdmap/status")
+def get_myvbdmap_status():
+    with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'MYVBDMAP%' ORDER BY id DESC LIMIT 1").fetchone()
+    return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
 @app.post("/sync/all/run")
-def run_all_syncs(): return {"seed": sync_seed_data(),"official_demo": sync_official_events(),"wahis": sync_wahis_events(),"adis": sync_adis_events()}
+def run_all_syncs(): return {"seed": sync_seed_data(),"official_demo": sync_official_events(),"wahis": sync_wahis_events(),"adis": sync_adis_events(),"izs_benv": sync_izs_benv_events(),"myvbdmap": sync_myvbdmap_events()}
 @app.get("/sync/sources/schema")
 def get_sync_sources_schema():
-    return {"required_columns": sorted(REQUIRED_COLUMNS), "optional_columns": sorted(OPTIONAL_COLUMNS), "sources": ["WAHIS", "ADIS"]}
+    return {"required_columns": sorted(REQUIRED_COLUMNS), "optional_columns": sorted(OPTIONAL_COLUMNS), "sources": ["WAHIS", "ADIS", "IZS_BENV", "MYVBDMAP"]}
 @app.post("/sync/csv/validate")
 async def validate_source_csv(request:Request,x_sync_token:str|None=Header(default=None)):
     require_sync_token(x_sync_token); body=await request.body(); rows=read_csv_text(body.decode("utf-8-sig")); valid, errors=validate_rows(rows); return {"received":len(rows),"valid":len(valid),"errors":errors[:50],"error_count":len(errors)}
@@ -267,7 +300,7 @@ def get_sync_remote_config():
     }
 @app.get("/sync/status")
 def get_sync_status():
-    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","demo_365"]
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365"]
     out={}
     with connect() as conn:
         for source in sources:
@@ -317,6 +350,8 @@ def get_sources_registry():
         "event_sources":[
             {"key":"WAHIS","type":"official","role":"global official animal disease events"},
             {"key":"ADIS","type":"official","role":"EU official animal disease events"},
+            {"key":"IZS_BENV","type":"official","role":"Italian BENV/IZS official veterinary outbreak events"},
+            {"key":"MYVBDMAP","type":"sentinel","role":"veterinary sentinel data for canine vector-borne diseases"},
             {"key":"user_report","type":"user","role":"suspect reports from platform users"},
             {"key":"rapid_test","type":"user","role":"rapid test positive reports"},
             {"key":"veterinarian","type":"professional","role":"veterinarian validated reports"},
