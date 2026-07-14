@@ -18,6 +18,7 @@ from sync.source_schema import REQUIRED_COLUMNS, OPTIONAL_COLUMNS, read_csv_text
 from sync.bdn_connector import BdnDensityConnector, normalize_density_row
 from sync.efsa_risk_connector import EfsaRiskLayerConnector, normalize_risk_layer
 from sync.risk_summary import summarize_area_risk
+from sync.territorial_layers_connector import load_territorial_layers, filter_territorial_layers, territorial_layers_csv_status
 
 try:
     from sync.demo_control import (
@@ -43,7 +44,8 @@ AUTO_POPULATE_DEMO_365=auto_populate_demo_365()
 SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.2.0-italy-sources-v101A")
+TERRITORIAL_LAYERS_CSV_PATH=os.getenv("TERRITORIAL_LAYERS_CSV_PATH","data/territorial_layers/territorial_layers.csv")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.0-territorial-layers-v133")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -300,7 +302,7 @@ def get_sync_remote_config():
     }
 @app.get("/sync/status")
 def get_sync_status():
-    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365"]
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS"]
     out={}
     with connect() as conn:
         for source in sources:
@@ -344,6 +346,36 @@ def get_area_summary(lat:float=Query(...), lon:float=Query(...), radius_km:float
     layers=get_efsa_risk_layers()
     return summarize_area_risk(events,density,layers,species=animal_filter)
 
+
+@app.get("/territorial-layers")
+def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None)):
+    layers=load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
+    out=filter_territorial_layers(layers, lat=lat, lon=lon, radius_km=radius_km, category=category, days=days, source=source, distance_fn=haversine_km, parse_date_fn=parse_date)
+    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days}
+
+@app.get("/territorial-layers/export")
+def export_territorial_layers(category:str=Query("all"),format:str=Query("csv")):
+    layers=filter_territorial_layers(load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH), category=category, distance_fn=haversine_km, parse_date_fn=parse_date)
+    if format.lower()=="json": return {"count":len(layers),"layers":layers}
+    fields=["id","external_id","category","source","display_source","label","scientific_name","data_type","count","period_start","period_end","country","region","province","location","lat","lon","radius_km","color","url_source","notes"]
+    output=io.StringIO(); writer=csv.DictWriter(output, fieldnames=fields, extrasaction="ignore"); writer.writeheader(); writer.writerows(layers); output.seek(0)
+    return Response(content=output.getvalue(), media_type="text/csv; charset=utf-8", headers={"Content-Disposition":"attachment; filename=vetector_territorial_layers.csv"})
+
+@app.post("/sync/territorial-layers/run")
+def run_territorial_layers_sync(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    status=territorial_layers_csv_status(TERRITORIAL_LAYERS_CSV_PATH)
+    state="success" if status.get("exists") else "missing"
+    message="Territorial layers CSV validated" if status.get("exists") else "Territorial layers CSV missing"
+    log_sync("TERRITORIAL_LAYERS",state,message,status.get("rows",0),0,0,started)
+    return {"status":state,"message":message,"csv":status}
+
+@app.get("/sync/territorial-layers/status")
+def get_territorial_layers_status():
+    with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source='TERRITORIAL_LAYERS' ORDER BY id DESC LIMIT 1").fetchone()
+    return {"status":"never_run" if row is None else "ok", "csv": territorial_layers_csv_status(TERRITORIAL_LAYERS_CSV_PATH), "last_sync": None if row is None else dict(row)}
+
 @app.get("/sources/registry")
 def get_sources_registry():
     return {
@@ -359,7 +391,11 @@ def get_sources_registry():
         ],
         "context_sources":[
             {"key":"BDN","type":"risk_context","role":"Italian livestock density/exposure context"},
-            {"key":"EFSA","type":"risk_context","role":"risk/trend/scientific context, not point events"}
+            {"key":"EFSA","type":"risk_context","role":"risk/trend/scientific context, not point events"},
+            {"key":"MOSQUITO_ALERT","type":"territorial_layer","role":"validated mosquito observations and breeding-site context"},
+            {"key":"VECTORNET","type":"territorial_layer","role":"validated vector occurrence data from ECDC/EFSA/GBIF"},
+            {"key":"ESCCAP","type":"territorial_layer","role":"aggregate parasite positive-test context for screened pets"},
+            {"key":"ISS_IZS_WNV","type":"territorial_layer","role":"West Nile / Usutu integrated surveillance context"}
         ]
     }
 @app.post("/demo/populate-365")
