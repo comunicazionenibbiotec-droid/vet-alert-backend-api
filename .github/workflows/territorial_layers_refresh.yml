@@ -1,0 +1,18 @@
+name: Validate territorial layers
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'data/territorial_layers/**'
+      - 'sync/territorial_layers_connector.py'
+      - 'scripts/validate_territorial_layers.py'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate CSV schema
+        run: python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
