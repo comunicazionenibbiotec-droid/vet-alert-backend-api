@@ -1,0 +1,3 @@
+external_id,province,region,location,lat,lon,virus,evidence_type,count,first_positive_date,period_end,radius_km,url_source,notes
+WNV-IT-TORINO-YYYY-MM-DD,Torino,Piemonte,Torino,45.0703,7.6869,West Nile / Usutu surveillance,"vettori, animali",1,YYYY-MM-DD,YYYY-MM-DD,40,https://www.epicentro.iss.it/westNile/bollettino,"Curated from official ISS/IZS/CESME bulletin; territorial context only"
+WNV-IT-MODENA-YYYY-MM-DD,Modena,Emilia-Romagna,Modena,44.6471,10.9252,West Nile / Usutu surveillance,umano,1,YYYY-MM-DD,YYYY-MM-DD,40,https://www.epicentro.iss.it/westNile/bollettino,"Curated from official ISS/IZS/CESME bulletin; territorial context only"

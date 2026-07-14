@@ -21,6 +21,7 @@ from sync.risk_summary import summarize_area_risk
 from sync.territorial_layers_connector import load_territorial_layers, filter_territorial_layers, territorial_layers_csv_status
 from sync.mosquito_alert_connector import sync_mosquito_alert_layers
 from sync.vectornet_gbif_connector import sync_vectornet_gbif_layers
+from sync.west_nile_connector import sync_west_nile_layers, west_nile_csv_status
 
 try:
     from sync.demo_control import (
@@ -47,7 +48,8 @@ SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
 TERRITORIAL_LAYERS_CSV_PATH=os.getenv("TERRITORIAL_LAYERS_CSV_PATH","data/territorial_layers/territorial_layers.csv")
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.2-vectornet-gbif-v136")
+WEST_NILE_CSV_PATH=os.getenv("WEST_NILE_CSV_PATH","data/territorial_layers/west_nile_surveillance.csv")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.3-west-nile-v137")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -304,7 +306,7 @@ def get_sync_remote_config():
     }
 @app.get("/sync/status")
 def get_sync_status():
-    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS","MOSQUITO_ALERT_TERRITORIAL","VECTORNET_GBIF_TERRITORIAL"]
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS","MOSQUITO_ALERT_TERRITORIAL","VECTORNET_GBIF_TERRITORIAL","ISS_IZS_WNV_TERRITORIAL"]
     out={}
     with connect() as conn:
         for source in sources:
@@ -398,6 +400,24 @@ def run_vectornet_gbif_territorial_sync(x_sync_token:str|None=Header(default=Non
     except Exception as e:
         log_sync("VECTORNET_GBIF_TERRITORIAL","error",str(e),0,0,0,started)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/sync/territorial-layers/west-nile/run")
+def run_west_nile_territorial_sync(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    try:
+        result=sync_west_nile_layers(TERRITORIAL_LAYERS_CSV_PATH, WEST_NILE_CSV_PATH)
+        log_sync("ISS_IZS_WNV_TERRITORIAL","success",result.get("message","West Nile territorial sync completed"),result.get("records_read",0),result.get("rows_inserted",0),result.get("rows_updated",0),started)
+        return result
+    except Exception as e:
+        log_sync("ISS_IZS_WNV_TERRITORIAL","error",str(e),0,0,0,started)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/sync/territorial-layers/west-nile/status")
+def get_west_nile_territorial_status():
+    with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source='ISS_IZS_WNV_TERRITORIAL' ORDER BY id DESC LIMIT 1").fetchone()
+    return {"status":"never_run" if row is None else "ok", "csv": west_nile_csv_status(WEST_NILE_CSV_PATH), "last_sync": None if row is None else dict(row)}
 
 @app.get("/sync/territorial-layers/status")
 def get_territorial_layers_status():
