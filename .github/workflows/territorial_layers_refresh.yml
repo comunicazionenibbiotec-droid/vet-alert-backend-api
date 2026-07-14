@@ -15,6 +15,6 @@ jobs:
         with:
           python-version: '3.11'
       - name: Compile Mosquito Alert connector
-        run: python -m py_compile sync/mosquito_alert_connector.py scripts/build_mosquito_alert_layers.py
+        run: python -m py_compile sync/mosquito_alert_connector.py sync/vectornet_gbif_connector.py scripts/build_mosquito_alert_layers.py scripts/build_vectornet_gbif_layers.py
       - name: Validate CSV schema
         run: python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
