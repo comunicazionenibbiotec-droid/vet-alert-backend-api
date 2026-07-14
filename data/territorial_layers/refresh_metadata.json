@@ -1,0 +1,20 @@
+{
+  "version": "v142-territorial-realdata-automation",
+  "generated_for": "vet.ector territorial layers",
+  "curated_seed_rows": {
+    "west_nile": 3,
+    "vectors": 0,
+    "parasites": 0
+  },
+  "automation_sources": {
+    "Mosquito Alert": "public dataset/data portal; to be rebuilt by scripts/build_mosquito_alert_layers.py",
+    "VectorNet/GBIF": "GBIF occurrence dataset; to be rebuilt by scripts/build_vectornet_gbif_layers.py",
+    "ESCCAP": "CSV-only curated/authorized; no auto-scraping by default",
+    "West Nile": "CSV curated from ECDC/ISS/IZS/CESME bulletins"
+  },
+  "notes": [
+    "territorial layers are context data, not disease diagnoses",
+    "Mosquito Alert and VectorNet scripts should be run by GitHub Actions or backend endpoints already added in previous patches",
+    "ESCCAP is kept CSV-only until terms/authorization are verified"
+  ]
+}

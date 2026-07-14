@@ -1,33 +1,46 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-import csv, sys, pathlib
-REQUIRED=["external_id","category","source","label","lat","lon"]
-ALLOWED={"vectors","parasites","west_nile"}
+import csv, sys
+from pathlib import Path
+
+REQUIRED = ['external_id','category','source','label','count','lat','lon','radius_km']
+VALID_CATEGORIES = {'vectors','parasites','west_nile'}
+
+def fail(msg):
+    print('ERROR', msg)
+    sys.exit(1)
 
 def main(path):
-    p=pathlib.Path(path)
-    errors=[]
+    p = Path(path)
     if not p.exists():
-        print(f"MISSING {p}")
-        return 1
-    with p.open(newline="",encoding="utf-8-sig") as f:
-        rows=list(csv.DictReader(f))
-    for col in REQUIRED:
-        if col not in (rows[0].keys() if rows else csv.DictReader(p.open(encoding="utf-8-sig")).fieldnames or []):
-            errors.append(f"missing column {col}")
-    for i,row in enumerate(rows, start=2):
-        for col in REQUIRED:
-            if not str(row.get(col,"")).strip(): errors.append(f"line {i}: missing {col}")
-        if row.get("category") and row["category"].strip().lower() not in ALLOWED:
-            errors.append(f"line {i}: invalid category {row['category']}")
-        for col in ("lat","lon"):
-            try: float(row.get(col,""))
-            except Exception: errors.append(f"line {i}: invalid {col}")
-    if errors:
-        print("INVALID territorial_layers.csv")
-        for e in errors[:100]: print("-",e)
-        return 1
-    print(f"OK territorial_layers.csv rows={len(rows)}")
-    return 0
-if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv)>1 else "data/territorial_layers/territorial_layers.csv"))
+        fail(f'missing file: {path}')
+    rows = 0
+    ids = set()
+    with p.open('r', encoding='utf-8-sig', newline='') as f:
+        reader = csv.DictReader(f)
+        missing = [c for c in REQUIRED if c not in (reader.fieldnames or [])]
+        if missing:
+            fail(f'missing columns: {missing}')
+        for i, row in enumerate(reader, start=2):
+            rows += 1
+            eid = (row.get('external_id') or '').strip()
+            if not eid:
+                fail(f'{path}:{i}: missing external_id')
+            if eid in ids:
+                fail(f'{path}:{i}: duplicate external_id {eid}')
+            ids.add(eid)
+            cat = (row.get('category') or '').strip()
+            if cat not in VALID_CATEGORIES:
+                fail(f'{path}:{i}: invalid category {cat}')
+            for c in ['lat','lon','radius_km']:
+                try:
+                    float(row.get(c, ''))
+                except Exception:
+                    fail(f'{path}:{i}: invalid {c}')
+            try:
+                int(float(row.get('count', '')))
+            except Exception:
+                fail(f'{path}:{i}: invalid count')
+    print(f'OK {path} rows={rows}')
+
+if __name__ == '__main__':
+    main(sys.argv[1] if len(sys.argv) > 1 else 'data/territorial_layers/territorial_layers.csv')
