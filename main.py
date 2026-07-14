@@ -19,6 +19,8 @@ from sync.bdn_connector import BdnDensityConnector, normalize_density_row
 from sync.efsa_risk_connector import EfsaRiskLayerConnector, normalize_risk_layer
 from sync.risk_summary import summarize_area_risk
 from sync.territorial_layers_connector import load_territorial_layers, filter_territorial_layers, territorial_layers_csv_status
+from sync.mosquito_alert_connector import sync_mosquito_alert_layers
+from sync.vectornet_gbif_connector import sync_vectornet_gbif_layers
 
 try:
     from sync.demo_control import (
@@ -45,7 +47,7 @@ SHOW_DEMO_EVENTS=show_demo_events()
 DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
 TERRITORIAL_LAYERS_CSV_PATH=os.getenv("TERRITORIAL_LAYERS_CSV_PATH","data/territorial_layers/territorial_layers.csv")
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.0-territorial-layers-v133")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.2-vectornet-gbif-v136")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -302,7 +304,7 @@ def get_sync_remote_config():
     }
 @app.get("/sync/status")
 def get_sync_status():
-    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS"]
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS","MOSQUITO_ALERT_TERRITORIAL","VECTORNET_GBIF_TERRITORIAL"]
     out={}
     with connect() as conn:
         for source in sources:
@@ -370,6 +372,32 @@ def run_territorial_layers_sync(x_sync_token:str|None=Header(default=None)):
     message="Territorial layers CSV validated" if status.get("exists") else "Territorial layers CSV missing"
     log_sync("TERRITORIAL_LAYERS",state,message,status.get("rows",0),0,0,started)
     return {"status":state,"message":message,"csv":status}
+
+
+@app.post("/sync/territorial-layers/mosquito-alert/run")
+def run_mosquito_alert_territorial_sync(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    try:
+        result=sync_mosquito_alert_layers(TERRITORIAL_LAYERS_CSV_PATH)
+        log_sync("MOSQUITO_ALERT_TERRITORIAL","success",result.get("message","Mosquito Alert territorial sync completed"),result.get("records_read",0),result.get("rows_inserted",0),result.get("rows_updated",0),started)
+        return result
+    except Exception as e:
+        log_sync("MOSQUITO_ALERT_TERRITORIAL","error",str(e),0,0,0,started)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/sync/territorial-layers/vectornet-gbif/run")
+def run_vectornet_gbif_territorial_sync(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    try:
+        result=sync_vectornet_gbif_layers(TERRITORIAL_LAYERS_CSV_PATH)
+        log_sync("VECTORNET_GBIF_TERRITORIAL","success",result.get("message","VectorNet/GBIF territorial sync completed"),result.get("records_read",0),result.get("rows_inserted",0),result.get("rows_updated",0),started)
+        return result
+    except Exception as e:
+        log_sync("VECTORNET_GBIF_TERRITORIAL","error",str(e),0,0,0,started)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/sync/territorial-layers/status")
 def get_territorial_layers_status():
