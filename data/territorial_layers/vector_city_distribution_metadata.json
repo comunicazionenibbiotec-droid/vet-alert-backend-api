@@ -1,0 +1,8 @@
+{
+  "source": "ECDC_VECTORNET",
+  "dataset": "Aedes albopictus current known distribution / invasive mosquito maps",
+  "city_source": "embedded_fallback_city_list",
+  "rows_written": 18,
+  "generated_at": "2026-07-15",
+  "notes": "Rows are area-level distribution layers centred on cities from the menu/source city file. Counts indicate one established distribution layer, not observation counts."
+}
