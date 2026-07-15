@@ -1,0 +1,20 @@
+# v144 territorial import resilience
+TERRITORIAL_HTTP_USER_AGENT=Mozilla/5.0 (compatible; vetector-territorial-refresh/1.0; +https://vet.ector.nibbiotec.com)
+TERRITORIAL_HTTP_RETRIES=3
+TERRITORIAL_REFRESH_STEP_TIMEOUT=300
+TERRITORIAL_REFRESH_TIMEOUT_SECONDS=900
+
+# Mosquito Alert
+MOSQUITO_ALERT_REPORTS_URL=https://raw.githubusercontent.com/MosquitoAlert/Data/master/all_reports.zip
+MOSQUITO_ALERT_FALLBACK_URLS=https://github.com/MosquitoAlert/Data/raw/master/all_reports.zip,https://raw.githubusercontent.com/MosquitoAlert/Data/master/all_reports.zip
+MOSQUITO_ALERT_CACHE_PATH=data/territorial_layers/cache/mosquito_alert_all_reports.zip
+MOSQUITO_ALERT_DAYS=730
+
+# VectorNet / GBIF
+VECTORNET_GBIF_DATASET_KEYS=4abd984b-122c-44a0-8c92-b37e2f5299b1,e497586a-1bdf-4f69-90eb-645d615762c8
+VECTORNET_GBIF_MAX_RECORDS=4000
+VECTORNET_CACHE_PATH=data/territorial_layers/cache/vectornet_gbif_results.json
+
+# West Nile / ESCCAP curated CSVs
+WEST_NILE_REMOTE_CSV_URL=
+ESCCAP_REMOTE_CSV_URL=
