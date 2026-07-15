@@ -1,0 +1,43 @@
+name: vet.ector territorial layers refresh
+
+on:
+  schedule:
+    - cron: "35 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-territorial-layers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install optional dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests || true
+
+      - name: Refresh territorial layers
+        env:
+          MOSQUITO_ALERT_REPORTS_URL: ${{ vars.MOSQUITO_ALERT_REPORTS_URL }}
+          MOSQUITO_ALERT_DAYS: ${{ vars.MOSQUITO_ALERT_DAYS }}
+          VECTORNET_GBIF_MAX_RECORDS: ${{ vars.VECTORNET_GBIF_MAX_RECORDS }}
+          VECTORNET_GBIF_DATASET_KEYS: ${{ vars.VECTORNET_GBIF_DATASET_KEYS }}
+          WEST_NILE_REMOTE_CSV_URL: ${{ vars.WEST_NILE_REMOTE_CSV_URL }}
+          ESCCAP_REMOTE_CSV_URL: ${{ secrets.ESCCAP_REMOTE_CSV_URL }}
+        run: |
+          PYTHONPATH=. python scripts/refresh_territorial_layers_all.py
+
+      - name: Commit updated territorial layers
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh territorial layer data"
+          file_pattern: data/territorial_layers/*.csv data/territorial_layers/*.json
