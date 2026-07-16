@@ -1,0 +1,12 @@
+{
+  "version": "v149-extended-vector-layers",
+  "rows": 73,
+  "species_counts": {
+    "Ixodes ricinus": 11,
+    "Rhipicephalus sanguineus": 18,
+    "Dermacentor reticulatus": 9,
+    "Phlebotomus perniciosus": 17,
+    "Culicoides spp.": 18
+  },
+  "interpretation": "area-level vector presence/distribution layers; radius_km is aggregation radius, count is not observations"
+}

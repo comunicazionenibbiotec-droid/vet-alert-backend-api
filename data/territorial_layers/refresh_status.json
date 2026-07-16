@@ -1,6 +1,6 @@
 {
-  "version": "v148-curated-vector-preserving-refresh",
-  "generated_at": "2026-07-16T18:58:17.910519+00:00",
+  "version": "v149-extended-vector-preserving-refresh",
+  "generated_at": "2026-07-16T19:03:26.213190+00:00",
   "sources": [
     {
       "path": "data/territorial_layers/mosquito_alert_layers.csv",
@@ -10,6 +10,11 @@
     {
       "path": "data/territorial_layers/vectornet_gbif_layers.csv",
       "rows": 34,
+      "exists": true
+    },
+    {
+      "path": "data/territorial_layers/extended_vector_layers.csv",
+      "rows": 73,
       "exists": true
     },
     {
@@ -23,9 +28,20 @@
       "exists": true
     }
   ],
-  "rows_total": 51,
+  "rows_total": 124,
   "categories": {
-    "vectors": 34,
+    "vectors": 107,
     "west_nile": 17
+  },
+  "species_counts": {
+    "Aedes albopictus": 18,
+    "Aedes japonicus": 7,
+    "Aedes koreicus": 9,
+    "Ixodes ricinus": 11,
+    "Rhipicephalus sanguineus": 18,
+    "Dermacentor reticulatus": 9,
+    "Phlebotomus perniciosus": 17,
+    "Culicoides spp.": 18,
+    "West Nile virus": 17
   }
 }
