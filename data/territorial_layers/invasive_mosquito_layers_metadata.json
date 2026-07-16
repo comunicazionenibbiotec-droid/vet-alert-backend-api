@@ -1,0 +1,11 @@
+{
+  "version": "v148-curated-invasive-mosquito-layers",
+  "generated_rows": 34,
+  "categories": {
+    "vectors": 34
+  },
+  "sources": [
+    "VECTORNET_CURATED"
+  ],
+  "interpretation": "count=1 means established or documented distribution area, not a single observation"
+}
