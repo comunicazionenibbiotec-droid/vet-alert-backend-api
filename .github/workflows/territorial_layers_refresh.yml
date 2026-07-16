@@ -54,10 +54,14 @@ jobs:
           python scripts/refresh_territorial_layers_all.py
           python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
 
-      - name: Commit updated territorial layers
+      - name: Build territorial quality/status report
+        run: |
+          python scripts/build_territorial_layers_status_report.py
+
+      - name: Commit updated territorial layers and reports
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Refresh territorial layers"
+          commit_message: "Refresh territorial layers and status report"
           file_pattern: |
             data/territorial_layers/*.csv
             data/territorial_layers/*.json
