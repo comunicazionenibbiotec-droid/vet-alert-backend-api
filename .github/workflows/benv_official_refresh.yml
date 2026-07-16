@@ -2,44 +2,69 @@ name: BENV official source refresh
 
 on:
   schedule:
-    - cron: "20 2 * * *"
+    - cron: "25 2 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  BENV_EXPORTS_DIR: data/raw/benv_exports
+  BENV_OUTPUT_CSV: data/official_sources/izs_benv_events.csv
+  BENV_REPORT_DIR: data/official_sources
+  BACKEND_BASE_URL: ${{ vars.VETECTOR_BACKEND_BASE_URL || 'https://vet-alert-api-v2.onrender.com' }}
+  BACKEND_SYNC_ENABLED: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED || 'false' }}
+  AFTER_DEPLOY_WAIT_SECONDS: ${{ vars.VETECTOR_AFTER_DEPLOY_WAIT_SECONDS || '120' }}
+
 jobs:
-  normalize-benv:
+  refresh-benv-official-source:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas openpyxl requests
+          python -m pip install pandas openpyxl requests
 
-      - name: Normalize BENV XLSX exports
+      - name: Ensure expected directories exist
         run: |
-          python scripts/benv_xlsx_to_vetector_csv.py             --input-dir data/raw/benv_exports             --output data/official_sources/izs_benv_events.csv             --centroids data/reference/italia_comuni_centroids.csv             --geocoding-report data/official_sources/benv_geocoding_report.csv             --import-report data/official_sources/benv_import_report.csv             --companion-report data/official_sources/benv_companion_report.csv             --metadata data/official_sources/benv_refresh_metadata.json
+          mkdir -p "$BENV_EXPORTS_DIR"
+          mkdir -p "$BENV_REPORT_DIR"
+
+      - name: Build BENV official CSV and reports
+        run: |
+          python scripts/benv_xlsx_to_vetector_csv.py \
+            --input-dir "$BENV_EXPORTS_DIR" \
+            --output "$BENV_OUTPUT_CSV" \
+            --report-dir "$BENV_REPORT_DIR"
 
       - name: Validate generated BENV CSV
         run: |
-          python scripts/validate_italy_sources.py data/official_sources/izs_benv_events.csv
+          python scripts/validate_italy_sources.py "$BENV_OUTPUT_CSV"
 
-      - name: Commit refreshed BENV CSV and reports
+      - name: Commit updated BENV files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Refresh BENV official events and reports"
-          file_pattern: data/official_sources/izs_benv_events.csv data/official_sources/benv_geocoding_report.csv data/official_sources/benv_import_report.csv data/official_sources/benv_companion_report.csv data/official_sources/benv_refresh_metadata.json
+          commit_message: "Refresh BENV official source files"
+          file_pattern: |
+            data/official_sources/izs_benv_events.csv
+            data/official_sources/benv_geocoding_report.csv
+            data/official_sources/benv_import_report.csv
+            data/official_sources/benv_companion_report.csv
+            data/official_sources/benv_refresh_metadata.json
+            data/official_sources/benv_backend_sync_status.json
 
-      - name: Optional Render deploy hook
+      - name: Trigger Render deploy hook if configured (non-blocking)
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
@@ -47,26 +72,44 @@ jobs:
             echo "No RENDER_DEPLOY_HOOK_URL secret configured; skipping Render deploy."
             exit 0
           fi
+
           echo "Triggering Render deploy hook..."
-          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
+          set +e
+          HTTP_CODE=$(curl -sS -o /tmp/render_deploy_response.txt -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK_URL")
+          CURL_EXIT=$?
+          set -e
 
-      - name: Optional wait after deploy
-        env:
-          VETECTOR_AFTER_DEPLOY_WAIT_SECONDS: ${{ vars.VETECTOR_AFTER_DEPLOY_WAIT_SECONDS }}
-        run: |
-          WAIT_SECONDS="${VETECTOR_AFTER_DEPLOY_WAIT_SECONDS:-120}"
-          echo "Waiting $WAIT_SECONDS seconds before backend sync..."
-          sleep "$WAIT_SECONDS"
+          echo "Render deploy hook HTTP status: $HTTP_CODE"
+          if [ -s /tmp/render_deploy_response.txt ]; then
+            echo "Render deploy hook response preview:"
+            head -c 600 /tmp/render_deploy_response.txt || true
+            echo ""
+          fi
 
-      - name: Optional backend BENV sync
-        env:
-          VETECTOR_BACKEND_SYNC_ENABLED: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED }}
-          VETECTOR_BACKEND_BASE_URL: ${{ vars.VETECTOR_BACKEND_BASE_URL }}
-          VETECTOR_BACKEND_SYNC_TOKEN: ${{ secrets.VETECTOR_BACKEND_SYNC_TOKEN }}
+          if [ "$CURL_EXIT" -ne 0 ] || [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "WARNING: Render deploy hook failed or returned non-2xx. Continuing workflow."
+            exit 0
+          fi
+
+          echo "Render deploy hook triggered successfully."
+
+      - name: Wait for optional Render deploy
+        if: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED == 'true' }}
         run: |
-          python scripts/trigger_backend_sync.py             --enabled "${VETECTOR_BACKEND_SYNC_ENABLED:-false}"             --base-url "${VETECTOR_BACKEND_BASE_URL:-https://vet-alert-api-v2.onrender.com}"             --endpoint "/sync/izs-benv/run"             --status-output "data/official_sources/benv_backend_sync_status.json"
+          echo "Waiting ${AFTER_DEPLOY_WAIT_SECONDS}s before backend sync..."
+          sleep "$AFTER_DEPLOY_WAIT_SECONDS"
+
+      - name: Trigger backend BENV sync if enabled (non-blocking)
+        if: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED == 'true' }}
+        run: |
+          python scripts/trigger_backend_sync.py \
+            --base-url "$BACKEND_BASE_URL" \
+            --endpoint "/sync/izs-benv/run" \
+            --output "data/official_sources/benv_backend_sync_status.json" \
+            --non-blocking
 
       - name: Commit backend sync status if changed
+        if: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED == 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update BENV backend sync status"
