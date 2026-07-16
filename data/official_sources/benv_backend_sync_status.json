@@ -1,0 +1,10 @@
+{
+  "version": "v161-backend-sync-trigger",
+  "generated_at": "2026-07-16T23:05:02.213704+00:00",
+  "enabled": false,
+  "base_url": "https://api.render.com/deploy/srv-d981ri6rnols73aob210?key=5Bv0gBG76jE",
+  "endpoint": "/sync/izs-benv/run",
+  "attempts": [],
+  "final_status": "skipped",
+  "message": "Backend sync disabled. Set repository variable VETECTOR_BACKEND_SYNC_ENABLED=true to enable."
+}
