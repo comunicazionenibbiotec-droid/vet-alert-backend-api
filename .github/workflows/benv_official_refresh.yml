@@ -23,25 +23,51 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas openpyxl
+          pip install pandas openpyxl requests
 
       - name: Normalize BENV XLSX exports
         run: |
-          python scripts/benv_xlsx_to_vetector_csv.py \
-            --input-dir data/raw/benv_exports \
-            --output data/official_sources/izs_benv_events.csv \
-            --centroids data/reference/italia_comuni_centroids.csv \
-            --geocoding-report data/official_sources/benv_geocoding_report.csv \
-            --import-report data/official_sources/benv_import_report.csv \
-            --companion-report data/official_sources/benv_companion_report.csv \
-            --metadata data/official_sources/benv_refresh_metadata.json
+          python scripts/benv_xlsx_to_vetector_csv.py             --input-dir data/raw/benv_exports             --output data/official_sources/izs_benv_events.csv             --centroids data/reference/italia_comuni_centroids.csv             --geocoding-report data/official_sources/benv_geocoding_report.csv             --import-report data/official_sources/benv_import_report.csv             --companion-report data/official_sources/benv_companion_report.csv             --metadata data/official_sources/benv_refresh_metadata.json
 
       - name: Validate generated BENV CSV
         run: |
           python scripts/validate_italy_sources.py data/official_sources/izs_benv_events.csv
 
-      - name: Commit refreshed BENV CSV
+      - name: Commit refreshed BENV CSV and reports
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Refresh BENV official events CSV"
+          commit_message: "Refresh BENV official events and reports"
           file_pattern: data/official_sources/izs_benv_events.csv data/official_sources/benv_geocoding_report.csv data/official_sources/benv_import_report.csv data/official_sources/benv_companion_report.csv data/official_sources/benv_refresh_metadata.json
+
+      - name: Optional Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "No RENDER_DEPLOY_HOOK_URL secret configured; skipping Render deploy."
+            exit 0
+          fi
+          echo "Triggering Render deploy hook..."
+          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+      - name: Optional wait after deploy
+        env:
+          VETECTOR_AFTER_DEPLOY_WAIT_SECONDS: ${{ vars.VETECTOR_AFTER_DEPLOY_WAIT_SECONDS }}
+        run: |
+          WAIT_SECONDS="${VETECTOR_AFTER_DEPLOY_WAIT_SECONDS:-120}"
+          echo "Waiting $WAIT_SECONDS seconds before backend sync..."
+          sleep "$WAIT_SECONDS"
+
+      - name: Optional backend BENV sync
+        env:
+          VETECTOR_BACKEND_SYNC_ENABLED: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED }}
+          VETECTOR_BACKEND_BASE_URL: ${{ vars.VETECTOR_BACKEND_BASE_URL }}
+          VETECTOR_BACKEND_SYNC_TOKEN: ${{ secrets.VETECTOR_BACKEND_SYNC_TOKEN }}
+        run: |
+          python scripts/trigger_backend_sync.py             --enabled "${VETECTOR_BACKEND_SYNC_ENABLED:-false}"             --base-url "${VETECTOR_BACKEND_BASE_URL:-https://vet-alert-api-v2.onrender.com}"             --endpoint "/sync/izs-benv/run"             --status-output "data/official_sources/benv_backend_sync_status.json"
+
+      - name: Commit backend sync status if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update BENV backend sync status"
+          file_pattern: data/official_sources/benv_backend_sync_status.json
