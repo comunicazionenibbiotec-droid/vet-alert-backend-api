@@ -1,0 +1,10 @@
+{
+  "version": "v161-backend-sync-trigger",
+  "generated_at": "2026-07-16T22:23:15.295097+00:00",
+  "enabled": false,
+  "base_url": "https://vet-alert-api-v2.onrender.com",
+  "endpoint": "/sync/izs-benv/run",
+  "attempts": [],
+  "final_status": "skipped",
+  "message": "Backend sync disabled. Set repository variable VETECTOR_BACKEND_SYNC_ENABLED=true to enable."
+}
