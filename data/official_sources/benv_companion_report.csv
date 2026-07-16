@@ -1,1 +1,4 @@
 disease_it,disease,dog_events,cat_events,companion_total,total_events,regions,source_files
+Leishmaniosi,Leishmaniosis,15,0,15,15,Lombardia; Toscana; Veneto,leishmaniosi_2026_italia.xlsx
+Leptospirosi,Leptospirosi,12,0,12,18,Abruzzo; Friuli Venezia Giulia; Lazio; Lombardia; Sardegna; Toscana; Veneto,leptospirosi_2026_italia.xlsx
+Rabbia,Rabies,1,0,1,1,Veneto,rabbia_2026_italia.xlsx
