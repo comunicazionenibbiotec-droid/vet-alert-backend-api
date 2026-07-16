@@ -30,7 +30,11 @@ jobs:
           python scripts/benv_xlsx_to_vetector_csv.py \
             --input-dir data/raw/benv_exports \
             --output data/official_sources/izs_benv_events.csv \
-            --centroids data/reference/italia_comuni_centroids.csv
+            --centroids data/reference/italia_comuni_centroids.csv \
+            --geocoding-report data/official_sources/benv_geocoding_report.csv \
+            --import-report data/official_sources/benv_import_report.csv \
+            --companion-report data/official_sources/benv_companion_report.csv \
+            --metadata data/official_sources/benv_refresh_metadata.json
 
       - name: Validate generated BENV CSV
         run: |
@@ -40,4 +44,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Refresh BENV official events CSV"
-          file_pattern: data/official_sources/izs_benv_events.csv
+          file_pattern: data/official_sources/izs_benv_events.csv data/official_sources/benv_geocoding_report.csv data/official_sources/benv_import_report.csv data/official_sources/benv_companion_report.csv data/official_sources/benv_refresh_metadata.json
