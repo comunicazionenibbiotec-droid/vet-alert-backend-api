@@ -37,8 +37,10 @@ def validate_file(path: Path) -> int:
                     print(f"ERROR {path}:{i}: missing {col}")
                     errors += 1
             try:
-                float((row.get("lat") or "").strip())
-                float((row.get("lon") or "").strip())
+                lat = float((row.get("lat") or "").strip())
+                lon = float((row.get("lon") or "").strip())
+                if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                    raise ValueError("coordinates out of range")
             except Exception:
                 print(f"ERROR {path}:{i}: invalid lat/lon")
                 errors += 1

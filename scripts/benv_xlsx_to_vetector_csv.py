@@ -22,6 +22,17 @@ GEOCODING_REPORT_COLUMNS = [
     "matched_level", "matched_label", "lat", "lon", "note"
 ]
 
+IMPORT_REPORT_COLUMNS = [
+    "source_file", "status", "disease_it", "records_imported", "records_deduplicated",
+    "species_groups", "regions", "geocoding_municipality", "geocoding_province",
+    "geocoding_region", "geocoding_country", "error"
+]
+
+COMPANION_REPORT_COLUMNS = [
+    "disease_it", "disease", "dog_events", "cat_events", "companion_total",
+    "total_events", "regions", "source_files"
+]
+
 BENV_URL = "https://www.izs.it/BENV_NEW/datiemappe.html"
 
 DISEASE_MAP = {
@@ -304,6 +315,8 @@ def read_benv_xlsx(path: Path, disease_override: Optional[str], centroids):
             "lon": f"{float(lon):.5f}",
             "url_source": BENV_URL,
             "notes": notes,
+            "_source_file": path.name,
+            "_matched_level": matched_level,
         })
 
         geocode_rows.append({
@@ -322,37 +335,149 @@ def read_benv_xlsx(path: Path, disease_override: Optional[str], centroids):
     return rows, geocode_rows
 
 
+def write_import_report(path: Path, files: list[Path], all_rows: list[dict], all_geocode_rows: list[dict], file_errors: dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = []
+    by_file: dict[str, list[dict]] = {}
+    geocode_by_file: dict[str, list[dict]] = {}
+    for row in all_rows:
+        by_file.setdefault(row.get("_source_file", "unknown"), []).append(row)
+    for row in all_geocode_rows:
+        geocode_by_file.setdefault(row.get("source_file", "unknown"), []).append(row)
+
+    for f in files:
+        name = f.name
+        imported = by_file.get(name, [])
+        geos = geocode_by_file.get(name, [])
+        levels = {"municipality": 0, "province": 0, "region": 0, "country": 0}
+        for gr in geos:
+            lvl = gr.get("matched_level") or "country"
+            levels[lvl] = levels.get(lvl, 0) + 1
+        disease_names = sorted({r.get("disease_it", "") for r in imported if r.get("disease_it")})
+        species_groups = sorted({r.get("animal_group", "") for r in imported if r.get("animal_group")})
+        regions = sorted({r.get("region", "") for r in imported if r.get("region")})
+        rows.append({
+            "source_file": name,
+            "status": "error" if name in file_errors else "success",
+            "disease_it": "; ".join(disease_names),
+            "records_imported": len(imported),
+            "records_deduplicated": "",
+            "species_groups": "; ".join(species_groups),
+            "regions": "; ".join(regions),
+            "geocoding_municipality": levels.get("municipality", 0),
+            "geocoding_province": levels.get("province", 0),
+            "geocoding_region": levels.get("region", 0),
+            "geocoding_country": levels.get("country", 0),
+            "error": file_errors.get(name, ""),
+        })
+
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=IMPORT_REPORT_COLUMNS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def write_companion_report(path: Path, all_rows: list[dict]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    grouped: dict[tuple[str, str], dict] = {}
+    for row in all_rows:
+        disease_it = row.get("disease_it", "") or row.get("disease", "")
+        disease = row.get("disease", "") or disease_it
+        key_ = (disease_it, disease)
+        info = grouped.setdefault(key_, {
+            "disease_it": disease_it,
+            "disease": disease,
+            "dog_events": 0,
+            "cat_events": 0,
+            "companion_total": 0,
+            "total_events": 0,
+            "regions": set(),
+            "source_files": set(),
+        })
+        group = row.get("animal_group", "")
+        info["total_events"] += 1
+        if group == "dog":
+            info["dog_events"] += 1
+            info["companion_total"] += 1
+        elif group == "cat":
+            info["cat_events"] += 1
+            info["companion_total"] += 1
+        if row.get("region"):
+            info["regions"].add(row["region"])
+        if row.get("_source_file"):
+            info["source_files"].add(row["_source_file"])
+
+    output_rows = []
+    for info in grouped.values():
+        if info["companion_total"] == 0:
+            continue
+        output_rows.append({
+            "disease_it": info["disease_it"],
+            "disease": info["disease"],
+            "dog_events": info["dog_events"],
+            "cat_events": info["cat_events"],
+            "companion_total": info["companion_total"],
+            "total_events": info["total_events"],
+            "regions": "; ".join(sorted(info["regions"])),
+            "source_files": "; ".join(sorted(info["source_files"])),
+        })
+    output_rows.sort(key=lambda r: (-int(r["companion_total"]), r["disease_it"]))
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=COMPANION_REPORT_COLUMNS)
+        writer.writeheader()
+        writer.writerows(output_rows)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Normalize BENV/IZS XLSX outbreak exports to vet.ector CSV schema")
     ap.add_argument("--input-dir", default="data/raw/benv_exports")
     ap.add_argument("--output", default="data/official_sources/izs_benv_events.csv")
     ap.add_argument("--centroids", default="data/reference/italia_comuni_centroids.csv")
     ap.add_argument("--geocoding-report", default="data/official_sources/benv_geocoding_report.csv")
+    ap.add_argument("--import-report", default="data/official_sources/benv_import_report.csv")
+    ap.add_argument("--companion-report", default="data/official_sources/benv_companion_report.csv")
+    ap.add_argument("--metadata", default="data/official_sources/benv_refresh_metadata.json")
     ap.add_argument("--disease", default=None, help="Optional disease override for all input files")
+    ap.add_argument("--fail-on-file-error", action="store_true", help="Fail the run if any BENV XLSX cannot be parsed")
     args = ap.parse_args()
 
     input_dir = Path(args.input_dir)
     output = Path(args.output)
     geocoding_report = Path(args.geocoding_report)
+    import_report = Path(args.import_report)
+    companion_report = Path(args.companion_report)
+    metadata_path = Path(args.metadata)
     centroids = load_centroids(Path(args.centroids))
-    files = sorted(input_dir.glob("*.xlsx"))
+
+    files = sorted(input_dir.glob("*.xlsx")) if input_dir.exists() else []
     all_rows: list[dict] = []
     all_geocode_rows: list[dict] = []
+    file_errors: dict[str, str] = {}
     seen = set()
+    duplicate_count = 0
 
     for f in files:
-        rows, geocode_rows = read_benv_xlsx(f, args.disease, centroids)
+        try:
+            rows, geocode_rows = read_benv_xlsx(f, args.disease, centroids)
+        except Exception as exc:
+            file_errors[f.name] = str(exc)
+            print(f"WARNING BENV import failed for {f}: {exc}", file=sys.stderr)
+            if args.fail_on_file_error:
+                raise
+            continue
         for row in rows:
             if row["external_id"] not in seen:
                 seen.add(row["external_id"])
                 all_rows.append(row)
+            else:
+                duplicate_count += 1
         all_geocode_rows.extend(geocode_rows)
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=OUTPUT_COLUMNS)
         writer.writeheader()
-        writer.writerows(all_rows)
+        writer.writerows([{col: row.get(col, "") for col in OUTPUT_COLUMNS} for row in all_rows])
 
     geocoding_report.parent.mkdir(parents=True, exist_ok=True)
     with geocoding_report.open("w", newline="", encoding="utf-8") as fh:
@@ -360,18 +485,39 @@ def main() -> int:
         writer.writeheader()
         writer.writerows(all_geocode_rows)
 
-    summary = {
-        "output": str(output),
-        "records": len(all_rows),
-        "input_files": [str(f) for f in files],
-        "geocoding_report": str(geocoding_report),
-        "geocoding_levels": {},
-    }
+    write_import_report(import_report, files, all_rows, all_geocode_rows, file_errors)
+    write_companion_report(companion_report, all_rows)
+
+    geocoding_levels: dict[str, int] = {}
+    disease_counts: dict[str, int] = {}
+    animal_counts: dict[str, int] = {}
     for gr in all_geocode_rows:
         lvl = gr.get("matched_level", "unknown")
-        summary["geocoding_levels"][lvl] = summary["geocoding_levels"].get(lvl, 0) + 1
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0
+        geocoding_levels[lvl] = geocoding_levels.get(lvl, 0) + 1
+    for row in all_rows:
+        disease_counts[row.get("disease_it", "unknown")] = disease_counts.get(row.get("disease_it", "unknown"), 0) + 1
+        animal_counts[row.get("animal_group", "unknown")] = animal_counts.get(row.get("animal_group", "unknown"), 0) + 1
+
+    metadata = {
+        "version": "v160-benv-multidisease-reports",
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "input_dir": str(input_dir),
+        "input_files": [str(f) for f in files],
+        "output": str(output),
+        "records": len(all_rows),
+        "duplicates_skipped": duplicate_count,
+        "file_errors": file_errors,
+        "geocoding_report": str(geocoding_report),
+        "import_report": str(import_report),
+        "companion_report": str(companion_report),
+        "geocoding_levels": geocoding_levels,
+        "disease_counts": disease_counts,
+        "animal_group_counts": animal_counts,
+    }
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(metadata, ensure_ascii=False, indent=2))
+    return 1 if file_errors and args.fail_on_file_error else 0
 
 
 if __name__ == "__main__":
