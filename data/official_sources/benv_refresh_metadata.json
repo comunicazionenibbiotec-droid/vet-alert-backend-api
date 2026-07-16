@@ -1,0 +1,16 @@
+{
+  "version": "v160-benv-multidisease-reports",
+  "generated_at": "2026-07-16T22:12:36.357704Z",
+  "input_dir": "/mnt/data/v160_benv_multidisease_reports/data/raw/benv_exports",
+  "input_files": [],
+  "output": "/mnt/data/v160_benv_multidisease_reports/data/official_sources/izs_benv_events.csv",
+  "records": 0,
+  "duplicates_skipped": 0,
+  "file_errors": {},
+  "geocoding_report": "/mnt/data/v160_benv_multidisease_reports/data/official_sources/benv_geocoding_report.csv",
+  "import_report": "/mnt/data/v160_benv_multidisease_reports/data/official_sources/benv_import_report.csv",
+  "companion_report": "/mnt/data/v160_benv_multidisease_reports/data/official_sources/benv_companion_report.csv",
+  "geocoding_levels": {},
+  "disease_counts": {},
+  "animal_group_counts": {}
+}
