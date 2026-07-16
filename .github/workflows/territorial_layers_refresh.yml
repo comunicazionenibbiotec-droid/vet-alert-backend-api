@@ -3,7 +3,7 @@ name: vet.ector territorial layers refresh
 on:
   workflow_dispatch:
   schedule:
-    - cron: '35 2 * * *'
+    - cron: "35 2 * * *"
 
 permissions:
   contents: write
@@ -13,39 +13,51 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pandas openpyxl
-      - name: Build curated invasive mosquito layers
-        continue-on-error: true
+
+      - name: Build local curated vector layers
         run: |
+          set -e
           if [ -f scripts/build_invasive_mosquito_layers.py ]; then python scripts/build_invasive_mosquito_layers.py; fi
           if [ -f scripts/build_extended_vector_layers.py ]; then python scripts/build_extended_vector_layers.py; fi
+
       - name: Build BENV parasite territorial layers
-        continue-on-error: true
         run: |
-          python scripts/build_benv_parasite_layers.py
-      - name: Try remote vector imports
-        continue-on-error: true
+          if [ -f scripts/build_benv_parasite_layers.py ]; then python scripts/build_benv_parasite_layers.py; fi
+
+      - name: Optional remote territorial imports (non-blocking)
+        env:
+          VETECTOR_TERRITORIAL_REMOTE_IMPORTS_ENABLED: ${{ vars.VETECTOR_TERRITORIAL_REMOTE_IMPORTS_ENABLED || 'false' }}
         run: |
+          if [ "$VETECTOR_TERRITORIAL_REMOTE_IMPORTS_ENABLED" != "true" ]; then
+            echo "Remote territorial imports disabled; using curated/local CSVs."
+            exit 0
+          fi
+          export PYTHONPATH="$GITHUB_WORKSPACE:${PYTHONPATH:-}"
+          set +e
           if [ -f scripts/build_mosquito_alert_layers.py ]; then python scripts/build_mosquito_alert_layers.py; fi
           if [ -f scripts/build_vectornet_gbif_layers.py ]; then python scripts/build_vectornet_gbif_layers.py; fi
-      - name: Rebuild West Nile layers
-        continue-on-error: true
-        run: |
           if [ -f scripts/build_west_nile_layers.py ]; then python scripts/build_west_nile_layers.py; fi
-      - name: Rebuild merged territorial layers
+          echo "Remote imports completed with non-blocking mode."
+          exit 0
+
+      - name: Merge and validate territorial layers
         run: |
           python scripts/refresh_territorial_layers_all.py
           python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
-      - name: Commit updates
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/territorial_layers scripts/refresh_territorial_layers_all.py scripts/build_benv_parasite_layers.py
-          git diff --cached --quiet || git commit -m "Refresh territorial layers"
-          git push
+
+      - name: Commit updated territorial layers
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh territorial layers"
+          file_pattern: |
+            data/territorial_layers/*.csv
+            data/territorial_layers/*.json
