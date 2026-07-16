@@ -1,37 +1,26 @@
 name: vet.ector territorial layers refresh
-
 on:
   schedule:
     - cron: "35 2 * * *"
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   refresh-territorial-layers:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Build curated invasive mosquito layers
-        run: |
-          python scripts/build_invasive_mosquito_layers.py
-
+        run: python scripts/build_invasive_mosquito_layers.py
+      - name: Build extended vector layers
+        run: python scripts/build_extended_vector_layers.py
       - name: Refresh territorial layers from all sources
-        run: |
-          python scripts/refresh_territorial_layers_all.py
-
+        run: python scripts/refresh_territorial_layers_all.py
       - name: Validate final territorial layers CSV
-        run: |
-          python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
-
+        run: python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
       - name: Commit updated territorial layers
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
