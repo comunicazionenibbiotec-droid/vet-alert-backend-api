@@ -1,20 +1,39 @@
-name: Validate territorial layers
+name: vet.ector territorial layers refresh
+
 on:
+  schedule:
+    - cron: "35 2 * * *"
   workflow_dispatch:
-  push:
-    paths:
-      - 'data/territorial_layers/**'
-      - 'sync/territorial_layers_connector.py'
-      - 'scripts/validate_territorial_layers.py'
+
+permissions:
+  contents: write
+
 jobs:
-  validate:
+  refresh-territorial-layers:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Compile Mosquito Alert connector
-        run: python -m py_compile sync/mosquito_alert_connector.py sync/vectornet_gbif_connector.py scripts/build_mosquito_alert_layers.py scripts/build_vectornet_gbif_layers.py
-      - name: Validate CSV schema
-        run: python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
+          python-version: "3.11"
+
+      - name: Build curated invasive mosquito layers
+        run: |
+          python scripts/build_invasive_mosquito_layers.py
+
+      - name: Refresh territorial layers from all sources
+        run: |
+          python scripts/refresh_territorial_layers_all.py
+
+      - name: Validate final territorial layers CSV
+        run: |
+          python scripts/validate_territorial_layers.py data/territorial_layers/territorial_layers.csv
+
+      - name: Commit updated territorial layers
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh territorial layers"
+          file_pattern: data/territorial_layers/*.csv data/territorial_layers/*.json
