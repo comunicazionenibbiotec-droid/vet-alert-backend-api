@@ -1,11 +1,12 @@
 {
-  "version": "v175-complete-vector-parasite-cards",
+  "version": "v176-parasite-card-detail-update",
   "generated_at": "2026-07-17T12:06:00Z",
   "schema": "vetector_diseases_catalog_v2_backward_compatible",
   "metadata": {
-    "purpose": "Structured catalog for vet.ector /patologie/. v175 completes vectors, parasites and West Nile cards with affected species, transmission, diagnostics, veterinary attention and precautions.",
+    "purpose": "Structured catalog for vet.ector /patologie/. Includes classic diseases plus dedicated sections for vectors, parasites and West Nile context.",
     "disclaimer": "Informazioni a scopo informativo e dimostrativo. Non sostituiscono diagnosi, terapia o visita veterinaria.",
-    "compatibility": "The top-level diseases array is preserved for older patologie.js implementations. New clients can also use sections and entities."
+    "compatibility": "The top-level diseases array is preserved for older patologie.js implementations. New clients can also use sections and entities.",
+    "last_update_note": "Completate Dipylidiosi ed Echinococcosi; aggiunti sintomi specifici per Giardiasi; aggiunte note preventive per Ascaridiosi."
   },
   "sections": [
     {
@@ -64,25 +65,13 @@
         "possibile rilevanza zoonotica in contesti specifici"
       ],
       "precautions_it": [
-        "protezione da flebotomi con prodotti autorizzati",
-        "ridurre esposizione serale/notturna",
-        "controlli periodici in aree endemiche",
-        "gestione veterinaria dei positivi"
+        "protezione da flebotomi",
+        "controlli veterinari",
+        "test diagnostici se indicati",
+        "attenzione alle aree endemiche"
       ],
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Trasmissione principalmente tramite puntura di flebotomi infetti. Non si considera normalmente una trasmissione diretta casuale tra cani.",
-      "recognition": "Sospettare in presenza di dimagrimento, lesioni cutanee persistenti, linfonodi aumentati, alterazioni oculari o problemi renali, soprattutto in aree endemiche o dopo soggiorni a rischio.",
-      "diagnostics_it": [
-        "test sierologici o rapidi come screening quando appropriato",
-        "PCR o esami di laboratorio secondo decisione veterinaria",
-        "valutazione di emocromo, profilo biochimico e urine se sospetto clinico"
-      ],
-      "when_vet_it": [
-        "lesioni cutanee croniche o dimagrimento non spiegato",
-        "test positivo o dubbio",
-        "animale proveniente da area endemica con sintomi compatibili"
-      ]
+      "source_note_it": "Scheda informativa. Gli eventi ufficiali e i layer territoriali derivano da fonti separate come BENV/IZS o dataset territoriali curati.",
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
     },
     {
       "id": "giardiasi",
@@ -102,11 +91,15 @@
       ],
       "summary_it": "Infezione intestinale da protozoo, spesso associata a diarrea e contaminazione ambientale.",
       "symptoms_it": [
-        "diarrea",
-        "feci molli o maleodoranti",
-        "dimagrimento",
-        "meteorismo",
-        "possibile andamento intermittente"
+        "diarrea intermittente o persistente",
+        "feci molli, acquose o maleodoranti",
+        "presenza di muco nelle feci",
+        "meteorismo e borborigmi intestinali",
+        "dolore o fastidio addominale",
+        "dimagrimento o mancato accrescimento nei giovani",
+        "pelo opaco o condizioni generali ridotte",
+        "vomito occasionale",
+        "possibile assenza di sintomi in portatori eliminatori"
       ],
       "risks_it": [
         "contagio tra animali conviventi",
@@ -114,24 +107,26 @@
         "ricadute se l'ambiente non viene gestito"
       ],
       "precautions_it": [
-        "rimozione rapida delle feci",
-        "lavaggio di cucce, ciotole e superfici",
-        "evitare acqua stagnante o contaminata",
-        "seguire terapia e controllo veterinario"
+        "igiene ambientale",
+        "raccolta rapida delle feci",
+        "test e terapia su indicazione veterinaria",
+        "controllo degli animali conviventi"
       ],
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
+      "source_note_it": "Scheda informativa. La Giardiasi può avere eliminazione intermittente: test e interpretazione devono essere valutati dal veterinario nel contesto clinico.",
       "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Ingestione di cisti da acqua, superfici, feci o ambiente contaminato. La trasmissione è favorita da convivenze, rifugi, asili e colonie.",
-      "recognition": "Sospettare in caso di diarrea intermittente, feci maleodoranti, dimagrimento o problemi intestinali ricorrenti, soprattutto in animali giovani o gruppi di animali.",
+      "recognition": "Sospettare Giardiasi in caso di diarrea intermittente, feci maleodoranti o con muco, gonfiore addominale, dimagrimento o mancato accrescimento, soprattutto in cuccioli, gattini, rifugi, colonie o animali che condividono ambienti contaminati.",
       "diagnostics_it": [
-        "test antigenico rapido o di laboratorio su feci",
-        "esame coproparassitologico ripetuto se necessario",
-        "valutazione di animali conviventi e ambiente"
+        "test antigenico rapido o test di laboratorio su feci",
+        "esame coproparassitologico, anche ripetuto, se il sospetto persiste",
+        "valutazione degli animali conviventi se ci sono sintomi ricorrenti",
+        "controllo della risposta clinica dopo terapia e igiene ambientale"
       ],
       "when_vet_it": [
-        "diarrea persistente o con sangue",
-        "cuccioli/gattini o animali fragili",
-        "recidive dopo trattamento o più animali sintomatici nello stesso ambiente"
+        "diarrea persistente oltre 24-48 ore o ricorrente",
+        "diarrea con sangue, forte abbattimento o disidratazione",
+        "cuccioli, gattini, animali anziani o immunodepressi",
+        "più animali sintomatici nello stesso ambiente",
+        "recidiva dopo trattamento"
       ]
     },
     {
@@ -168,24 +163,12 @@
         "difficoltà terapeutiche se avanzata"
       ],
       "precautions_it": [
-        "profilassi antiparassitaria regolare su indicazione veterinaria",
-        "riduzione delle punture di zanzara",
-        "screening periodico nelle aree a rischio"
+        "profilassi antiparassitaria su indicazione veterinaria",
+        "riduzione esposizione a zanzare",
+        "controlli periodici nelle aree a rischio"
       ],
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Trasmissione attraverso punture di zanzare infette. Il rischio dipende da area geografica, stagione e prevenzione antiparassitaria.",
-      "recognition": "Sospettare in cane con tosse, affaticamento o intolleranza all’esercizio in aree a rischio. Nel gatto i segni possono essere più variabili e meno specifici.",
-      "diagnostics_it": [
-        "test antigenico per Dirofilaria immitis nel cane secondo indicazione veterinaria",
-        "test anticorpali o imaging in casi selezionati",
-        "controlli periodici nelle aree endemiche"
-      ],
-      "when_vet_it": [
-        "tosse, affaticamento, difficoltà respiratoria o sincope",
-        "animale non protetto in area endemica",
-        "prima di iniziare o modificare profilassi"
-      ]
+      "source_note_it": "Scheda informativa. Non rappresenta una stima di prevalenza territoriale.",
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
     },
     {
       "id": "west_nile_fever",
@@ -228,18 +211,7 @@
         "protezione dei donatori nelle aree indicate dalle autorità"
       ],
       "source_note_it": "I layer territoriali West Nile indicano aree/province di sorveglianza o prevenzione, non diagnosi puntuali veterinarie.",
-      "species_note_it": "Specie animali coinvolte: soprattutto equidi e uccelli nel contesto di sorveglianza. Gli esseri umani sono rilevanti come contesto One Health, ma vet.ector non fornisce indicazioni mediche umane.",
-      "recognition": "Negli equidi considerare West Nile in caso di febbre, atassia, debolezza, tremori, alterazioni neurologiche o cambiamenti dell’andatura in area con circolazione stagionale.",
-      "diagnostics_it": [
-        "valutazione veterinaria urgente in caso di segni neurologici",
-        "test sierologici o molecolari secondo protocolli e indicazioni sanitarie",
-        "segnalazione alle autorità competenti quando previsto"
-      ],
-      "when_vet_it": [
-        "qualsiasi segno neurologico negli equidi",
-        "febbre associata a debolezza o atassia",
-        "presenza di alert territoriali West Nile nella zona"
-      ]
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
     },
     {
       "id": "aedes_albopictus",
@@ -255,44 +227,29 @@
       ],
       "associated_diseases_it": [
         "Dirofilariosi",
-        "arbovirosi in contesto One Health",
-        "potenziale ruolo in trasmissione di virus emergenti secondo area e stagione"
+        "arbovirosi in contesto One Health"
       ],
       "summary_it": "Zanzara invasiva ampiamente diffusa in Italia. È un vettore di interesse sanitario e un importante indicatore di rischio territoriale.",
       "habitat_it": [
-        "aree urbane e periurbane",
-        "giardini, cortili e aree verdi",
-        "piccoli ristagni in sottovasi, secchi, tombini e contenitori",
-        "periodi caldi e umidi"
+        "aree urbane",
+        "piccoli ristagni d'acqua",
+        "giardini",
+        "contenitori"
       ],
       "precautions_it": [
-        "eliminare ristagni e contenitori con acqua",
-        "usare antiparassitari o repellenti sugli animali solo su indicazione veterinaria",
-        "proteggere cucce e ambienti nelle ore di maggiore attività",
-        "monitorare cani e gatti nelle aree con filariosi o arbovirosi"
+        "eliminare ristagni",
+        "barriere fisiche",
+        "repellenti autorizzati sugli animali secondo indicazione veterinaria",
+        "monitoraggio stagionale"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto",
         "Equidi in contesto arbovirosi",
-        "Uccelli e fauna selvatica come contesto One Health"
+        "Uccelli / fauna selvatica come contesto One Health"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "aumento dell’esposizione a punture",
-        "favorisce la circolazione locale di patogeni trasmessi da zanzare se presenti",
-        "può aumentare il rischio per animali sensibili in aree endemiche"
-      ],
-      "diagnostics_it": [
-        "non si diagnostica il vettore sull’animale",
-        "per le malattie associate servono test specifici, ad esempio test per Dirofilaria o controlli veterinari mirati"
-      ],
-      "when_vet_it": [
-        "tosse, affaticamento o intolleranza all’esercizio in cane in area a rischio filariosi",
-        "segni neurologici o febbre in equidi in aree con sorveglianza arbovirosi",
-        "punture diffuse con reazioni importanti"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "aedes_japonicus",
@@ -302,41 +259,26 @@
       "scientific_name": "Aedes japonicus",
       "common_name_it": "Zanzara invasiva asiatica",
       "associated_diseases_it": [
-        "arbovirosi in contesto One Health",
-        "possibile interesse entomologico per sorveglianza territoriale"
+        "arbovirosi in contesto One Health"
       ],
       "summary_it": "Specie invasiva monitorata in Europa. La presenza territoriale richiede attenzione entomologica e prevenzione dei siti larvali.",
       "habitat_it": [
-        "aree periurbane e rurali",
-        "ambienti freschi e umidi",
-        "contenitori artificiali con acqua",
-        "aree boschive o marginali in alcune zone"
+        "aree periurbane",
+        "contenitori",
+        "habitat larvali artificiali o naturali"
       ],
       "precautions_it": [
-        "rimuovere ristagni",
-        "favorire segnalazioni entomologiche autorizzate quando disponibili",
-        "proteggere animali sensibili secondo indicazione veterinaria"
+        "riduzione ristagni",
+        "sorveglianza entomologica",
+        "segnalazione a programmi autorizzati se disponibili"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto",
-        "Equidi e fauna selvatica nel contesto di sorveglianza arbovirosi"
+        "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "indicatore di espansione di zanzare invasive",
-        "aumento del carico vettoriale locale",
-        "possibile sovrapposizione con aree frequentate da animali domestici e selvatici"
-      ],
-      "diagnostics_it": [
-        "non è una malattia: non esiste test clinico per “Aedes japonicus” sull’animale",
-        "valutare test solo per patologie compatibili con sintomi e area geografica"
-      ],
-      "when_vet_it": [
-        "sintomi compatibili con malattie trasmesse da vettori",
-        "peggioramento rapido o febbre persistente dopo esposizione in area a rischio"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "aedes_koreicus",
@@ -346,41 +288,26 @@
       "scientific_name": "Aedes koreicus",
       "common_name_it": "Zanzara invasiva coreana",
       "associated_diseases_it": [
-        "potenziale interesse per arbovirosi",
-        "sorveglianza di zanzare invasive"
+        "potenziale interesse per arbovirosi"
       ],
       "summary_it": "Specie invasiva oggetto di sorveglianza in alcune aree europee e italiane.",
       "habitat_it": [
         "aree periurbane",
-        "zone fresche e ombreggiate",
-        "contenitori con ristagno d’acqua",
-        "aree collinari o pedemontane in alcuni contesti"
+        "zone fresche e umide",
+        "contenitori con acqua"
       ],
       "precautions_it": [
         "rimozione ristagni",
-        "protezione da punture",
-        "controllo ambientale in giardini, cortili e aree verdi"
+        "monitoraggio territoriale",
+        "protezione da punture"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto",
-        "Equidi e fauna selvatica nel contesto di sorveglianza arbovirosi"
+        "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "presenza di specie invasiva in espansione",
-        "possibile aumento dell’esposizione a punture",
-        "necessità di monitoraggio entomologico"
-      ],
-      "diagnostics_it": [
-        "dato entomologico, non test diagnostico sull’animale",
-        "test clinici solo se presenti sintomi compatibili con malattie specifiche"
-      ],
-      "when_vet_it": [
-        "febbre, abbattimento o sintomi neurologici in specie sensibili",
-        "reazioni cutanee importanti o peggioramento dopo esposizione a punture"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "culex_pipiens",
@@ -391,43 +318,28 @@
       "common_name_it": "Zanzara comune",
       "associated_diseases_it": [
         "West Nile Fever",
-        "Usutu virus",
-        "arbovirosi con ciclo uccelli-zanzare"
+        "Usutu virus"
       ],
       "summary_it": "Vettore chiave nel ciclo di West Nile virus tra uccelli e zanzare, con possibile coinvolgimento di equidi e persone come ospiti accidentali.",
       "habitat_it": [
         "acque stagnanti",
-        "canali e fossati",
-        "caditoie e scoli urbani",
-        "aree rurali, periurbane e zone umide"
+        "canali",
+        "caditoie",
+        "aree periurbane e rurali"
       ],
       "precautions_it": [
-        "riduzione ristagni",
-        "protezione degli equidi in zone con circolazione WNV",
-        "attenzione ai bollettini sanitari territoriali",
-        "segnalazione di sintomi neurologici negli equidi"
+        "gestione ristagni",
+        "sorveglianza entomologica",
+        "protezione degli equidi in aree a rischio"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di contesto entomologico.",
       "affected_animals_it": [
         "Equidi",
         "Uccelli",
         "Fauna selvatica aviare",
         "Contesto One Health"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "vettore chiave per West Nile in molte aree",
-        "rilevanza per equidi e sorveglianza avifauna",
-        "stagionalità estiva-autunnale"
-      ],
-      "diagnostics_it": [
-        "per West Nile negli equidi servono valutazione veterinaria e test di laboratorio",
-        "i layer indicano sorveglianza territoriale e non diagnosi individuale"
-      ],
-      "when_vet_it": [
-        "febbre, atassia, debolezza, tremori o altri segni neurologici negli equidi",
-        "mortalità anomala di uccelli da segnalare agli enti competenti secondo indicazioni locali"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "ixodes_ricinus",
@@ -443,25 +355,24 @@
         "wildlife"
       ],
       "associated_diseases_it": [
-        "Borreliosi / Malattia di Lyme",
-        "Anaplasmosi",
-        "Babesiosi in specifici contesti",
-        "TBE in contesto One Health"
+        "Borreliosi",
+        "anaplasmosi",
+        "piroplasmosi in contesti specifici"
       ],
       "summary_it": "Zecca ampiamente diffusa in molte aree europee, rilevante per animali domestici, fauna e contesto One Health.",
       "habitat_it": [
-        "boschi e margini boschivi",
+        "boschi",
         "prati umidi",
-        "aree con vegetazione alta",
-        "ecotoni frequentati da fauna selvatica"
+        "aree con vegetazione",
+        "ecotoni"
       ],
       "precautions_it": [
-        "controllare il mantello dopo passeggiate",
-        "rimuovere le zecche rapidamente con strumenti adatti",
-        "usare antiparassitari su indicazione veterinaria",
-        "evitare aree ad alta esposizione nei periodi critici quando possibile"
+        "controllo del mantello dopo passeggiate",
+        "antiparassitari su indicazione veterinaria",
+        "rimozione rapida delle zecche",
+        "monitoraggio stagionale"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto",
@@ -471,21 +382,7 @@
         "Equino",
         "Fauna selvatica"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "morso di zecca e trasmissione di patogeni",
-        "coinfezioni possibili",
-        "stagionalità variabile secondo clima e area"
-      ],
-      "diagnostics_it": [
-        "test per malattie da zecche solo se coerenti con sintomi, esposizione e valutazione veterinaria",
-        "emocromo e test specifici possono essere consigliati dal veterinario"
-      ],
-      "when_vet_it": [
-        "febbre, zoppia, abbattimento o mucose pallide dopo morso di zecca",
-        "zecche numerose o infestazione ricorrente",
-        "comparsa di sintomi nelle settimane successive all’esposizione"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "rhipicephalus_sanguineus",
@@ -498,45 +395,30 @@
         "dog"
       ],
       "associated_diseases_it": [
-        "Ehrlichiosi",
-        "Babesiosi",
-        "Anaplasmosi",
-        "rickettsiosi in contesti specifici"
+        "ehrlichiosi",
+        "babesiosi",
+        "anaplasmosi"
       ],
       "summary_it": "Zecca associata al cane e ad ambienti domestici/peridomestici, rilevante per la prevenzione antiparassitaria.",
       "habitat_it": [
-        "canili e rifugi",
-        "abitazioni e cucce",
-        "fessure e ambienti peridomestici",
-        "aree calde e asciutte"
+        "canili",
+        "abitazioni",
+        "aree peridomestiche",
+        "ambienti caldi"
       ],
       "precautions_it": [
-        "trattare animali e ambiente secondo indicazione veterinaria",
-        "lavare e controllare cucce e ricoveri",
-        "monitorare animali conviventi",
-        "prevenzione antiparassitaria continuativa in aree a rischio"
+        "profilassi antiparassitaria",
+        "controllo ambientale",
+        "ispezione del cane",
+        "consulto veterinario in caso di infestazione"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto possibile",
         "Animali conviventi in ambienti infestati"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "infestazioni ambientali persistenti",
-        "trasmissione di patogeni del cane",
-        "recidive se l’ambiente non viene trattato"
-      ],
-      "diagnostics_it": [
-        "controllo clinico e test per malattie da zecche se presenti sintomi",
-        "valutazione ambientale in caso di infestazione"
-      ],
-      "when_vet_it": [
-        "febbre, abbattimento, sanguinamenti, dimagrimento o pallore nel cane",
-        "zecche ricorrenti in casa o canile",
-        "mancata risposta a trattamenti antiparassitari"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "phlebotomus_perniciosus",
@@ -550,39 +432,23 @@
       ],
       "summary_it": "Flebotomo rilevante per la trasmissione di Leishmania infantum in molte aree mediterranee.",
       "habitat_it": [
-        "aree mediterranee",
-        "ripari animali e muri a secco",
-        "microhabitat ombreggiati e umidi",
-        "aree rurali e periurbane"
+        "aree rurali e periurbane",
+        "ripari animali",
+        "microhabitat ombreggiati"
       ],
       "precautions_it": [
-        "proteggere i cani nelle ore serali/notturne",
-        "usare repellenti autorizzati secondo indicazione veterinaria",
-        "ridurre siti di riposo dei flebotomi",
-        "test periodici in aree endemiche"
+        "protezione serale/notturna",
+        "repellenti autorizzati sugli animali secondo indicazione veterinaria",
+        "riduzione dei siti di riposo"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
         "Cane",
         "Gatto",
         "Altri mammiferi in aree endemiche",
         "Contesto zoonotico"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "trasmissione di Leishmania infantum",
-        "esposizione serale e notturna",
-        "rischio aumentato in aree endemiche"
-      ],
-      "diagnostics_it": [
-        "test sierologici o molecolari per Leishmania secondo indicazione veterinaria",
-        "valutazione clinica e laboratoristica in presenza di segni compatibili"
-      ],
-      "when_vet_it": [
-        "dimagrimento, lesioni cutanee, linfonodi aumentati o alterazioni oculari",
-        "cane proveniente da area endemica con sintomi compatibili",
-        "prima di iniziare profilassi o interpretare test dubbi"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "culicoides_spp",
@@ -599,44 +465,27 @@
       ],
       "associated_diseases_it": [
         "Bluetongue",
-        "malattie trasmesse da Culicoides",
-        "Schmallenberg in contesti specifici"
+        "malattie trasmesse da Culicoides"
       ],
       "summary_it": "Insetti ematofagi rilevanti in sanità veterinaria, soprattutto per alcune malattie degli animali da reddito.",
       "habitat_it": [
         "aree umide",
-        "ambienti rurali e allevamenti",
-        "substrati organici umidi",
-        "zone con ristagno o materiale vegetale umido"
+        "ambienti rurali",
+        "vicinanza ad allevamenti"
       ],
       "precautions_it": [
-        "attenzione a bollettini e piani ufficiali",
-        "protezione degli animali sensibili dove indicato",
-        "gestione ambientale nelle aziende",
-        "sorveglianza veterinaria dei sintomi nei ruminanti"
+        "gestione ambientale",
+        "sorveglianza veterinaria",
+        "attenzione a campagne sanitarie ufficiali"
       ],
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio.",
+      "source_note_it": "Dato territoriale di contesto vettoriale.",
       "affected_animals_it": [
         "Ovino",
         "Bovino",
         "Caprino",
         "Equino"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "risks_it": [
-        "trasmissione di malattie dei ruminanti",
-        "stagionalità legata a clima e presenza di insetti",
-        "impatto su movimentazioni e piani sanitari"
-      ],
-      "diagnostics_it": [
-        "test ufficiali per malattie trasmesse da Culicoides se indicati dalle autorità o dal veterinario",
-        "segnalazione di sintomi compatibili nei ruminanti"
-      ],
-      "when_vet_it": [
-        "febbre, lesioni orali, edema del muso o zoppia negli ovini",
-        "cluster di sintomi in allevamento",
-        "indicazioni sanitarie locali per Bluetongue o malattie correlate"
-      ]
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
     },
     {
       "id": "peste_suina_africana",
@@ -1467,21 +1316,30 @@
       "precautions_it": [
         "sverminazione su protocollo veterinario",
         "raccolta feci",
-        "igiene ambientale"
+        "igiene ambientale",
+        "programmare sverminazioni nei cuccioli e nei gattini secondo protocollo veterinario",
+        "eseguire controlli fecali periodici, soprattutto in animali giovani o che vivono in gruppo",
+        "raccogliere rapidamente le feci e pulire le aree di eliminazione",
+        "evitare contaminazione di giardini, sabbiere e aree frequentate da bambini",
+        "trattare anche la madre e gli animali conviventi quando il veterinario lo ritiene necessario",
+        "lavare le mani dopo contatto con feci, lettiere, terreno o aree potenzialmente contaminate",
+        "mantenere un controllo antiparassitario regolare negli animali che cacciano o frequentano ambienti esterni"
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
+      "source_note_it": "Scheda informativa. Per l’Ascaridiosi è fondamentale impostare prevenzione e sverminazione con il veterinario, evitando trattamenti casuali o incompleti.",
       "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Trasmissione oro-fecale tramite uova resistenti nell’ambiente o, in alcune specie, vie materne.",
+      "prevention_note_it": "La prevenzione dell’Ascaridiosi si basa su igiene ambientale, raccolta rapida delle feci, controlli fecali e protocolli di sverminazione definiti dal veterinario. Nei giovani animali la prevenzione è particolarmente importante perché l’infestazione può interferire con crescita e condizioni generali.",
       "diagnostics_it": [
-        "esame fecale",
-        "identificazione uova/parassiti",
-        "valutazione protocollo sverminazione"
+        "esame fecale per ricerca di uova",
+        "valutazione veterinaria del protocollo di sverminazione",
+        "controlli ripetuti nei cuccioli/gattini o in ambienti con reinfestazione"
       ],
       "when_vet_it": [
-        "cuccioli o gattini con addome gonfio, vomito o diarrea",
+        "cuccioli o gattini con addome gonfio, diarrea, vomito o scarso accrescimento",
         "presenza di vermi visibili",
-        "convivenza con bambini o soggetti fragili"
+        "convivenza con bambini o persone fragili",
+        "reinfestazioni ricorrenti",
+        "animali provenienti da rifugi, colonie o ambienti affollati"
       ]
     },
     {
@@ -1517,19 +1375,8 @@
         "igiene ambientale"
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Trasmissione tramite larve nell’ambiente, ingestione o penetrazione cutanea secondo specie.",
-      "diagnostics_it": [
-        "esame fecale",
-        "emocromo se sospetta anemia",
-        "valutazione ambientale"
-      ],
-      "when_vet_it": [
-        "mucose pallide, debolezza o diarrea importante",
-        "cuccioli/gattini",
-        "sospetto di anemia"
-      ]
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
     },
     {
       "id": "dipylidiosi",
@@ -1542,38 +1389,48 @@
       ],
       "affected_animals_it": [
         "Cane",
-        "Gatto"
+        "Gatto",
+        "Animali conviventi con infestazione da pulci"
       ],
       "section": "parassiti",
-      "summary_it": "Infestazione da cestode spesso associata all’ingestione di pulci infette.",
+      "summary_it": "Parassitosi intestinale da cestode, molto spesso collegata all’ingestione accidentale di pulci infette durante il grooming o il mordicchiamento del mantello.",
       "symptoms_it": [
-        "proglottidi nelle feci",
-        "prurito anale",
-        "talvolta disturbi gastrointestinali",
-        "spesso lieve"
+        "presenza di proglottidi simili a piccoli chicchi di riso nelle feci o vicino all’ano",
+        "prurito o fastidio perianale",
+        "leccamento o trascinamento del posteriore",
+        "disturbi gastrointestinali lievi o intermittenti",
+        "possibile dimagrimento o pelo opaco in infestazioni importanti",
+        "spesso assenza di sintomi evidenti"
       ],
       "risks_it": [
-        "persistenza se non si controllano le pulci",
-        "contagio tra animali infestati da pulci"
+        "recidive se non viene controllata l’infestazione da pulci",
+        "contaminazione dell’ambiente domestico con pulci infette",
+        "coinvolgimento di più animali conviventi",
+        "rischio maggiore in cuccioli, gattini o animali debilitati"
       ],
       "precautions_it": [
-        "controllo pulci",
-        "trattamento antiparassitario veterinario",
-        "igiene cucce e ambienti"
+        "controllare e trattare le pulci sull’animale secondo indicazione veterinaria",
+        "trattare anche l’ambiente, cucce, coperte e aree di riposo",
+        "raccogliere rapidamente le feci",
+        "controllare gli animali conviventi",
+        "non limitarsi al solo vermifugo se l’infestazione da pulci persiste"
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Trasmissione tramite ingestione di pulci infette durante il grooming.",
+      "source_note_it": "Scheda informativa. La conferma e il trattamento devono essere valutati dal veterinario, soprattutto se sono presenti animali giovani, debilitati o infestazioni ricorrenti.",
+      "species_note_it": "Specie animali principalmente coinvolte: cane e gatto. La gestione efficace richiede quasi sempre anche il controllo delle pulci.",
+      "transmission": "Trasmissione tramite ingestione di pulci infette. La presenza di Dipylidium caninum è quindi spesso un indicatore indiretto di infestazione da pulci nell’animale o nell’ambiente.",
       "diagnostics_it": [
-        "osservazione proglottidi",
-        "esame fecale se necessario",
-        "controllo pulci"
+        "osservazione di proglottidi nelle feci o nell’area perianale",
+        "esame coproparassitologico se indicato",
+        "valutazione veterinaria per impostare trattamento antiparassitario e controllo pulci",
+        "controllo della presenza di pulci o loro residui sul mantello"
       ],
       "when_vet_it": [
         "proglottidi visibili nelle feci o vicino all’ano",
-        "infestazione da pulci",
-        "più animali conviventi"
+        "prurito anale persistente o trascinamento del posteriore",
+        "infestazione da pulci difficile da controllare",
+        "più animali conviventi infestati",
+        "cuccioli, gattini o soggetti debilitati"
       ]
     },
     {
@@ -1597,34 +1454,45 @@
         "Contesto zoonotico"
       ],
       "section": "parassiti",
-      "summary_it": "Parassitosi zoonotica da cestodi con ciclo tra carnivori definitivi e ospiti intermedi.",
+      "summary_it": "Parassitosi zoonotica da cestodi, con ciclo che coinvolge carnivori come ospiti definitivi e ruminanti, suini o fauna selvatica come ospiti intermedi. È rilevante in ottica One Health.",
       "symptoms_it": [
-        "spesso asintomatica nel cane",
-        "cisti negli ospiti intermedi",
-        "rilevanza zoonotica"
+        "nel cane spesso assente o molto lieve",
+        "possibili disturbi intestinali aspecifici nei carnivori definitivi",
+        "negli ospiti intermedi formazione di cisti in organi interni",
+        "calo di performance o segni aspecifici negli animali da reddito in casi avanzati",
+        "rilevanza zoonotica per contaminazione ambientale"
       ],
       "risks_it": [
         "zoonosi importante",
-        "contaminazione ambientale",
-        "ciclo cane-ruminanti"
+        "mantenimento del ciclo cane-ruminanti o cane-fauna selvatica",
+        "contaminazione ambientale tramite feci di carnivori infetti",
+        "rischio in contesti rurali, pastorali o di macellazione non controllata",
+        "difficile percezione clinica perché il cane può essere asintomatico"
       ],
       "precautions_it": [
-        "vermifugazione controllata",
-        "evitare consumo di visceri crudi",
-        "igiene e controllo cani da lavoro"
+        "non somministrare visceri crudi o non controllati ai cani",
+        "seguire protocolli di sverminazione veterinaria nei cani a rischio",
+        "raccogliere e smaltire correttamente le feci",
+        "mantenere igiene delle mani e degli ambienti",
+        "controllare cani da lavoro, cani da gregge e cani con accesso a carcasse o visceri",
+        "rispettare le indicazioni sanitarie locali e dei servizi veterinari"
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. La conferma richiede valutazione veterinaria e, quando indicato, test diagnostici appropriati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "transmission": "Ciclo tra carnivori definitivi e ospiti intermedi; rischio legato a ingestione di visceri crudi o contaminazione ambientale.",
+      "source_note_it": "Scheda informativa One Health. La gestione deve seguire indicazioni veterinarie e, quando pertinente, dei servizi veterinari pubblici.",
+      "species_note_it": "Specie animali coinvolte: cane come ospite definitivo principale in molti contesti; ovini, caprini, bovini, suini e fauna selvatica come ospiti intermedi. La rilevanza è anche zoonotica.",
+      "transmission": "Il cane e altri carnivori possono eliminare uova del parassita con le feci. Gli ospiti intermedi si infettano ingerendo uova dall’ambiente contaminato. Il ciclo viene favorito dal consumo di visceri crudi o non controllati da parte dei cani.",
       "diagnostics_it": [
-        "test coproantigenico o esami specifici dove indicati",
-        "approccio in sanità pubblica/veterinaria secondo contesto"
+        "valutazione veterinaria del rischio in base a stile di vita, area e accesso a visceri o carcasse",
+        "test coproantigenici o indagini specifiche dove disponibili e indicate",
+        "approccio integrato con servizi veterinari in contesti zootecnici o faunistici",
+        "eventuale monitoraggio di gruppo nei cani da lavoro o da gregge"
       ],
       "when_vet_it": [
-        "cani da lavoro o da gregge in aree a rischio",
-        "accesso a visceri crudi",
-        "necessità di protocolli di controllo zoonotico"
+        "cane con accesso a visceri crudi, carcasse o attività di pastorizia/caccia",
+        "presenza di ciclo rurale cane-ruminanti",
+        "necessità di impostare un protocollo di sverminazione regolare",
+        "rischio per persone fragili o contesti familiari con bambini",
+        "segnalazioni territoriali o indicazioni sanitarie locali"
       ]
     },
     {
@@ -1781,58 +1649,6 @@
       "type": "disease",
       "section": "patologie",
       "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
-    },
-    {
-      "id": "dermacentor_reticulatus",
-      "type": "vector",
-      "section": "vettori",
-      "name_it": "Dermacentor reticulatus",
-      "scientific_name": "Dermacentor reticulatus",
-      "common_name_it": "Zecca ornamentata",
-      "animal_groups": [
-        "dog",
-        "equine",
-        "livestock",
-        "wildlife"
-      ],
-      "affected_animals_it": [
-        "Cane",
-        "Equino",
-        "Bovino",
-        "Fauna selvatica"
-      ],
-      "associated_diseases_it": [
-        "Babesiosi canina in contesti specifici",
-        "malattie trasmesse da zecche"
-      ],
-      "summary_it": "Zecca presente in diverse aree europee, associata ad ambienti umidi, prati e territori frequentati da fauna e animali domestici.",
-      "habitat_it": [
-        "prati umidi",
-        "aree ripariali",
-        "zone con vegetazione erbacea",
-        "ambienti frequentati da fauna selvatica"
-      ],
-      "risks_it": [
-        "morso di zecca",
-        "possibile trasmissione di patogeni in specifici contesti geografici",
-        "esposizione di cani da attività all’aperto"
-      ],
-      "precautions_it": [
-        "prevenzione antiparassitaria",
-        "ispezione del mantello",
-        "rimozione rapida delle zecche",
-        "attenzione a febbre o anemia dopo esposizione"
-      ],
-      "diagnostics_it": [
-        "test mirati per babesiosi o altre malattie da zecche se indicati dal veterinario"
-      ],
-      "when_vet_it": [
-        "febbre, urine scure, mucose pallide o debolezza dopo morso di zecca",
-        "infestazione con molte zecche",
-        "peggioramento rapido"
-      ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
-      "source_note_it": "La presenza territoriale del vettore indica un contesto ecologico favorevole, non una diagnosi negli animali e non un focolaio."
     }
   ],
   "entities": {
@@ -1843,7 +1659,6 @@
       "culex_pipiens",
       "ixodes_ricinus",
       "rhipicephalus_sanguineus",
-      "dermacentor_reticulatus",
       "phlebotomus_perniciosus",
       "culicoides_spp"
     ],
@@ -1854,8 +1669,7 @@
       "ascaridiosi",
       "anchilostomiasi",
       "dipylidiosi",
-      "echinococcosi",
-      "toxoplasmosi"
+      "echinococcosi"
     ],
     "west_nile": [
       "west_nile_fever"
