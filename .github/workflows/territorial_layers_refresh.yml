@@ -58,6 +58,10 @@ jobs:
         run: |
           python scripts/build_territorial_layers_status_report.py
 
+      - name: Build unified data sources status
+        run: |
+          python scripts/build_data_sources_status.py
+
       - name: Commit updated territorial layers and reports
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -65,3 +69,5 @@ jobs:
           file_pattern: |
             data/territorial_layers/*.csv
             data/territorial_layers/*.json
+            data/status/*.json
+            data/status/*.csv

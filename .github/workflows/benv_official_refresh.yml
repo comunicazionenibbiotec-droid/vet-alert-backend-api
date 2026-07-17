@@ -52,6 +52,10 @@ jobs:
         run: |
           python scripts/validate_italy_sources.py "$BENV_OUTPUT_CSV"
 
+      - name: Build unified data sources status
+        run: |
+          python scripts/build_data_sources_status.py
+
       - name: Commit updated BENV files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -63,6 +67,8 @@ jobs:
             data/official_sources/benv_companion_report.csv
             data/official_sources/benv_refresh_metadata.json
             data/official_sources/benv_backend_sync_status.json
+            data/status/*.json
+            data/status/*.csv
 
       - name: Trigger Render deploy hook if configured (non-blocking)
         env:

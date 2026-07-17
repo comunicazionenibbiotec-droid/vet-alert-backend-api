@@ -1,0 +1,31 @@
+name: vet.ector database status refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "55 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-database-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build unified data sources status
+        run: |
+          python scripts/build_data_sources_status.py
+
+      - name: Commit updated data sources status
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh unified data sources status"
+          file_pattern: |
+            data/status/*.json
+            data/status/*.csv
