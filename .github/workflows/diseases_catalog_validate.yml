@@ -1,0 +1,23 @@
+name: vet.ector diseases catalog validate
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "public_html/data/diseases.json"
+      - "scripts/validate_diseases_catalog.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-diseases-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate diseases catalog
+        run: |
+          python scripts/validate_diseases_catalog.py public_html/data/diseases.json
