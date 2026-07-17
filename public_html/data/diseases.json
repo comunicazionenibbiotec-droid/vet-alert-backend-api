@@ -1,0 +1,210 @@
+{
+  "version": "v171-structured-pathology-vector-parasite-catalog",
+  "generated_at": "2026-07-17T10:06:00Z",
+  "schema": "vetector_diseases_catalog_v2_backward_compatible",
+  "metadata": {
+    "purpose": "Structured catalog for vet.ector /patologie/. Includes classic diseases plus dedicated sections for vectors, parasites and West Nile context.",
+    "disclaimer": "Informazioni a scopo informativo e dimostrativo. Non sostituiscono diagnosi, terapia o visita veterinaria.",
+    "compatibility": "The top-level diseases array is preserved for older patologie.js implementations. New clients can also use sections and entities."
+  },
+  "sections": [
+    {
+      "key": "patologie",
+      "title_it": "Patologie",
+      "description_it": "Malattie infettive e condizioni sanitarie monitorate dalla piattaforma."
+    },
+    {
+      "key": "vettori",
+      "title_it": "Vettori",
+      "description_it": "Zanzare, zecche, flebotomi e culicoidi che possono contribuire alla trasmissione di patogeni o indicare un rischio territoriale."
+    },
+    {
+      "key": "parassiti",
+      "title_it": "Parassiti",
+      "description_it": "Parassiti di interesse veterinario, con focus su cane, gatto e contesto territoriale."
+    },
+    {
+      "key": "west_nile",
+      "title_it": "West Nile e arbovirosi",
+      "description_it": "Contesto di sorveglianza territoriale per West Nile virus e infezioni correlate."
+    }
+  ],
+  "diseases": [
+    {
+      "id": "leishmaniosi",
+      "type": "disease",
+      "section": "patologie",
+      "name_it": "Leishmaniosi",
+      "disease": "Leishmaniosis",
+      "agent": "Leishmania infantum",
+      "animal_groups": ["dog", "cat"],
+      "affected_animals_it": ["Cane", "Gatto"],
+      "vector_ids": ["phlebotomus_perniciosus"],
+      "summary_it": "Malattia parassitaria trasmessa prevalentemente da flebotomi. Nel cane può essere cronica e grave se non diagnosticata e gestita correttamente.",
+      "symptoms_it": ["dimagrimento", "lesioni cutanee", "linfonodi aumentati", "apatia", "alterazioni oculari", "possibili problemi renali"],
+      "risks_it": ["cronicizzazione", "coinvolgimento renale", "possibile rilevanza zoonotica in contesti specifici"],
+      "precautions_it": ["protezione da flebotomi", "controlli veterinari", "test diagnostici se indicati", "attenzione alle aree endemiche"],
+      "source_note_it": "Scheda informativa. Gli eventi ufficiali e i layer territoriali derivano da fonti separate come BENV/IZS o dataset territoriali curati."
+    },
+    {
+      "id": "giardiasi",
+      "type": "disease",
+      "section": "patologie",
+      "name_it": "Giardiasi",
+      "disease": "Giardiasis",
+      "agent": "Giardia spp.",
+      "animal_groups": ["dog", "cat"],
+      "affected_animals_it": ["Cane", "Gatto"],
+      "summary_it": "Infezione intestinale da protozoo, spesso associata a diarrea e contaminazione ambientale.",
+      "symptoms_it": ["diarrea", "feci molli o maleodoranti", "dimagrimento", "meteorismo", "possibile andamento intermittente"],
+      "risks_it": ["contagio tra animali conviventi", "persistenza ambientale", "ricadute se l'ambiente non viene gestito"],
+      "precautions_it": ["igiene ambientale", "raccolta rapida delle feci", "test e terapia su indicazione veterinaria", "controllo degli animali conviventi"],
+      "source_note_it": "Scheda informativa. I dati territoriali reali vengono derivati solo da eventi/fonti autorizzate o da BENV quando disponibili."
+    },
+    {
+      "id": "dirofilariosi",
+      "type": "disease",
+      "section": "patologie",
+      "name_it": "Dirofilariosi",
+      "disease": "Dirofilariasis",
+      "agent": "Dirofilaria spp.",
+      "animal_groups": ["dog", "cat"],
+      "affected_animals_it": ["Cane", "Gatto"],
+      "vector_ids": ["aedes_albopictus", "culex_pipiens"],
+      "summary_it": "Parassitosi trasmessa da zanzare. Nel cane può coinvolgere apparato cardiopolmonare o sottocute a seconda della specie parassitaria.",
+      "symptoms_it": ["tosse", "affaticamento", "intolleranza all'esercizio", "possibile assenza di sintomi nelle fasi iniziali"],
+      "risks_it": ["malattia cardiopolmonare", "evoluzione cronica", "difficoltà terapeutiche se avanzata"],
+      "precautions_it": ["profilassi antiparassitaria su indicazione veterinaria", "riduzione esposizione a zanzare", "controlli periodici nelle aree a rischio"],
+      "source_note_it": "Scheda informativa. Non rappresenta una stima di prevalenza territoriale."
+    },
+    {
+      "id": "west_nile_fever",
+      "type": "disease",
+      "section": "west_nile",
+      "name_it": "West Nile Fever",
+      "disease": "West Nile Fever",
+      "agent": "West Nile virus",
+      "animal_groups": ["equine", "birds", "human_context"],
+      "affected_animals_it": ["Equidi", "Uccelli"],
+      "vector_ids": ["culex_pipiens"],
+      "summary_it": "Arbovirosi trasmessa da zanzare, con sorveglianza in ambito umano, veterinario ed entomologico. I layer vet.ector sono contesto territoriale di sorveglianza/prevenzione.",
+      "symptoms_it": ["negli equidi possibili sintomi neurologici", "febbre", "debolezza", "atassia", "possibile infezione asintomatica"],
+      "risks_it": ["coinvolgimento neurologico negli equidi", "circolazione stagionale", "rilevanza One Health"],
+      "precautions_it": ["misure anti-zanzara", "sorveglianza veterinaria", "attenzione a indicazioni sanitarie locali", "protezione dei donatori nelle aree indicate dalle autorità"],
+      "source_note_it": "I layer territoriali West Nile indicano aree/province di sorveglianza o prevenzione, non diagnosi puntuali veterinarie."
+    },
+    {
+      "id": "aedes_albopictus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Aedes albopictus",
+      "scientific_name": "Aedes albopictus",
+      "common_name_it": "Zanzara tigre",
+      "animal_groups": ["dog", "cat", "human_context"],
+      "associated_diseases_it": ["Dirofilariosi", "arbovirosi in contesto One Health"],
+      "summary_it": "Zanzara invasiva ampiamente diffusa in Italia. È un vettore di interesse sanitario e un importante indicatore di rischio territoriale.",
+      "habitat_it": ["aree urbane", "piccoli ristagni d'acqua", "giardini", "contenitori"],
+      "precautions_it": ["eliminare ristagni", "barriere fisiche", "repellenti autorizzati sugli animali secondo indicazione veterinaria", "monitoraggio stagionale"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "aedes_japonicus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Aedes japonicus",
+      "scientific_name": "Aedes japonicus",
+      "common_name_it": "Zanzara invasiva asiatica",
+      "associated_diseases_it": ["arbovirosi in contesto One Health"],
+      "summary_it": "Specie invasiva monitorata in Europa. La presenza territoriale richiede attenzione entomologica e prevenzione dei siti larvali.",
+      "habitat_it": ["aree periurbane", "contenitori", "habitat larvali artificiali o naturali"],
+      "precautions_it": ["riduzione ristagni", "sorveglianza entomologica", "segnalazione a programmi autorizzati se disponibili"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "aedes_koreicus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Aedes koreicus",
+      "scientific_name": "Aedes koreicus",
+      "common_name_it": "Zanzara invasiva coreana",
+      "associated_diseases_it": ["potenziale interesse per arbovirosi"],
+      "summary_it": "Specie invasiva oggetto di sorveglianza in alcune aree europee e italiane.",
+      "habitat_it": ["aree periurbane", "zone fresche e umide", "contenitori con acqua"],
+      "precautions_it": ["rimozione ristagni", "monitoraggio territoriale", "protezione da punture"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "culex_pipiens",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Culex pipiens",
+      "scientific_name": "Culex pipiens",
+      "common_name_it": "Zanzara comune",
+      "associated_diseases_it": ["West Nile Fever", "Usutu virus"],
+      "summary_it": "Vettore chiave nel ciclo di West Nile virus tra uccelli e zanzare, con possibile coinvolgimento di equidi e persone come ospiti accidentali.",
+      "habitat_it": ["acque stagnanti", "canali", "caditoie", "aree periurbane e rurali"],
+      "precautions_it": ["gestione ristagni", "sorveglianza entomologica", "protezione degli equidi in aree a rischio"],
+      "source_note_it": "Dato territoriale di contesto entomologico."
+    },
+    {
+      "id": "ixodes_ricinus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Ixodes ricinus",
+      "scientific_name": "Ixodes ricinus",
+      "common_name_it": "Zecca dei boschi",
+      "animal_groups": ["dog", "cat", "livestock", "wildlife"],
+      "associated_diseases_it": ["Borreliosi", "anaplasmosi", "piroplasmosi in contesti specifici"],
+      "summary_it": "Zecca ampiamente diffusa in molte aree europee, rilevante per animali domestici, fauna e contesto One Health.",
+      "habitat_it": ["boschi", "prati umidi", "aree con vegetazione", "ecotoni"],
+      "precautions_it": ["controllo del mantello dopo passeggiate", "antiparassitari su indicazione veterinaria", "rimozione rapida delle zecche", "monitoraggio stagionale"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "rhipicephalus_sanguineus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Rhipicephalus sanguineus",
+      "scientific_name": "Rhipicephalus sanguineus",
+      "common_name_it": "Zecca del cane",
+      "animal_groups": ["dog"],
+      "associated_diseases_it": ["ehrlichiosi", "babesiosi", "anaplasmosi"],
+      "summary_it": "Zecca associata al cane e ad ambienti domestici/peridomestici, rilevante per la prevenzione antiparassitaria.",
+      "habitat_it": ["canili", "abitazioni", "aree peridomestiche", "ambienti caldi"],
+      "precautions_it": ["profilassi antiparassitaria", "controllo ambientale", "ispezione del cane", "consulto veterinario in caso di infestazione"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "phlebotomus_perniciosus",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Phlebotomus perniciosus",
+      "scientific_name": "Phlebotomus perniciosus",
+      "common_name_it": "Flebotomo",
+      "associated_diseases_it": ["Leishmaniosi"],
+      "summary_it": "Flebotomo rilevante per la trasmissione di Leishmania infantum in molte aree mediterranee.",
+      "habitat_it": ["aree rurali e periurbane", "ripari animali", "microhabitat ombreggiati"],
+      "precautions_it": ["protezione serale/notturna", "repellenti autorizzati sugli animali secondo indicazione veterinaria", "riduzione dei siti di riposo"],
+      "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio."
+    },
+    {
+      "id": "culicoides_spp",
+      "type": "vector",
+      "section": "vettori",
+      "name_it": "Culicoides spp.",
+      "scientific_name": "Culicoides spp.",
+      "common_name_it": "Ceratopogonidi",
+      "animal_groups": ["bovine", "ovine", "caprine", "equine"],
+      "associated_diseases_it": ["Bluetongue", "malattie trasmesse da Culicoides"],
+      "summary_it": "Insetti ematofagi rilevanti in sanità veterinaria, soprattutto per alcune malattie degli animali da reddito.",
+      "habitat_it": ["aree umide", "ambienti rurali", "vicinanza ad allevamenti"],
+      "precautions_it": ["gestione ambientale", "sorveglianza veterinaria", "attenzione a campagne sanitarie ufficiali"],
+      "source_note_it": "Dato territoriale di contesto vettoriale."
+    }
+  ],
+  "entities": {
+    "vectors": ["aedes_albopictus", "aedes_japonicus", "aedes_koreicus", "culex_pipiens", "ixodes_ricinus", "rhipicephalus_sanguineus", "phlebotomus_perniciosus", "culicoides_spp"],
+    "parasites": ["leishmaniosi", "giardiasi", "dirofilariosi"],
+    "west_nile": ["west_nile_fever"]
+  }
+}
