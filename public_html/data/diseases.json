@@ -1,12 +1,12 @@
 {
-  "version": "v176-parasite-card-detail-update",
+  "version": "v177-all-cards-animal-symptoms-prevention-linked-vector-diseases",
   "generated_at": "2026-07-17T12:06:00Z",
   "schema": "vetector_diseases_catalog_v2_backward_compatible",
   "metadata": {
     "purpose": "Structured catalog for vet.ector /patologie/. Includes classic diseases plus dedicated sections for vectors, parasites and West Nile context.",
     "disclaimer": "Informazioni a scopo informativo e dimostrativo. Non sostituiscono diagnosi, terapia o visita veterinaria.",
     "compatibility": "The top-level diseases array is preserved for older patologie.js implementations. New clients can also use sections and entities.",
-    "last_update_note": "Completate Dipylidiosi ed Echinococcosi; aggiunti sintomi specifici per Giardiasi; aggiunte note preventive per Ascaridiosi."
+    "last_update_note": "All cards include animal-specific symptoms and preventive notes. Vector associated diseases include info links when a matching disease card exists."
   },
   "sections": [
     {
@@ -68,10 +68,29 @@
         "protezione da flebotomi",
         "controlli veterinari",
         "test diagnostici se indicati",
-        "attenzione alle aree endemiche"
+        "attenzione alle aree endemiche",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "source_note_it": "Scheda informativa. Gli eventi ufficiali e i layer territoriali derivano da fonti separate come BENV/IZS o dataset territoriali curati.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "dimagrimento progressivo",
+          "lesioni cutanee, forfora o alopecia",
+          "linfonodi aumentati",
+          "apatia o ridotta tolleranza all’esercizio",
+          "alterazioni oculari",
+          "segni renali o aumento sete/urine nei casi avanzati"
+        ],
+        "Gatto": [
+          "lesioni cutanee o noduli",
+          "dimagrimento o scadimento condizioni generali",
+          "alterazioni oculari",
+          "linfonodi aumentati",
+          "segni spesso meno tipici rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "giardiasi",
@@ -91,15 +110,11 @@
       ],
       "summary_it": "Infezione intestinale da protozoo, spesso associata a diarrea e contaminazione ambientale.",
       "symptoms_it": [
-        "diarrea intermittente o persistente",
-        "feci molli, acquose o maleodoranti",
-        "presenza di muco nelle feci",
-        "meteorismo e borborigmi intestinali",
-        "dolore o fastidio addominale",
-        "dimagrimento o mancato accrescimento nei giovani",
-        "pelo opaco o condizioni generali ridotte",
-        "vomito occasionale",
-        "possibile assenza di sintomi in portatori eliminatori"
+        "diarrea",
+        "feci molli o maleodoranti",
+        "dimagrimento",
+        "meteorismo",
+        "possibile andamento intermittente"
       ],
       "risks_it": [
         "contagio tra animali conviventi",
@@ -110,24 +125,30 @@
         "igiene ambientale",
         "raccolta rapida delle feci",
         "test e terapia su indicazione veterinaria",
-        "controllo degli animali conviventi"
+        "controllo degli animali conviventi",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
-      "source_note_it": "Scheda informativa. La Giardiasi può avere eliminazione intermittente: test e interpretazione devono essere valutati dal veterinario nel contesto clinico.",
+      "source_note_it": "Scheda informativa. I dati territoriali reali vengono derivati solo da eventi/fonti autorizzate o da BENV quando disponibili.",
       "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "recognition": "Sospettare Giardiasi in caso di diarrea intermittente, feci maleodoranti o con muco, gonfiore addominale, dimagrimento o mancato accrescimento, soprattutto in cuccioli, gattini, rifugi, colonie o animali che condividono ambienti contaminati.",
-      "diagnostics_it": [
-        "test antigenico rapido o test di laboratorio su feci",
-        "esame coproparassitologico, anche ripetuto, se il sospetto persiste",
-        "valutazione degli animali conviventi se ci sono sintomi ricorrenti",
-        "controllo della risposta clinica dopo terapia e igiene ambientale"
-      ],
-      "when_vet_it": [
-        "diarrea persistente oltre 24-48 ore o ricorrente",
-        "diarrea con sangue, forte abbattimento o disidratazione",
-        "cuccioli, gattini, animali anziani o immunodepressi",
-        "più animali sintomatici nello stesso ambiente",
-        "recidiva dopo trattamento"
-      ]
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "diarrea intermittente o persistente",
+          "feci molli, acquose o maleodoranti",
+          "muco nelle feci",
+          "meteorismo e borborigmi intestinali",
+          "dimagrimento o mancato accrescimento nei cuccioli",
+          "possibile portatore asintomatico"
+        ],
+        "Gatto": [
+          "feci molli o diarrea intermittente",
+          "muco nelle feci",
+          "gonfiore o fastidio addominale",
+          "pelo opaco o riduzione condizioni generali",
+          "mancato accrescimento nei gattini",
+          "possibile assenza di sintomi evidenti"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "dirofilariosi",
@@ -165,10 +186,29 @@
       "precautions_it": [
         "profilassi antiparassitaria su indicazione veterinaria",
         "riduzione esposizione a zanzare",
-        "controlli periodici nelle aree a rischio"
+        "controlli periodici nelle aree a rischio",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "source_note_it": "Scheda informativa. Non rappresenta una stima di prevalenza territoriale.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "tosse",
+          "affaticamento",
+          "intolleranza all’esercizio",
+          "difficoltà respiratoria nei casi avanzati",
+          "sincope o collasso nei casi gravi",
+          "possibile assenza di sintomi iniziali"
+        ],
+        "Gatto": [
+          "tosse o respiro difficoltoso",
+          "vomito intermittente",
+          "letargia",
+          "episodi respiratori acuti",
+          "possibili segni improvvisi anche con bassa carica parassitaria"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "west_nile_fever",
@@ -208,10 +248,28 @@
         "misure anti-zanzara",
         "sorveglianza veterinaria",
         "attenzione a indicazioni sanitarie locali",
-        "protezione dei donatori nelle aree indicate dalle autorità"
+        "protezione dei donatori nelle aree indicate dalle autorità",
+        "La prevenzione si basa su misure anti-zanzara, attenzione ai bollettini territoriali e valutazione veterinaria tempestiva degli equidi con sintomi neurologici."
       ],
       "source_note_it": "I layer territoriali West Nile indicano aree/province di sorveglianza o prevenzione, non diagnosi puntuali veterinarie.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Equidi": [
+          "febbre",
+          "debolezza",
+          "atassia o incoordinazione",
+          "tremori muscolari",
+          "difficoltà a stare in piedi",
+          "alterazioni neurologiche"
+        ],
+        "Uccelli": [
+          "mortalità anomala",
+          "debolezza o riduzione reattività",
+          "segni neurologici quando osservabili",
+          "rilevanza come sentinelle di sorveglianza"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su misure anti-zanzara, attenzione ai bollettini territoriali e valutazione veterinaria tempestiva degli equidi con sintomi neurologici."
     },
     {
       "id": "aedes_albopictus",
@@ -240,7 +298,8 @@
         "eliminare ristagni",
         "barriere fisiche",
         "repellenti autorizzati sugli animali secondo indicazione veterinaria",
-        "monitoraggio stagionale"
+        "monitoraggio stagionale",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -249,7 +308,43 @@
         "Equidi in contesto arbovirosi",
         "Uccelli / fauna selvatica come contesto One Health"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Equidi in contesto arbovirosi": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Uccelli / fauna selvatica come contesto One Health": [
+          "mortalità anomala, debolezza o segni neurologici",
+          "riduzione della reattività o difficoltà di volo quando osservabile",
+          "rilevanza per sorveglianza territoriale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "Dirofilariosi",
+          "id": "dirofilariosi"
+        },
+        {
+          "name": "arbovirosi in contesto One Health",
+          "id": ""
+        }
+      ]
     },
     {
       "id": "aedes_japonicus",
@@ -270,7 +365,8 @@
       "precautions_it": [
         "riduzione ristagni",
         "sorveglianza entomologica",
-        "segnalazione a programmi autorizzati se disponibili"
+        "segnalazione a programmi autorizzati se disponibili",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -278,7 +374,34 @@
         "Gatto",
         "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "arbovirosi in contesto One Health",
+          "id": ""
+        }
+      ]
     },
     {
       "id": "aedes_koreicus",
@@ -299,7 +422,8 @@
       "precautions_it": [
         "rimozione ristagni",
         "monitoraggio territoriale",
-        "protezione da punture"
+        "protezione da punture",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -307,7 +431,34 @@
         "Gatto",
         "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Equidi e fauna selvatica in contesto di sorveglianza arbovirosi": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "potenziale interesse per arbovirosi",
+          "id": ""
+        }
+      ]
     },
     {
       "id": "culex_pipiens",
@@ -330,7 +481,8 @@
       "precautions_it": [
         "gestione ristagni",
         "sorveglianza entomologica",
-        "protezione degli equidi in aree a rischio"
+        "protezione degli equidi in aree a rischio",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di contesto entomologico.",
       "affected_animals_it": [
@@ -339,7 +491,41 @@
         "Fauna selvatica aviare",
         "Contesto One Health"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Equidi": [
+          "febbre, abbattimento o rigidità",
+          "zoppia, debolezza o intolleranza all’esercizio quando compatibile",
+          "segni neurologici come atassia, tremori o incoordinazione nelle arbovirosi",
+          "peggioramento rapido o difficoltà a stare in piedi"
+        ],
+        "Uccelli": [
+          "mortalità anomala, debolezza o segni neurologici",
+          "riduzione della reattività o difficoltà di volo quando osservabile",
+          "rilevanza per sorveglianza territoriale"
+        ],
+        "Fauna selvatica aviare": [
+          "mortalità anomala, debolezza o segni neurologici",
+          "riduzione della reattività o difficoltà di volo quando osservabile",
+          "rilevanza per sorveglianza territoriale"
+        ],
+        "Contesto One Health": [
+          "rilevanza territoriale ed epidemiologica",
+          "interpretazione integrata con sorveglianza veterinaria, ambientale e sanitaria",
+          "non rappresenta indicazione clinica individuale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "West Nile Fever",
+          "id": "west_nile_fever"
+        },
+        {
+          "name": "Usutu virus",
+          "id": "west_nile_fever"
+        }
+      ]
     },
     {
       "id": "ixodes_ricinus",
@@ -370,7 +556,8 @@
         "controllo del mantello dopo passeggiate",
         "antiparassitari su indicazione veterinaria",
         "rimozione rapida delle zecche",
-        "monitoraggio stagionale"
+        "monitoraggio stagionale",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -382,7 +569,65 @@
         "Equino",
         "Fauna selvatica"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Ovino": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Caprino": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Equino": [
+          "febbre, abbattimento o rigidità",
+          "zoppia, debolezza o intolleranza all’esercizio quando compatibile",
+          "segni neurologici come atassia, tremori o incoordinazione nelle arbovirosi",
+          "peggioramento rapido o difficoltà a stare in piedi"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "Borreliosi",
+          "id": "borreliosi_lyme"
+        },
+        {
+          "name": "anaplasmosi",
+          "id": "anaplasmosi"
+        },
+        {
+          "name": "piroplasmosi in contesti specifici",
+          "id": ""
+        }
+      ]
     },
     {
       "id": "rhipicephalus_sanguineus",
@@ -410,7 +655,8 @@
         "profilassi antiparassitaria",
         "controllo ambientale",
         "ispezione del cane",
-        "consulto veterinario in caso di infestazione"
+        "consulto veterinario in caso di infestazione",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -418,7 +664,41 @@
         "Gatto possibile",
         "Animali conviventi in ambienti infestati"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto possibile": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Animali conviventi in ambienti infestati": [
+          "segni variabili secondo specie, età e stato sanitario",
+          "valutare il contesto territoriale e l’evoluzione clinica",
+          "contattare il veterinario in caso di peggioramento o sintomi persistenti"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "ehrlichiosi",
+          "id": "ehrlichiosi"
+        },
+        {
+          "name": "babesiosi",
+          "id": "babesiosi"
+        },
+        {
+          "name": "anaplasmosi",
+          "id": "anaplasmosi"
+        }
+      ]
     },
     {
       "id": "phlebotomus_perniciosus",
@@ -439,7 +719,8 @@
       "precautions_it": [
         "protezione serale/notturna",
         "repellenti autorizzati sugli animali secondo indicazione veterinaria",
-        "riduzione dei siti di riposo"
+        "riduzione dei siti di riposo",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di presenza/distribuzione; non rappresenta un focolaio.",
       "affected_animals_it": [
@@ -448,7 +729,38 @@
         "Altri mammiferi in aree endemiche",
         "Contesto zoonotico"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Altri mammiferi in aree endemiche": [
+          "segni variabili secondo specie, età e stato sanitario",
+          "valutare il contesto territoriale e l’evoluzione clinica",
+          "contattare il veterinario in caso di peggioramento o sintomi persistenti"
+        ],
+        "Contesto zoonotico": [
+          "rilevanza territoriale ed epidemiologica",
+          "interpretazione integrata con sorveglianza veterinaria, ambientale e sanitaria",
+          "non rappresenta indicazione clinica individuale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "Leishmaniosi",
+          "id": "leishmaniosi"
+        }
+      ]
     },
     {
       "id": "culicoides_spp",
@@ -476,7 +788,8 @@
       "precautions_it": [
         "gestione ambientale",
         "sorveglianza veterinaria",
-        "attenzione a campagne sanitarie ufficiali"
+        "attenzione a campagne sanitarie ufficiali",
+        "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia."
       ],
       "source_note_it": "Dato territoriale di contesto vettoriale.",
       "affected_animals_it": [
@@ -485,7 +798,44 @@
         "Caprino",
         "Equino"
       ],
-      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali."
+      "species_note_it": "Specie animali rilevanti per esposizione, trasmissione o malattia associata. Per i vettori la presenza del vettore non equivale a diagnosi negli animali.",
+      "symptoms_by_animal_it": {
+        "Ovino": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Caprino": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Equino": [
+          "febbre, abbattimento o rigidità",
+          "zoppia, debolezza o intolleranza all’esercizio quando compatibile",
+          "segni neurologici come atassia, tremori o incoordinazione nelle arbovirosi",
+          "peggioramento rapido o difficoltà a stare in piedi"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su controllo ambientale, riduzione dei siti di sviluppo del vettore, protezione degli animali esposti e sorveglianza territoriale. La presenza del vettore non equivale a diagnosi di malattia.",
+      "associated_disease_links": [
+        {
+          "name": "Bluetongue",
+          "id": "bluetongue"
+        },
+        {
+          "name": "malattie trasmesse da Culicoides",
+          "id": ""
+        }
+      ]
     },
     {
       "id": "peste_suina_africana",
@@ -517,11 +867,29 @@
       "precautions_it": [
         "rispettare misure di biosicurezza",
         "evitare contatti con cinghiali o carcasse",
-        "segnalare mortalità anomale alle autorità veterinarie"
+        "segnalare mortalità anomale alle autorità veterinarie",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Suino": [
+          "febbre alta",
+          "abbattimento marcato",
+          "perdita di appetito",
+          "arrossamenti o cianosi cutanea",
+          "emorragie",
+          "mortalità improvvisa"
+        ],
+        "Cinghiale": [
+          "mortalità anomala",
+          "debolezza o difficoltà di movimento",
+          "comportamento insolito",
+          "carcasse da segnalare alle autorità competenti"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "brucellosi",
@@ -559,11 +927,44 @@
         "seguire piani ufficiali",
         "isolamento dei sospetti",
         "test diagnostici ufficiali",
-        "gestione sicura di aborti e materiali biologici"
+        "gestione sicura di aborti e materiali biologici",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Ovini": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Caprini": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Suini": [
+          "febbre, abbattimento e perdita di appetito",
+          "diarrea, sintomi respiratori o cutanei secondo la patologia",
+          "mortalità improvvisa o aumento casi nel gruppo",
+          "riduzione performance o problemi riproduttivi"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "tubercolosi_bovina_mtbc",
@@ -596,11 +997,32 @@
       "precautions_it": [
         "aderire ai controlli ufficiali",
         "isolamento dei positivi",
-        "biosicurezza e tracciabilità"
+        "biosicurezza e tracciabilità",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Caprino": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "leucosi_bovina_enzootica",
@@ -628,11 +1050,21 @@
       "precautions_it": [
         "controlli sierologici",
         "gestione aghi e sangue",
-        "biosicurezza e piani ufficiali"
+        "biosicurezza e piani ufficiali",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "influenza_aviaria_hpai",
@@ -663,11 +1095,26 @@
       "precautions_it": [
         "biosicurezza negli allevamenti",
         "evitare contatto con selvatici",
-        "segnalare mortalità anomala"
+        "segnalare mortalità anomala",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Avicoli": [
+          "mortalità improvvisa o aumento mortalità",
+          "calo ovodeposizione, sintomi respiratori o neurologici",
+          "diarrea o alterazioni del comportamento alimentare",
+          "coinvolgimento rapido del gruppo"
+        ],
+        "Volatili selvatici": [
+          "mortalità anomala, debolezza o segni neurologici",
+          "riduzione della reattività o difficoltà di volo quando osservabile",
+          "rilevanza per sorveglianza territoriale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "dermatite_nodulare_contagiosa",
@@ -696,11 +1143,21 @@
       "precautions_it": [
         "sorveglianza clinica",
         "controllo vettori",
-        "misure ufficiali e vaccinazione dove prevista"
+        "misure ufficiali e vaccinazione dove prevista",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "rabbia",
@@ -735,11 +1192,38 @@
       "precautions_it": [
         "vaccinazioni dove previste",
         "non manipolare animali sospetti",
-        "contattare subito autorità/veterinario"
+        "contattare subito autorità/veterinario",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ],
+        "Animali da reddito": [
+          "cambiamenti comportamentali",
+          "aggressività o apatia",
+          "ipersalivazione",
+          "difficoltà a deglutire"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "bluetongue",
@@ -776,11 +1260,33 @@
       "precautions_it": [
         "seguire piani ufficiali",
         "controllo vettori",
-        "vaccinazione se prevista"
+        "vaccinazione se prevista",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Ovini": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Bovini": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Caprini": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "aethina_tumida",
@@ -808,11 +1314,21 @@
       "precautions_it": [
         "controlli in apiario",
         "segnalazione tempestiva",
-        "rispetto misure ufficiali"
+        "rispetto misure ufficiali",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Api": [
+          "indebolimento della colonia",
+          "danni ai favi o alterazioni della covata",
+          "riduzione attività dell’alveare",
+          "presenza di parassiti o larve quando rilevante"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "parvovirosi_canina",
@@ -842,11 +1358,21 @@
         "vaccinazione",
         "isolamento",
         "disinfezione adeguata",
-        "visita veterinaria urgente"
+        "visita veterinaria urgente",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "cimurro",
@@ -879,11 +1405,26 @@
       "precautions_it": [
         "vaccinazione",
         "isolamento dei sospetti",
-        "consulto veterinario rapido"
+        "consulto veterinario rapido",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "leptospirosi",
@@ -919,11 +1460,38 @@
         "vaccinazione dove indicata",
         "evitare acque contaminate",
         "igiene e gestione urine",
-        "veterinario in caso di sospetto"
+        "veterinario in caso di sospetto",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Suino": [
+          "febbre, abbattimento e perdita di appetito",
+          "diarrea, sintomi respiratori o cutanei secondo la patologia",
+          "mortalità improvvisa o aumento casi nel gruppo",
+          "riduzione performance o problemi riproduttivi"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "panleucopenia_felina",
@@ -954,11 +1522,21 @@
         "vaccinazione",
         "isolamento",
         "disinfezione ambientale",
-        "supporto veterinario rapido"
+        "supporto veterinario rapido",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "calicivirosi_felina",
@@ -989,11 +1567,21 @@
         "vaccinazione",
         "isolamento dei sintomatici",
         "igiene ambientale",
-        "valutazione veterinaria"
+        "valutazione veterinaria",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "herpesvirosi_felina",
@@ -1024,11 +1612,21 @@
         "vaccinazione",
         "riduzione stress",
         "igiene e isolamento temporaneo",
-        "controllo veterinario"
+        "controllo veterinario",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "fiv",
@@ -1058,11 +1656,21 @@
         "test veterinario",
         "gestione indoor o controllata",
         "sterilizzazione dove indicata",
-        "ridurre lotte e morsi"
+        "ridurre lotte e morsi",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "felv",
@@ -1092,11 +1700,21 @@
         "test veterinario",
         "vaccinazione nei soggetti a rischio",
         "gestione separata dei positivi",
-        "controlli periodici"
+        "controlli periodici",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "toxoplasmosi",
@@ -1131,11 +1749,38 @@
         "igiene lettiera",
         "cottura carne",
         "controllo alimentazione del gatto",
-        "consulto veterinario/medico nei casi a rischio"
+        "consulto veterinario/medico nei casi a rischio",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Ovini": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Caprini": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Contesto zoonotico": [
+          "rilevanza territoriale ed epidemiologica",
+          "interpretazione integrata con sorveglianza veterinaria, ambientale e sanitaria",
+          "non rappresenta indicazione clinica individuale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "borreliosi_lyme",
@@ -1171,11 +1816,32 @@
       "precautions_it": [
         "prevenzione zecche",
         "rimozione rapida",
-        "consulto veterinario in caso di zoppia/febbre dopo morso"
+        "consulto veterinario in caso di zoppia/febbre dopo morso",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Equino": [
+          "febbre, abbattimento o rigidità",
+          "zoppia, debolezza o intolleranza all’esercizio quando compatibile",
+          "segni neurologici come atassia, tremori o incoordinazione nelle arbovirosi",
+          "peggioramento rapido o difficoltà a stare in piedi"
+        ],
+        "Contesto One Health": [
+          "rilevanza territoriale ed epidemiologica",
+          "interpretazione integrata con sorveglianza veterinaria, ambientale e sanitaria",
+          "non rappresenta indicazione clinica individuale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "babesiosi",
@@ -1209,11 +1875,33 @@
       "precautions_it": [
         "prevenzione zecche",
         "diagnosi veterinaria rapida",
-        "controllo dopo viaggi in aree a rischio"
+        "controllo dopo viaggi in aree a rischio",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Equino": [
+          "febbre, abbattimento o rigidità",
+          "zoppia, debolezza o intolleranza all’esercizio quando compatibile",
+          "segni neurologici come atassia, tremori o incoordinazione nelle arbovirosi",
+          "peggioramento rapido o difficoltà a stare in piedi"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "anaplasmosi",
@@ -1246,11 +1934,33 @@
       "precautions_it": [
         "controllo zecche",
         "test veterinari mirati",
-        "monitoraggio in aree endemiche"
+        "monitoraggio in aree endemiche",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Bovino": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Piccoli ruminanti": [
+          "febbre",
+          "apatia",
+          "zoppia",
+          "piastrinopenia"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "ehrlichiosi",
@@ -1280,11 +1990,21 @@
       "precautions_it": [
         "prevenzione zecche",
         "test e terapia veterinaria",
-        "controlli ematologici"
+        "controlli ematologici",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "ascaridiosi",
@@ -1317,30 +2037,26 @@
         "sverminazione su protocollo veterinario",
         "raccolta feci",
         "igiene ambientale",
-        "programmare sverminazioni nei cuccioli e nei gattini secondo protocollo veterinario",
-        "eseguire controlli fecali periodici, soprattutto in animali giovani o che vivono in gruppo",
-        "raccogliere rapidamente le feci e pulire le aree di eliminazione",
-        "evitare contaminazione di giardini, sabbiere e aree frequentate da bambini",
-        "trattare anche la madre e gli animali conviventi quando il veterinario lo ritiene necessario",
-        "lavare le mani dopo contatto con feci, lettiere, terreno o aree potenzialmente contaminate",
-        "mantenere un controllo antiparassitario regolare negli animali che cacciano o frequentano ambienti esterni"
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. Per l’Ascaridiosi è fondamentale impostare prevenzione e sverminazione con il veterinario, evitando trattamenti casuali o incompleti.",
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
       "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
-      "prevention_note_it": "La prevenzione dell’Ascaridiosi si basa su igiene ambientale, raccolta rapida delle feci, controlli fecali e protocolli di sverminazione definiti dal veterinario. Nei giovani animali la prevenzione è particolarmente importante perché l’infestazione può interferire con crescita e condizioni generali.",
-      "diagnostics_it": [
-        "esame fecale per ricerca di uova",
-        "valutazione veterinaria del protocollo di sverminazione",
-        "controlli ripetuti nei cuccioli/gattini o in ambienti con reinfestazione"
-      ],
-      "when_vet_it": [
-        "cuccioli o gattini con addome gonfio, diarrea, vomito o scarso accrescimento",
-        "presenza di vermi visibili",
-        "convivenza con bambini o persone fragili",
-        "reinfestazioni ricorrenti",
-        "animali provenienti da rifugi, colonie o ambienti affollati"
-      ]
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "anchilostomiasi",
@@ -1372,11 +2088,27 @@
       "precautions_it": [
         "controlli fecali",
         "sverminazione veterinaria",
-        "igiene ambientale"
+        "igiene ambientale",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "type": "disease",
       "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
-      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale."
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "dipylidiosi",
@@ -1389,49 +2121,44 @@
       ],
       "affected_animals_it": [
         "Cane",
-        "Gatto",
-        "Animali conviventi con infestazione da pulci"
+        "Gatto"
       ],
       "section": "parassiti",
-      "summary_it": "Parassitosi intestinale da cestode, molto spesso collegata all’ingestione accidentale di pulci infette durante il grooming o il mordicchiamento del mantello.",
+      "summary_it": "Infestazione da cestode spesso associata all’ingestione di pulci infette.",
       "symptoms_it": [
-        "presenza di proglottidi simili a piccoli chicchi di riso nelle feci o vicino all’ano",
-        "prurito o fastidio perianale",
-        "leccamento o trascinamento del posteriore",
-        "disturbi gastrointestinali lievi o intermittenti",
-        "possibile dimagrimento o pelo opaco in infestazioni importanti",
-        "spesso assenza di sintomi evidenti"
+        "proglottidi nelle feci",
+        "prurito anale",
+        "talvolta disturbi gastrointestinali",
+        "spesso lieve"
       ],
       "risks_it": [
-        "recidive se non viene controllata l’infestazione da pulci",
-        "contaminazione dell’ambiente domestico con pulci infette",
-        "coinvolgimento di più animali conviventi",
-        "rischio maggiore in cuccioli, gattini o animali debilitati"
+        "persistenza se non si controllano le pulci",
+        "contagio tra animali infestati da pulci"
       ],
       "precautions_it": [
-        "controllare e trattare le pulci sull’animale secondo indicazione veterinaria",
-        "trattare anche l’ambiente, cucce, coperte e aree di riposo",
-        "raccogliere rapidamente le feci",
-        "controllare gli animali conviventi",
-        "non limitarsi al solo vermifugo se l’infestazione da pulci persiste"
+        "controllo pulci",
+        "trattamento antiparassitario veterinario",
+        "igiene cucce e ambienti",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa. La conferma e il trattamento devono essere valutati dal veterinario, soprattutto se sono presenti animali giovani, debilitati o infestazioni ricorrenti.",
-      "species_note_it": "Specie animali principalmente coinvolte: cane e gatto. La gestione efficace richiede quasi sempre anche il controllo delle pulci.",
-      "transmission": "Trasmissione tramite ingestione di pulci infette. La presenza di Dipylidium caninum è quindi spesso un indicatore indiretto di infestazione da pulci nell’animale o nell’ambiente.",
-      "diagnostics_it": [
-        "osservazione di proglottidi nelle feci o nell’area perianale",
-        "esame coproparassitologico se indicato",
-        "valutazione veterinaria per impostare trattamento antiparassitario e controllo pulci",
-        "controllo della presenza di pulci o loro residui sul mantello"
-      ],
-      "when_vet_it": [
-        "proglottidi visibili nelle feci o vicino all’ano",
-        "prurito anale persistente o trascinamento del posteriore",
-        "infestazione da pulci difficile da controllare",
-        "più animali conviventi infestati",
-        "cuccioli, gattini o soggetti debilitati"
-      ]
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "echinococcosi",
@@ -1454,46 +2181,69 @@
         "Contesto zoonotico"
       ],
       "section": "parassiti",
-      "summary_it": "Parassitosi zoonotica da cestodi, con ciclo che coinvolge carnivori come ospiti definitivi e ruminanti, suini o fauna selvatica come ospiti intermedi. È rilevante in ottica One Health.",
+      "summary_it": "Parassitosi zoonotica da cestodi con ciclo tra carnivori definitivi e ospiti intermedi.",
       "symptoms_it": [
-        "nel cane spesso assente o molto lieve",
-        "possibili disturbi intestinali aspecifici nei carnivori definitivi",
-        "negli ospiti intermedi formazione di cisti in organi interni",
-        "calo di performance o segni aspecifici negli animali da reddito in casi avanzati",
-        "rilevanza zoonotica per contaminazione ambientale"
+        "spesso asintomatica nel cane",
+        "cisti negli ospiti intermedi",
+        "rilevanza zoonotica"
       ],
       "risks_it": [
         "zoonosi importante",
-        "mantenimento del ciclo cane-ruminanti o cane-fauna selvatica",
-        "contaminazione ambientale tramite feci di carnivori infetti",
-        "rischio in contesti rurali, pastorali o di macellazione non controllata",
-        "difficile percezione clinica perché il cane può essere asintomatico"
+        "contaminazione ambientale",
+        "ciclo cane-ruminanti"
       ],
       "precautions_it": [
-        "non somministrare visceri crudi o non controllati ai cani",
-        "seguire protocolli di sverminazione veterinaria nei cani a rischio",
-        "raccogliere e smaltire correttamente le feci",
-        "mantenere igiene delle mani e degli ambienti",
-        "controllare cani da lavoro, cani da gregge e cani con accesso a carcasse o visceri",
-        "rispettare le indicazioni sanitarie locali e dei servizi veterinari"
+        "vermifugazione controllata",
+        "evitare consumo di visceri crudi",
+        "igiene e controllo cani da lavoro",
+        "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
       ],
       "type": "disease",
-      "source_note_it": "Scheda informativa One Health. La gestione deve seguire indicazioni veterinarie e, quando pertinente, dei servizi veterinari pubblici.",
-      "species_note_it": "Specie animali coinvolte: cane come ospite definitivo principale in molti contesti; ovini, caprini, bovini, suini e fauna selvatica come ospiti intermedi. La rilevanza è anche zoonotica.",
-      "transmission": "Il cane e altri carnivori possono eliminare uova del parassita con le feci. Gli ospiti intermedi si infettano ingerendo uova dall’ambiente contaminato. Il ciclo viene favorito dal consumo di visceri crudi o non controllati da parte dei cani.",
-      "diagnostics_it": [
-        "valutazione veterinaria del rischio in base a stile di vita, area e accesso a visceri o carcasse",
-        "test coproantigenici o indagini specifiche dove disponibili e indicate",
-        "approccio integrato con servizi veterinari in contesti zootecnici o faunistici",
-        "eventuale monitoraggio di gruppo nei cani da lavoro o da gregge"
-      ],
-      "when_vet_it": [
-        "cane con accesso a visceri crudi, carcasse o attività di pastorizia/caccia",
-        "presenza di ciclo rurale cane-ruminanti",
-        "necessità di impostare un protocollo di sverminazione regolare",
-        "rischio per persone fragili o contesti familiari con bambini",
-        "segnalazioni territoriali o indicazioni sanitarie locali"
-      ]
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "species_note_it": "Specie animali potenzialmente coinvolte secondo il contesto clinico/territoriale.",
+      "symptoms_by_animal_it": {
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Ovini": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Caprini": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ],
+        "Bovini": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Suini": [
+          "febbre, abbattimento e perdita di appetito",
+          "diarrea, sintomi respiratori o cutanei secondo la patologia",
+          "mortalità improvvisa o aumento casi nel gruppo",
+          "riduzione performance o problemi riproduttivi"
+        ],
+        "Fauna selvatica": [
+          "mortalità anomala o comportamento insolito",
+          "riduzione mobilità, segni neurologici o debolezza quando osservabili",
+          "segnalazione agli enti competenti secondo indicazioni locali"
+        ],
+        "Contesto zoonotico": [
+          "rilevanza territoriale ed epidemiologica",
+          "interpretazione integrata con sorveglianza veterinaria, ambientale e sanitaria",
+          "non rappresenta indicazione clinica individuale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione si basa su igiene ambientale, controlli periodici, protocolli antiparassitari definiti dal veterinario e gestione degli animali conviventi quando indicato."
     },
     {
       "id": "salmonellosi",
@@ -1532,11 +2282,45 @@
         "igiene alimentare",
         "biosicurezza",
         "gestione feci",
-        "diagnosi veterinaria/laboratorio"
+        "diagnosi veterinaria/laboratorio",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Avicoli": [
+          "mortalità improvvisa o aumento mortalità",
+          "calo ovodeposizione, sintomi respiratori o neurologici",
+          "diarrea o alterazioni del comportamento alimentare",
+          "coinvolgimento rapido del gruppo"
+        ],
+        "Bovini": [
+          "febbre, calo produzione o riduzione dell’appetito",
+          "segni respiratori, digestivi, riproduttivi o cutanei secondo la patologia",
+          "aborti, calo fertilità o aumento mortalità quando rilevanti",
+          "cluster di sintomi nel gruppo o nella stalla"
+        ],
+        "Suini": [
+          "febbre, abbattimento e perdita di appetito",
+          "diarrea, sintomi respiratori o cutanei secondo la patologia",
+          "mortalità improvvisa o aumento casi nel gruppo",
+          "riduzione performance o problemi riproduttivi"
+        ],
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "campylobacteriosi",
@@ -1571,11 +2355,39 @@
       "precautions_it": [
         "igiene mani e superfici",
         "gestione sicura degli alimenti",
-        "valutazione veterinaria se sintomatica"
+        "valutazione veterinaria se sintomatica",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Avicoli": [
+          "mortalità improvvisa o aumento mortalità",
+          "calo ovodeposizione, sintomi respiratori o neurologici",
+          "diarrea o alterazioni del comportamento alimentare",
+          "coinvolgimento rapido del gruppo"
+        ],
+        "Cane": [
+          "abbattimento, febbre o riduzione dell’attività",
+          "disturbi gastrointestinali come vomito o diarrea quando compatibili",
+          "segni cutanei, respiratori o neurologici secondo la patologia",
+          "peggioramento rapido o mancata risposta alle cure di base"
+        ],
+        "Gatto": [
+          "apatia, riduzione dell’appetito o dimagrimento",
+          "disturbi gastrointestinali o respiratori secondo la patologia",
+          "alterazioni oculari, cutanee o neurologiche quando compatibili",
+          "segni lievi ma persistenti, spesso meno evidenti rispetto al cane"
+        ],
+        "Animali da reddito": [
+          "diarrea",
+          "feci molli",
+          "dolore addominale",
+          "talvolta asintomatica"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "malattia_newcastle",
@@ -1608,11 +2420,26 @@
       "precautions_it": [
         "biosicurezza",
         "vaccinazione dove prevista",
-        "segnalazione mortalità anomale"
+        "segnalazione mortalità anomale",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Avicoli": [
+          "mortalità improvvisa o aumento mortalità",
+          "calo ovodeposizione, sintomi respiratori o neurologici",
+          "diarrea o alterazioni del comportamento alimentare",
+          "coinvolgimento rapido del gruppo"
+        ],
+        "Volatili": [
+          "mortalità anomala, debolezza o segni neurologici",
+          "riduzione della reattività o difficoltà di volo quando osservabile",
+          "rilevanza per sorveglianza territoriale"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     },
     {
       "id": "peste_piccoli_ruminanti",
@@ -1644,11 +2471,27 @@
       "precautions_it": [
         "sorveglianza ufficiale",
         "biosicurezza",
-        "segnalazione rapida dei sospetti"
+        "segnalazione rapida dei sospetti",
+        "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
       ],
       "type": "disease",
       "section": "patologie",
-      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria."
+      "source_note_it": "Scheda informativa. Non sostituisce diagnosi, terapia o visita veterinaria.",
+      "symptoms_by_animal_it": {
+        "Ovini": [
+          "febbre, abbattimento o calo alimentazione",
+          "lesioni orali, zoppia, diarrea o sintomi respiratori secondo la patologia",
+          "aborti o mortalità anomala quando rilevante",
+          "coinvolgimento di più soggetti nel gregge"
+        ],
+        "Caprini": [
+          "febbre, abbattimento o riduzione dell’appetito",
+          "diarrea, sintomi respiratori, lesioni orali o zoppia secondo la patologia",
+          "aborti o problemi riproduttivi quando rilevanti",
+          "cluster di casi nel gruppo"
+        ]
+      },
+      "prevention_note_it": "La prevenzione dipende da specie, contesto e patologia: vaccinazioni quando disponibili, biosicurezza, igiene, controllo dei vettori/parassiti e consulto veterinario in caso di sintomi."
     }
   ],
   "entities": {
