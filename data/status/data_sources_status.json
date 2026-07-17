@@ -1,65 +1,374 @@
 {
   "version": "v170-data-sources-status",
-  "generated_at": "2026-07-17T10:56:20.262630+00:00",
+  "generated_at": "2026-07-17T11:01:20.628831+00:00",
   "official_events": {
     "adis": {
       "key": "ADIS",
-      "status": "empty_or_missing",
-      "records": 0,
+      "status": "active",
+      "records": 474,
       "file": {
-        "exists": false,
-        "path": "data/official_sources/adis_events.csv"
+        "exists": true,
+        "path": "data/official_sources/adis_events.csv",
+        "size_bytes": 202050,
+        "modified_at": "2026-07-17T11:01:20.292581+00:00"
       },
-      "top_diseases": [],
-      "animal_groups": {},
-      "regions": {},
-      "companion_records": 0,
-      "period_start": null,
-      "period_end": null
+      "top_diseases": [
+        [
+          "Peste suina africana",
+          402
+        ],
+        [
+          "Tubercolosi bovina / Mycobacterium tuberculosis complex",
+          23
+        ],
+        [
+          "Influenza aviaria ad alta patogenicita nel pollame H5N1",
+          19
+        ],
+        [
+          "Dermatite nodulare contagiosa",
+          9
+        ],
+        [
+          "Influenza aviaria ad alta patogenicita in volatili selvatici H5",
+          7
+        ],
+        [
+          "Influenza aviaria ad alta patogenicita in volatili selvatici H5N1",
+          5
+        ],
+        [
+          "West Nile Fever",
+          4
+        ],
+        [
+          "Aethina tumida / piccolo coleottero dell alveare",
+          2
+        ],
+        [
+          "Leucosi bovina enzootica",
+          2
+        ],
+        [
+          "Rabbia",
+          1
+        ]
+      ],
+      "animal_groups": {
+        "swine": 402,
+        "bees": 2,
+        "bovine": 34,
+        "poultry": 35,
+        "dog": 1
+      },
+      "regions": {
+        "Piemonte": 95,
+        "Liguria": 90,
+        "Emilia-Romagna": 92,
+        "Toscana": 95,
+        "Lombardia": 50,
+        "Sicilia": 1,
+        "Lazio": 3,
+        "Marche": 3,
+        "Puglia": 5,
+        "Friuli-Venezia Giulia": 4,
+        "Veneto": 17,
+        "Umbria": 2,
+        "Sardegna": 12,
+        "Basilicata": 2,
+        "Molise": 1,
+        "Abruzzo": 2
+      },
+      "companion_records": 1,
+      "period_start": "2026-06-04",
+      "period_end": "2026-07-08"
     },
     "wahis": {
       "key": "WAHIS",
-      "status": "empty_or_missing",
-      "records": 0,
+      "status": "active",
+      "records": 2,
       "file": {
-        "exists": false,
-        "path": "data/official_sources/wahis_events.csv"
+        "exists": true,
+        "path": "data/official_sources/wahis_events.csv",
+        "size_bytes": 669,
+        "modified_at": "2026-07-17T11:01:20.295005+00:00"
       },
-      "top_diseases": [],
-      "animal_groups": {},
-      "regions": {},
+      "top_diseases": [
+        [
+          "Peste suina africana",
+          1
+        ],
+        [
+          "Influenza aviaria ad alta patogenicita",
+          1
+        ]
+      ],
+      "animal_groups": {
+        "swine": 1,
+        "poultry": 1
+      },
+      "regions": {
+        "Lombardia": 1,
+        "Veneto": 1
+      },
       "companion_records": 0,
-      "period_start": null,
-      "period_end": null
+      "period_start": "2026-07-04",
+      "period_end": "2026-07-07"
     },
     "izs_benv": {
       "key": "IZS_BENV",
-      "status": "empty_or_missing",
-      "records": 0,
+      "status": "active",
+      "records": 1615,
       "file": {
-        "exists": false,
-        "path": "data/official_sources/izs_benv_events.csv"
+        "exists": true,
+        "path": "data/official_sources/izs_benv_events.csv",
+        "size_bytes": 958254,
+        "modified_at": "2026-07-17T11:01:20.294005+00:00"
       },
-      "top_diseases": [],
-      "animal_groups": {},
-      "regions": {},
-      "companion_records": 0,
-      "period_start": null,
-      "period_end": null
+      "top_diseases": [
+        [
+          "Peste suina africana",
+          905
+        ],
+        [
+          "Idatidosi Echinococcosi",
+          190
+        ],
+        [
+          "Bluetongue",
+          159
+        ],
+        [
+          "Tubercolosi bovina / MTBC",
+          128
+        ],
+        [
+          "Salmonellosi Aviare Non Tifoidee",
+          35
+        ],
+        [
+          "Influenza Aviria Pollame",
+          30
+        ],
+        [
+          "Brucellosi",
+          28
+        ],
+        [
+          "Leptospirosi",
+          18
+        ],
+        [
+          "West Nile Fever",
+          18
+        ],
+        [
+          "Salmonellosi",
+          16
+        ],
+        [
+          "Leishmaniosi",
+          15
+        ],
+        [
+          "Malattia Di Newcastle",
+          14
+        ],
+        [
+          "Febbreq",
+          12
+        ],
+        [
+          "Dermatite Nodulare Contagiosa",
+          10
+        ],
+        [
+          "Influenza aviaria ad alta patogenicita",
+          9
+        ],
+        [
+          "Scrapie",
+          8
+        ],
+        [
+          "Agalassia Contagiosa",
+          5
+        ],
+        [
+          "Peste Americana",
+          5
+        ],
+        [
+          "Anemia Infettiva",
+          3
+        ],
+        [
+          "Carbonchio Ematico",
+          2
+        ]
+      ],
+      "animal_groups": {
+        "ovine": 192,
+        "unknown": 111,
+        "bovine": 323,
+        "caprine": 26,
+        "wildlife": 7,
+        "bees": 6,
+        "dog": 28,
+        "swine": 922
+      },
+      "regions": {
+        "Sardegna": 220,
+        "Piemonte": 48,
+        "Campania": 41,
+        "Calabria": 39,
+        "Abruzzo": 25,
+        "Emilia Romagna": 185,
+        "Friuli Venezia Giulia": 27,
+        "Lombardia": 68,
+        "Sicilia": 56,
+        "Trentino Alto Adige": 13,
+        "Basilicata": 10,
+        "Lazio": 22,
+        "Toscana": 587,
+        "Marche": 25,
+        "Puglia": 23,
+        "Molise": 4,
+        "Veneto": 43,
+        "Umbria": 6,
+        "Liguria": 173
+      },
+      "companion_records": 28,
+      "period_start": "2026-01-05",
+      "period_end": "2026-07-10"
     }
   },
   "territorial_layers": {
-    "status": "empty_or_missing",
-    "records": 0,
+    "status": "active",
+    "records": 339,
     "file": {
-      "exists": false,
-      "path": "data/territorial_layers/territorial_layers.csv"
+      "exists": true,
+      "path": "data/territorial_layers/territorial_layers.csv",
+      "size_bytes": 238071,
+      "modified_at": "2026-07-17T11:01:20.299736+00:00"
     },
-    "categories": {},
-    "sources": {},
-    "regions": {},
-    "provinces": {},
-    "top_labels_by_category": {},
+    "categories": {
+      "vectors": 107,
+      "parasites": 205,
+      "west_nile": 27
+    },
+    "sources": {
+      "VECTORNET_CURATED": 107,
+      "IZS_BENV": 205,
+      "ECDC_CNS_WNV": 3,
+      "CNS_WNV": 14,
+      "AVIS_CNS_WNV": 10
+    },
+    "regions": {
+      "Piemonte": 19,
+      "Lombardia": 34,
+      "Liguria": 7,
+      "Veneto": 27,
+      "Emilia-Romagna": 19,
+      "Toscana": 17,
+      "Lazio": 9,
+      "Campania": 9,
+      "Puglia": 4,
+      "Sicilia": 4,
+      "Sardegna": 188,
+      "Abruzzo": 1,
+      "Friuli Venezia Giulia": 1
+    },
+    "provinces": {
+      "Torino": 8,
+      "Cuneo": 7,
+      "Milano": 9,
+      "Pavia": 9,
+      "Brescia": 9,
+      "Genova": 7,
+      "Verona": 9,
+      "Padova": 9,
+      "Bologna": 8,
+      "Parma": 7,
+      "Firenze": 6,
+      "Grosseto": 4,
+      "Roma": 4,
+      "Napoli": 4,
+      "Caserta": 5,
+      "Bari": 4,
+      "Palermo": 4,
+      "Cagliari": 4,
+      "unknown": 205,
+      "Medio Campidano": 1,
+      "Ferrara": 1,
+      "Rovigo": 1,
+      "Mantova": 1,
+      "Bergamo": 1,
+      "Vercelli": 1,
+      "Verbano-Cusio-Ossola": 1,
+      "Novara": 1,
+      "Alessandria": 1,
+      "Venezia": 1,
+      "Vicenza": 1,
+      "Lodi": 1,
+      "Monza-Brianza": 1,
+      "Modena": 1,
+      "Reggio Emilia": 1,
+      "Piacenza": 1,
+      "Cremona": 1
+    },
+    "top_labels_by_category": {
+      "vectors": [
+        [
+          "Aedes albopictus",
+          18
+        ],
+        [
+          "Rhipicephalus sanguineus",
+          18
+        ],
+        [
+          "Culicoides spp.",
+          18
+        ],
+        [
+          "Phlebotomus perniciosus",
+          17
+        ],
+        [
+          "Ixodes ricinus",
+          11
+        ],
+        [
+          "Aedes koreicus",
+          9
+        ],
+        [
+          "Dermacentor reticulatus",
+          9
+        ],
+        [
+          "Aedes japonicus",
+          7
+        ]
+      ],
+      "parasites": [
+        [
+          "Echinococcus spp.",
+          190
+        ],
+        [
+          "Leishmania infantum",
+          15
+        ]
+      ],
+      "west_nile": [
+        [
+          "West Nile virus",
+          27
+        ]
+      ]
+    },
     "interpretation": {
       "radius_km": "territorial precision / aggregation radius, not biological movement range",
       "count_or_evidence_count": "number of evidence records or curated evidence units, not prevalence",
@@ -98,17 +407,145 @@
   "refresh_artifacts": {
     "benv_refresh_metadata": {
       "file": {
-        "exists": false,
-        "path": "data/official_sources/benv_refresh_metadata.json"
+        "exists": true,
+        "path": "data/official_sources/benv_refresh_metadata.json",
+        "size_bytes": 3088,
+        "modified_at": "2026-07-17T11:01:20.293188+00:00"
       },
-      "content": null
+      "content": {
+        "version": "v160-benv-multidisease-reports",
+        "generated_at": "2026-07-16T23:03:00.278809Z",
+        "input_dir": "data/raw/benv_exports",
+        "input_files": [
+          "data/raw/benv_exports/agalassia_contagiosa_2026_italia.xlsx",
+          "data/raw/benv_exports/anemia_infettiva_2026_italia.xlsx",
+          "data/raw/benv_exports/bluetongue_2026_italia.xlsx",
+          "data/raw/benv_exports/brucellosi_2026_italia.xlsx",
+          "data/raw/benv_exports/carbonchio_ematico_2026_italia.xlsx",
+          "data/raw/benv_exports/dermatite_nodulare_contagiosa_2026_italia.xlsx",
+          "data/raw/benv_exports/febbreQ_2026_italia.xlsx",
+          "data/raw/benv_exports/idatidosi_echinococcosi_2026_italia.xlsx",
+          "data/raw/benv_exports/influenza_aviaria_selvaggina_2026_italia.xlsx",
+          "data/raw/benv_exports/influenza_aviria_pollame_2026_italia.xlsx",
+          "data/raw/benv_exports/leishmaniosi_2026_italia.xlsx",
+          "data/raw/benv_exports/leptospirosi_2026_italia.xlsx",
+          "data/raw/benv_exports/leucosi_bovina_enzootica_2026_italia.xlsx",
+          "data/raw/benv_exports/malattia_di_newcastle_2026_italia.xlsx",
+          "data/raw/benv_exports/malattia_virale_emorragica_2026_italia.xlsx",
+          "data/raw/benv_exports/paratubercolosi_2026_italia.xlsx",
+          "data/raw/benv_exports/peste_americana_2026_italia.xlsx",
+          "data/raw/benv_exports/peste_suina_africana_2026_italia.xlsx",
+          "data/raw/benv_exports/rabbia_2026_italia.xlsx",
+          "data/raw/benv_exports/salmonellosi_2026_italia.xlsx",
+          "data/raw/benv_exports/salmonellosi_aviare_non_tifoidee_2026_italia.xlsx",
+          "data/raw/benv_exports/scrapie_2026_italia.xlsx",
+          "data/raw/benv_exports/tubercolosi_2026_italia.xlsx",
+          "data/raw/benv_exports/tubercolosi_bovina_2026_italia.xlsx",
+          "data/raw/benv_exports/west_nile_fever_2026_italia.xlsx"
+        ],
+        "output": "data/official_sources/izs_benv_events.csv",
+        "records": 1615,
+        "duplicates_skipped": 0,
+        "file_errors": {},
+        "geocoding_report": "data/official_sources/benv_geocoding_report.csv",
+        "import_report": "data/official_sources/benv_import_report.csv",
+        "companion_report": "data/official_sources/benv_companion_report.csv",
+        "geocoding_levels": {
+          "province": 1596,
+          "municipality": 18,
+          "region": 1
+        },
+        "disease_counts": {
+          "Agalassia Contagiosa": 5,
+          "Anemia Infettiva": 3,
+          "Bluetongue": 159,
+          "Brucellosi": 28,
+          "Carbonchio Ematico": 2,
+          "Dermatite Nodulare Contagiosa": 10,
+          "Febbreq": 12,
+          "Idatidosi Echinococcosi": 190,
+          "Influenza aviaria ad alta patogenicita": 9,
+          "Influenza Aviria Pollame": 30,
+          "Leishmaniosi": 15,
+          "Leptospirosi": 18,
+          "Leucosi bovina enzootica": 2,
+          "Malattia Di Newcastle": 14,
+          "Malattia Virale Emorragica": 2,
+          "Tubercolosi bovina / MTBC": 128,
+          "Peste Americana": 5,
+          "Peste suina africana": 905,
+          "Rabbia": 1,
+          "Salmonellosi": 16,
+          "Salmonellosi Aviare Non Tifoidee": 35,
+          "Scrapie": 8,
+          "West Nile Fever": 18
+        },
+        "animal_group_counts": {
+          "ovine": 192,
+          "unknown": 111,
+          "bovine": 323,
+          "caprine": 26,
+          "wildlife": 7,
+          "bees": 6,
+          "dog": 28,
+          "swine": 922
+        }
+      }
     },
     "territorial_refresh_status": {
       "file": {
-        "exists": false,
-        "path": "data/territorial_layers/refresh_status.json"
+        "exists": true,
+        "path": "data/territorial_layers/refresh_status.json",
+        "size_bytes": 1095,
+        "modified_at": "2026-07-17T11:01:20.299736+00:00"
       },
-      "content": null
+      "content": {
+        "version": "v149-extended-vector-preserving-refresh",
+        "generated_at": "2026-07-16T19:03:26.213190+00:00",
+        "sources": [
+          {
+            "path": "data/territorial_layers/mosquito_alert_layers.csv",
+            "rows": 0,
+            "exists": true
+          },
+          {
+            "path": "data/territorial_layers/vectornet_gbif_layers.csv",
+            "rows": 34,
+            "exists": true
+          },
+          {
+            "path": "data/territorial_layers/extended_vector_layers.csv",
+            "rows": 73,
+            "exists": true
+          },
+          {
+            "path": "data/territorial_layers/west_nile_surveillance.csv",
+            "rows": 17,
+            "exists": true
+          },
+          {
+            "path": "data/territorial_layers/esccap_parasites.csv",
+            "rows": 0,
+            "exists": true
+          }
+        ],
+        "rows_total": 124,
+        "categories": {
+          "vectors": 107,
+          "west_nile": 17
+        },
+        "species_counts": {
+          "Aedes albopictus": 18,
+          "Aedes japonicus": 7,
+          "Aedes koreicus": 9,
+          "Ixodes ricinus": 11,
+          "Rhipicephalus sanguineus": 18,
+          "Dermacentor reticulatus": 9,
+          "Phlebotomus perniciosus": 17,
+          "Culicoides spp.": 18,
+          "West Nile virus": 17
+        }
+      }
     },
     "territorial_layers_status_report": {
       "file": {
@@ -119,10 +556,21 @@
     },
     "benv_backend_sync_status": {
       "file": {
-        "exists": false,
-        "path": "data/official_sources/benv_backend_sync_status.json"
+        "exists": true,
+        "path": "data/official_sources/benv_backend_sync_status.json",
+        "size_bytes": 398,
+        "modified_at": "2026-07-17T11:01:20.293188+00:00"
       },
-      "content": null
+      "content": {
+        "version": "v161-backend-sync-trigger",
+        "generated_at": "2026-07-16T23:05:02.213704+00:00",
+        "enabled": false,
+        "base_url": "https://api.render.com/deploy/srv-d981ri6rnols73aob210?key=5Bv0gBG76jE",
+        "endpoint": "/sync/izs-benv/run",
+        "attempts": [],
+        "final_status": "skipped",
+        "message": "Backend sync disabled. Set repository variable VETECTOR_BACKEND_SYNC_ENABLED=true to enable."
+      }
     }
   }
 }
