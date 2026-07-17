@@ -1,0 +1,128 @@
+{
+  "version": "v170-data-sources-status",
+  "generated_at": "2026-07-17T10:56:20.262630+00:00",
+  "official_events": {
+    "adis": {
+      "key": "ADIS",
+      "status": "empty_or_missing",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "data/official_sources/adis_events.csv"
+      },
+      "top_diseases": [],
+      "animal_groups": {},
+      "regions": {},
+      "companion_records": 0,
+      "period_start": null,
+      "period_end": null
+    },
+    "wahis": {
+      "key": "WAHIS",
+      "status": "empty_or_missing",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "data/official_sources/wahis_events.csv"
+      },
+      "top_diseases": [],
+      "animal_groups": {},
+      "regions": {},
+      "companion_records": 0,
+      "period_start": null,
+      "period_end": null
+    },
+    "izs_benv": {
+      "key": "IZS_BENV",
+      "status": "empty_or_missing",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "data/official_sources/izs_benv_events.csv"
+      },
+      "top_diseases": [],
+      "animal_groups": {},
+      "regions": {},
+      "companion_records": 0,
+      "period_start": null,
+      "period_end": null
+    }
+  },
+  "territorial_layers": {
+    "status": "empty_or_missing",
+    "records": 0,
+    "file": {
+      "exists": false,
+      "path": "data/territorial_layers/territorial_layers.csv"
+    },
+    "categories": {},
+    "sources": {},
+    "regions": {},
+    "provinces": {},
+    "top_labels_by_category": {},
+    "interpretation": {
+      "radius_km": "territorial precision / aggregation radius, not biological movement range",
+      "count_or_evidence_count": "number of evidence records or curated evidence units, not prevalence",
+      "territorial_layers": "context layers, not point diagnoses or confirmed clinical cases"
+    }
+  },
+  "catalogs": {
+    "diseases": {
+      "key": "diseases",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "public_html/data/diseases.json"
+      },
+      "status": "empty_or_missing"
+    },
+    "diagnostic_tests": {
+      "key": "diagnostic_tests",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "public_html/data/diagnostic_tests.json"
+      },
+      "status": "empty_or_missing"
+    },
+    "foods_supplements": {
+      "key": "foods_supplements",
+      "records": 0,
+      "file": {
+        "exists": false,
+        "path": "public_html/data/foods_supplements.json"
+      },
+      "status": "empty_or_missing"
+    }
+  },
+  "refresh_artifacts": {
+    "benv_refresh_metadata": {
+      "file": {
+        "exists": false,
+        "path": "data/official_sources/benv_refresh_metadata.json"
+      },
+      "content": null
+    },
+    "territorial_refresh_status": {
+      "file": {
+        "exists": false,
+        "path": "data/territorial_layers/refresh_status.json"
+      },
+      "content": null
+    },
+    "territorial_layers_status_report": {
+      "file": {
+        "exists": false,
+        "path": "data/territorial_layers/territorial_layers_status_report.json"
+      },
+      "content": null
+    },
+    "benv_backend_sync_status": {
+      "file": {
+        "exists": false,
+        "path": "data/official_sources/benv_backend_sync_status.json"
+      },
+      "content": null
+    }
+  }
+}
