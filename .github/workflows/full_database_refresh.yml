@@ -34,14 +34,24 @@ jobs:
         run: |
           python scripts/refresh_all_databases.py
 
+      - name: Verify full refresh JSON report exists
+        run: |
+          test -s data/status/full_refresh_report.json
+          test -s data/status/full_refresh_report.csv
+          echo "full_refresh_report.json and full_refresh_report.csv generated."
+
       - name: Commit database outputs if changed
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Refresh vet.ector databases status"
-          file_pattern: |
-            data/**/*.csv
-            data/**/*.json
-            public_html/data/*.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/status/full_refresh_report.json data/status/full_refresh_report.csv data/status/.gitkeep
+          git add data/**/*.csv data/**/*.json public_html/data/*.json || true
+          if git diff --cached --quiet; then
+            echo "No database output changes to commit."
+          else
+            git commit -m "Refresh vet.ector databases status"
+            git push
+          fi
 
       - name: Trigger Render deploy hook if configured, non-blocking
         env:
