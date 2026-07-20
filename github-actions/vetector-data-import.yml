@@ -1,0 +1,54 @@
+name: vetector-data-import
+
+on:
+  schedule:
+    - cron: "15 3 * * *"   # CNS WNV daily, 03:15 UTC
+    - cron: "45 4 * * 1"   # BENV weekly, Monday 04:45 UTC
+  workflow_dispatch:
+    inputs:
+      run_cns_wnv:
+        description: "Run CNS WNV import"
+        type: boolean
+        default: true
+      run_benv:
+        description: "Run BENV / IZS import"
+        type: boolean
+        default: false
+
+jobs:
+  import-cns-wnv:
+    if: github.event_name == 'schedule' || inputs.run_cns_wnv == true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vetector_database_automation_benv_cns_v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r importers/requirements.txt
+      - name: Import CNS WNV
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PROVINCE_CENTROIDS_JSON: data/province_centroids_italy_minimal.json
+        run: python importers/import_cns_wnv.py
+
+  import-benv-izs:
+    if: github.event_name == 'schedule' || inputs.run_benv == true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vetector_database_automation_benv_cns_v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r importers/requirements.txt
+      - name: Import BENV / IZS
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BENV_CSV_URL: ${{ vars.BENV_CSV_URL }}
+          PROVINCE_CENTROIDS_JSON: data/province_centroids_italy_minimal.json
+        run: python importers/import_benv_izs.py

@@ -1,0 +1,67 @@
+services:
+  - type: web
+    name: vetector-backend-api
+    runtime: node
+    plan: starter
+    rootDir: vetector_backend_api_v2
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://vet.ector.nibbiotec.com
+      - key: DEFAULT_RADIUS_KM
+        value: "50"
+      - key: MAX_RADIUS_KM
+        value: "250"
+      - key: DEFAULT_DAYS
+        value: "180"
+      - key: MAX_DAYS
+        value: "730"
+      - key: MAX_RESULTS
+        value: "1000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetector-postgres
+          property: connectionString
+
+  - type: cron
+    name: vetector-import-cns-wnv-daily
+    runtime: python
+    plan: starter
+    rootDir: vetector_database_automation_benv_cns_v1
+    schedule: "15 3 * * *"
+    buildCommand: pip install -r importers/requirements.txt
+    startCommand: python importers/import_cns_wnv.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetector-postgres
+          property: connectionString
+      - key: PROVINCE_CENTROIDS_JSON
+        value: data/province_centroids_italy_minimal.json
+
+  - type: cron
+    name: vetector-import-benv-weekly
+    runtime: python
+    plan: starter
+    rootDir: vetector_database_automation_benv_cns_v1
+    schedule: "45 4 * * 1"
+    buildCommand: pip install -r importers/requirements.txt
+    startCommand: python importers/import_benv_izs.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vetector-postgres
+          property: connectionString
+      - key: BENV_CSV_URL
+        sync: false
+      - key: PROVINCE_CENTROIDS_JSON
+        value: data/province_centroids_italy_minimal.json
+
+databases:
+  - name: vetector-postgres
+    plan: starter
+    databaseName: vetector
+    user: vetector

@@ -1,0 +1,14 @@
+### Health
+GET {{API_BASE_URL}}/health
+
+### Cities
+GET {{API_BASE_URL}}/cities
+
+### Events around Torino
+GET {{API_BASE_URL}}/events?lat=45.0703&lon=7.6869&radius_km=50&days=180&animal_filter=all
+
+### Territorial layers around Torino
+GET {{API_BASE_URL}}/territorial-layers?lat=45.0703&lon=7.6869&radius_km=50&category=all
+
+### Import status
+GET {{API_BASE_URL}}/import/status

@@ -1,0 +1,11 @@
+# vet.ector data automation cron examples
+# Requires DATABASE_URL, BENV_CSV_URL and working directory configured in the environment.
+
+# CNS WNV daily during vector season
+15 3 * * * cd /opt/vetector/vetector_database_automation_benv_cns_v1 && /usr/bin/python3 importers/import_cns_wnv.py >> /var/log/vetector-import-cns.log 2>&1
+
+# BENV / IZS weekly from curated CSV/export
+45 4 * * 1 cd /opt/vetector/vetector_database_automation_benv_cns_v1 && /usr/bin/python3 importers/import_benv_izs.py >> /var/log/vetector-import-benv.log 2>&1
+
+# API smoke test every 30 minutes
+*/30 * * * * /usr/bin/curl -fsS "$API_BASE_URL/health" >> /var/log/vetector-api-health.log 2>&1
