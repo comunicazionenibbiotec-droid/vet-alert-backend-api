@@ -1,0 +1,16 @@
+{
+  "Torino": {"region": "Piemonte", "lat": 45.0703, "lon": 7.6869},
+  "Modena": {"region": "Emilia-Romagna", "lat": 44.6471, "lon": 10.9252},
+  "Parma": {"region": "Emilia-Romagna", "lat": 44.8015, "lon": 10.3279},
+  "Piacenza": {"region": "Emilia-Romagna", "lat": 45.0526, "lon": 9.6929},
+  "Rovigo": {"region": "Veneto", "lat": 45.0698, "lon": 11.7902},
+  "Lodi": {"region": "Lombardia", "lat": 45.3097, "lon": 9.5037},
+  "Pavia": {"region": "Lombardia", "lat": 45.1847, "lon": 9.1582},
+  "Cremona": {"region": "Lombardia", "lat": 45.1332, "lon": 10.0227},
+  "Padova": {"region": "Veneto", "lat": 45.4064, "lon": 11.8768},
+  "Venezia": {"region": "Veneto", "lat": 45.4408, "lon": 12.3155},
+  "Oristano": {"region": "Sardegna", "lat": 39.9038, "lon": 8.5926},
+  "Latina": {"region": "Lazio", "lat": 41.4676, "lon": 12.9037},
+  "Mantova": {"region": "Lombardia", "lat": 45.1564, "lon": 10.7914},
+  "Reggio Emilia": {"region": "Emilia-Romagna", "lat": 44.6983, "lon": 10.6312}
+}
