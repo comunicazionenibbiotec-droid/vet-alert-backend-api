@@ -1,0 +1,77 @@
+name: vet.ector full database refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 2 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-all-databases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl requests
+
+      - name: Run full database refresh controller
+        env:
+          VETECTOR_FULL_REFRESH_RUN_BENV: ${{ vars.VETECTOR_FULL_REFRESH_RUN_BENV || 'true' }}
+          VETECTOR_FULL_REFRESH_RUN_TERRITORIAL: ${{ vars.VETECTOR_FULL_REFRESH_RUN_TERRITORIAL || 'true' }}
+          VETECTOR_FULL_REFRESH_RUN_DISEASES: ${{ vars.VETECTOR_FULL_REFRESH_RUN_DISEASES || 'true' }}
+          VETECTOR_FULL_REFRESH_RUN_STATUS: ${{ vars.VETECTOR_FULL_REFRESH_RUN_STATUS || 'true' }}
+        run: |
+          python scripts/refresh_all_databases.py
+
+      - name: Commit database outputs if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Refresh vet.ector databases status"
+          file_pattern: |
+            data/**/*.csv
+            data/**/*.json
+            public_html/data/*.json
+
+      - name: Trigger Render deploy hook if configured, non-blocking
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "No RENDER_DEPLOY_HOOK_URL configured; skipping Render deploy."
+            exit 0
+          fi
+          echo "Triggering Render deploy hook (non-blocking)..."
+          set +e
+          curl -sS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          code=$?
+          set -e
+          if [ "$code" -ne 0 ]; then
+            echo "WARNING: Render deploy hook failed with exit code $code. Continuing."
+          else
+            echo "Render deploy hook triggered."
+          fi
+
+      - name: Optional backend sync after deploy wait
+        if: ${{ vars.VETECTOR_BACKEND_SYNC_ENABLED == 'true' }}
+        env:
+          VETECTOR_BACKEND_BASE_URL: ${{ vars.VETECTOR_BACKEND_BASE_URL || 'https://vet-alert-api-v2.onrender.com' }}
+          VETECTOR_AFTER_DEPLOY_WAIT_SECONDS: ${{ vars.VETECTOR_AFTER_DEPLOY_WAIT_SECONDS || '180' }}
+        run: |
+          echo "Waiting $VETECTOR_AFTER_DEPLOY_WAIT_SECONDS seconds before optional backend sync..."
+          sleep "$VETECTOR_AFTER_DEPLOY_WAIT_SECONDS"
+          set +e
+          curl -sS -X POST "$VETECTOR_BACKEND_BASE_URL/sync/izs-benv/run"
+          curl -sS -X POST "$VETECTOR_BACKEND_BASE_URL/sync/territorial-layers/all/run"
+          set -e
+          echo "Optional backend sync attempted."
