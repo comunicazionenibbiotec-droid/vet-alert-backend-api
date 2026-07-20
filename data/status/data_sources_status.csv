@@ -1,8 +1,8 @@
 section,key,records,status,file_path,notes
-official_events,adis,0,empty_or_missing,data/official_sources/adis_events.csv,companion_records=0
-official_events,wahis,0,empty_or_missing,data/official_sources/wahis_events.csv,companion_records=0
-official_events,izs_benv,0,empty_or_missing,data/official_sources/izs_benv_events.csv,companion_records=0
-territorial_layers,all,0,empty_or_missing,data/territorial_layers/territorial_layers.csv,{}
-catalogs,diseases,0,empty_or_missing,public_html/data/diseases.json,
+official_events,adis,474,active,data/official_sources/adis_events.csv,companion_records=1
+official_events,wahis,2,active,data/official_sources/wahis_events.csv,companion_records=0
+official_events,izs_benv,1615,active,data/official_sources/izs_benv_events.csv,companion_records=28
+territorial_layers,all,339,active,data/territorial_layers/territorial_layers.csv,"{""vectors"": 107, ""parasites"": 205, ""west_nile"": 27}"
+catalogs,diseases,42,active,public_html/data/diseases.json,
 catalogs,diagnostic_tests,0,empty_or_missing,public_html/data/diagnostic_tests.json,
 catalogs,foods_supplements,0,empty_or_missing,public_html/data/foods_supplements.json,
