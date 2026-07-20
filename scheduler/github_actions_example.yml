@@ -1,0 +1,26 @@
+name: vetector-data-import
+
+on:
+  schedule:
+    - cron: "15 3 * * *"   # daily 03:15 UTC
+  workflow_dispatch:
+
+jobs:
+  import-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r importers/requirements.txt
+      - name: Import CNS WNV
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python importers/import_cns_wnv.py
+      - name: Import BENV / IZS from curated CSV
+        if: ${{ vars.BENV_CSV_URL != '' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BENV_CSV_URL: ${{ vars.BENV_CSV_URL }}
+        run: python importers/import_benv_izs.py
