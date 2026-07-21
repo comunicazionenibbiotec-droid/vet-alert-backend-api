@@ -718,6 +718,76 @@ def run_all_territorial_layers_sync(x_sync_token:str|None=Header(default=None)):
         log_sync("TERRITORIAL_LAYERS_ALL","error",str(e),0,0,0,started)
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# --- v8: merge real vector occurrence data into /territorial-layers ---
+def _vector_occurrence_layer(row, distance_km=None):
+    scientific = row.get("scientific_name") or "Vector occurrence"
+    focus = row.get("pathogen_focus") or ""
+    leish = "leish" in f"{scientific} {focus}".lower() or str(scientific).lower().startswith("phlebotomus")
+    uncertainty = row.get("coordinate_uncertainty_m")
+    try:
+        radius_km = max(5, min(25, float(uncertainty) / 1000.0)) if uncertainty is not None else 8
+    except Exception:
+        radius_km = 8
+    return {
+        "id": "vector-occurrence-layer-" + str(row.get("id")),
+        "external_id": row.get("id"),
+        "category": "vectors",
+        "label": scientific,
+        "scientific_name": scientific,
+        "data_type": "Vector occurrence / leishmaniasis vector" if leish else "Vector occurrence",
+        "count": 1,
+        "count_label": "occurrence record",
+        "period": row.get("event_date") or str(row.get("year") or "n/d"),
+        "period_start": row.get("event_date"),
+        "period_end": row.get("event_date"),
+        "country": row.get("country") or "Italy",
+        "region": row.get("region") or "",
+        "province": row.get("province") or "",
+        "location": row.get("locality") or row.get("municipality") or row.get("province") or row.get("region") or "",
+        "lat": row.get("lat"),
+        "lon": row.get("lon"),
+        "radius_km": radius_km,
+        "aggregation_level": "occurrence_point",
+        "source": row.get("source") or "VectorNet / GBIF",
+        "display_source": row.get("source") or "VectorNet / GBIF",
+        "url_source": row.get("source_url") or "https://www.vectornetdata.org/",
+        "notes": "Real vector occurrence from VectorNet/GBIF; context data, not a disease diagnosis." + (" High-priority leishmaniasis vector." if leish else ""),
+        "distance_km": None if distance_km is None else round(distance_km, 2),
+        "confidence_score": row.get("confidence_score"),
+    }
+
+def vector_occurrence_layers_for_area(lat=None, lon=None, radius_km=100, species="all", focus="all", leishmaniasis=False, source=None, limit=1500):
+    init_vector_surveillance_db()
+    species_l = str(species or "all").lower().strip()
+    focus_l = str(focus or "all").lower().strip()
+    source_l = str(source or "").lower().strip()
+    with connect() as conn:
+        try:
+            rows = [dict(r) for r in conn.execute("SELECT * FROM vector_occurrences ORDER BY COALESCE(event_date,'') DESC, COALESCE(year,0) DESC LIMIT ?", (limit,)).fetchall()]
+        except Exception:
+            rows = []
+    out=[]
+    for row in rows:
+        if row.get("lat") is None or row.get("lon") is None: continue
+        hay = f"{row.get('scientific_name','')} {row.get('pathogen_focus','')} {row.get('common_group','')} {row.get('source','')}".lower()
+        if species_l and species_l != "all" and species_l not in str(row.get("scientific_name","")).lower(): continue
+        if focus_l and focus_l != "all" and focus_l not in hay: continue
+        if leishmaniasis and "leish" not in hay and "phlebotomus" not in hay: continue
+        if source_l and source_l != "all" and source_l not in hay: continue
+        distance=None
+        if lat is not None and lon is not None:
+            distance = haversine_km(float(lat), float(lon), float(row["lat"]), float(row["lon"]))
+            # include occurrence if point is inside selected radius plus its uncertainty radius
+            try:
+                uncertainty_km = max(0, float(row.get("coordinate_uncertainty_m") or 0) / 1000.0)
+            except Exception:
+                uncertainty_km = 0
+            if distance > float(radius_km) + min(25, uncertainty_km): continue
+        out.append(_vector_occurrence_layer(row, distance))
+    return out
+# --- end v8 real vector layers ---
+
 @app.get("/territorial-layers/status")
 def get_territorial_layers_public_status():
     status_path="data/territorial_layers/refresh_status.json"
@@ -726,11 +796,26 @@ def get_territorial_layers_public_status():
     return {"status":"ok","csv":csv_status,"refresh":status}
 
 @app.get("/territorial-layers")
-def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None),species:str=Query("all"),focus:str=Query("all"),leishmaniasis:bool=Query(False)):
+def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None),species:str=Query("all"),focus:str=Query("all"),leishmaniasis:bool=Query(False),include_vector_occurrences:bool=Query(True)):
     layers=load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
     out=filter_territorial_layers(layers, lat=lat, lon=lon, radius_km=radius_km, category=category, days=days, source=source, distance_fn=haversine_km, parse_date_fn=parse_date)
     out=[layer for layer in out if _layer_matches_vector_filters(layer, species=species, focus=focus, leishmaniasis=leishmaniasis)]
-    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis}
+    vector_count = 0
+    if include_vector_occurrences and str(category or "all").lower() in ("all", "vectors"):
+        vector_layers = vector_occurrence_layers_for_area(lat=lat, lon=lon, radius_km=radius_km, species=species, focus=focus, leishmaniasis=leishmaniasis, source=source)
+        out.extend(vector_layers)
+        vector_count = len(vector_layers)
+    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis,"vector_occurrence_layers":vector_count,"include_vector_occurrences":include_vector_occurrences}
+
+@app.get("/territorial-layers/vector-occurrences/status")
+def get_territorial_vector_occurrence_layer_status():
+    init_vector_surveillance_db()
+    with connect() as conn:
+        total=conn.execute("SELECT COUNT(*) AS c FROM vector_occurrences").fetchone()["c"]
+        leish=conn.execute("SELECT COUNT(*) AS c FROM vector_occurrences WHERE LOWER(COALESCE(scientific_name,'') || ' ' || COALESCE(pathogen_focus,'')) LIKE '%leish%' OR LOWER(COALESCE(scientific_name,'')) LIKE 'phlebotomus%'").fetchone()["c"]
+        by_species=[dict(r) for r in conn.execute("SELECT scientific_name, COUNT(*) AS count FROM vector_occurrences GROUP BY scientific_name ORDER BY count DESC").fetchall()]
+    return {"status":"ok","total_occurrences":total,"leishmaniasis_relevant_occurrences":leish,"by_species":by_species}
+
 @app.get("/territorial-layers/export")
 def export_territorial_layers(category:str=Query("all"),format:str=Query("csv")):
     layers=filter_territorial_layers(load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH), category=category, distance_fn=haversine_km, parse_date_fn=parse_date)
