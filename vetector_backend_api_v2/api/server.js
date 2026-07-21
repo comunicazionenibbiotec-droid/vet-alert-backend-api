@@ -10,6 +10,9 @@ import citiesRouter from './routes/cities.js';
 import eventsRouter from './routes/events.js';
 import importStatusRouter from './routes/importStatus.js';
 import territorialLayersRouter from './routes/territorialLayers.js';
+import vectorOccurrencesRouter from './routes/vectorOccurrences.js';
+import vectorSpeciesRouter from './routes/vectorSpecies.js';
+
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -42,6 +45,8 @@ app.use('/cities', citiesRouter);
 app.use('/events', eventsRouter);
 app.use('/territorial-layers', territorialLayersRouter);
 app.use('/import/status', importStatusRouter);
+app.use('/vector-occurrences', vectorOccurrencesRouter);
+app.use('/vector-species', vectorSpeciesRouter);
 
 app.use(notFound);
 app.use(errorHandler);
