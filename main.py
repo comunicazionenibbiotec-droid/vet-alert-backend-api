@@ -435,12 +435,148 @@ def _layer_matches_vector_filters(layer, species="all", focus="all", leishmanias
     return True
 # --- end v6 vector endpoints support ---
 
+
+# --- v7 VectorNet/GBIF occurrence sync for SQLite backend ---
+VECTORNET_GBIF_API = os.getenv("VECTORNET_GBIF_API", "https://api.gbif.org/v1/occurrence/search")
+VECTORNET_PUBLISHER_KEY = os.getenv("VECTORNET_PUBLISHER_KEY", "8f9f9814-a595-4bc3-8631-776ba3c9c62e")
+VECTORNET_COUNTRY = os.getenv("VECTORNET_COUNTRY", "IT")
+VECTORNET_LIMIT_PER_SPECIES = int(os.getenv("VECTORNET_LIMIT_PER_SPECIES", "200"))
+VECTORNET_MAX_PAGES_PER_SPECIES = int(os.getenv("VECTORNET_MAX_PAGES_PER_SPECIES", "2"))
+VECTORNET_SYNC_INTERVAL_HOURS = int(os.getenv("VECTORNET_SYNC_INTERVAL_HOURS", "168"))
+VECTORNET_DEFAULT_SPECIES = ["Phlebotomus perniciosus","Phlebotomus perfiliewi","Phlebotomus neglectus","Phlebotomus ariasi","Phlebotomus mascitii","Phlebotomus papatasi","Phlebotomus sergenti","Phlebotomus tobbi"]
+
+def _stable_vector_id(*parts):
+    import hashlib
+    return hashlib.sha1("|".join(str(p or "").lower().strip() for p in parts).encode("utf-8")).hexdigest()[:32]
+
+def _gbif_get_json(params):
+    import urllib.parse, urllib.request
+    query = urllib.parse.urlencode(params)
+    req = urllib.request.Request(VECTORNET_GBIF_API + "?" + query, headers={"User-Agent":"vetector-fastapi-vectornet-sync/7.0"})
+    with urllib.request.urlopen(req, timeout=45) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+def _vector_group_for_species(scientific_name:str):
+    s=str(scientific_name or "").lower()
+    if s.startswith("phlebotomus"): return "sand_fly"
+    if "culex" in s or "aedes" in s: return "mosquito"
+    if "ixodes" in s: return "tick"
+    return "vector"
+
+def _vector_focus_for_species(scientific_name:str):
+    s=str(scientific_name or "").lower()
+    if s.startswith("phlebotomus"):
+        if "sergenti" in s: return "Leishmania tropica / leishmaniasis vector"
+        return "Leishmania infantum / leishmaniasis vector"
+    return None
+
+def upsert_vector_occurrence(row):
+    init_vector_surveillance_db()
+    with connect() as conn:
+        existing=conn.execute("SELECT id FROM vector_occurrences WHERE id=?", (row["id"],)).fetchone()
+        conn.execute("""INSERT INTO vector_occurrences(
+            id, scientific_name, common_group, pathogen_focus, occurrence_status,
+            event_date, year, country, region, province, municipality, locality,
+            lat, lon, coordinate_uncertainty_m, source, source_dataset, source_url,
+            license, confidence_score, raw_payload, updated_at
+        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET
+            scientific_name=excluded.scientific_name,
+            common_group=excluded.common_group,
+            pathogen_focus=excluded.pathogen_focus,
+            occurrence_status=excluded.occurrence_status,
+            event_date=excluded.event_date,
+            year=excluded.year,
+            country=excluded.country,
+            region=excluded.region,
+            province=excluded.province,
+            municipality=excluded.municipality,
+            locality=excluded.locality,
+            lat=excluded.lat,
+            lon=excluded.lon,
+            coordinate_uncertainty_m=excluded.coordinate_uncertainty_m,
+            source=excluded.source,
+            source_dataset=excluded.source_dataset,
+            source_url=excluded.source_url,
+            license=excluded.license,
+            confidence_score=excluded.confidence_score,
+            raw_payload=excluded.raw_payload,
+            updated_at=CURRENT_TIMESTAMP""", (
+            row.get("id"), row.get("scientific_name"), row.get("common_group"), row.get("pathogen_focus"), row.get("occurrence_status"),
+            row.get("event_date"), row.get("year"), row.get("country"), row.get("region"), row.get("province"), row.get("municipality"), row.get("locality"),
+            row.get("lat"), row.get("lon"), row.get("coordinate_uncertainty_m"), row.get("source"), row.get("source_dataset"), row.get("source_url"),
+            row.get("license"), row.get("confidence_score"), row.get("raw_payload")
+        ))
+        conn.commit()
+    return "updated" if existing else "inserted"
+
+def _normalize_gbif_vector_occurrence(item, requested_species):
+    lat=item.get("decimalLatitude"); lon=item.get("decimalLongitude")
+    if lat is None or lon is None: return None
+    scientific=item.get("scientificName") or requested_species
+    gbif_id=item.get("key") or item.get("gbifID") or item.get("occurrenceID")
+    return {
+        "id":"gbif-vector-" + _stable_vector_id(gbif_id, scientific, lat, lon),
+        "scientific_name":scientific,
+        "common_group":_vector_group_for_species(scientific),
+        "pathogen_focus":_vector_focus_for_species(scientific),
+        "occurrence_status":item.get("occurrenceStatus") or "PRESENT",
+        "event_date":str(item.get("eventDate") or "")[:10] or None,
+        "year":item.get("year"),
+        "country":item.get("country") or "Italy",
+        "region":item.get("stateProvince"),
+        "province":item.get("county"),
+        "municipality":item.get("municipality"),
+        "locality":item.get("locality"),
+        "lat":float(lat),
+        "lon":float(lon),
+        "coordinate_uncertainty_m":item.get("coordinateUncertaintyInMeters"),
+        "source":"VectorNet / GBIF",
+        "source_dataset":item.get("datasetName") or item.get("datasetKey"),
+        "source_url":"https://www.gbif.org/occurrence/" + str(gbif_id) if gbif_id else "https://www.gbif.org/",
+        "license":item.get("license"),
+        "confidence_score":90 if str(scientific).lower().startswith("phlebotomus") else 75,
+        "raw_payload":json.dumps(item, ensure_ascii=False),
+    }
+
+def sync_vectornet_gbif_occurrences(species_list=None, limit_per_species=None, max_pages=None):
+    init_vector_surveillance_db(); seed_leishmaniasis_vector_species()
+    species_list = species_list or [s.strip() for s in os.getenv("VECTORNET_SPECIES", ",".join(VECTORNET_DEFAULT_SPECIES)).split(",") if s.strip()]
+    limit_per_species = int(limit_per_species or VECTORNET_LIMIT_PER_SPECIES)
+    max_pages = int(max_pages or VECTORNET_MAX_PAGES_PER_SPECIES)
+    started=now_iso(); fetched=inserted=updated=skipped=0
+    try:
+        for species in species_list:
+            offset=0; pages=0
+            while offset < limit_per_species and pages < max_pages:
+                page_limit=min(300, limit_per_species-offset)
+                params={"country":VECTORNET_COUNTRY,"scientificName":species,"hasCoordinate":"true","limit":page_limit,"offset":offset}
+                if VECTORNET_PUBLISHER_KEY: params["publishingOrg"] = VECTORNET_PUBLISHER_KEY
+                payload=_gbif_get_json(params)
+                batch=payload.get("results", [])
+                fetched += len(batch)
+                if not batch: break
+                for item in batch:
+                    row=_normalize_gbif_vector_occurrence(item, species)
+                    if not row:
+                        skipped += 1; continue
+                    status=upsert_vector_occurrence(row)
+                    inserted += status=="inserted"; updated += status=="updated"
+                offset += len(batch); pages += 1
+                if payload.get("endOfRecords"): break
+        log_sync("VECTORNET_GBIF_OCCURRENCES", "success", "VectorNet/GBIF occurrence sync completed", fetched, inserted, updated, started)
+        return {"status":"success","source":"VECTORNET_GBIF_OCCURRENCES","species":species_list,"fetched":fetched,"inserted":inserted,"updated":updated,"skipped":skipped}
+    except Exception as e:
+        log_sync("VECTORNET_GBIF_OCCURRENCES", "error", str(e), fetched, inserted, updated, started)
+        raise
+# --- end v7 VectorNet/GBIF sync ---
+
 @app.on_event("startup")
 def startup():
     init_db(); init_vector_surveillance_db(); seed_leishmaniasis_vector_species(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events(); sync_myvbdmap_events()
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
-        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.start()
+        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.add_job(sync_vectornet_gbif_occurrences,"interval",hours=VECTORNET_SYNC_INTERVAL_HOURS,id="vectornet_gbif_occurrences_sync",replace_existing=True); scheduler.start()
 @app.on_event("shutdown")
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
@@ -747,6 +883,24 @@ def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_3
 def demo_purge(older_than_days: int | None = Query(None, ge=1, le=3650)):
     with connect() as conn: return purge_demo_events_sqlite(conn, table_name="events", older_than_days=older_than_days)
 
+
+
+@app.post("/sync/vectornet-gbif-occurrences/run")
+def run_vectornet_gbif_occurrence_sync(x_sync_token:str|None=Header(default=None), limit_per_species:int=Query(200,ge=1,le=2000), max_pages:int=Query(2,ge=1,le=20)):
+    require_sync_token(x_sync_token)
+    try:
+        return sync_vectornet_gbif_occurrences(limit_per_species=limit_per_species, max_pages=max_pages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/sync/vectornet-gbif-occurrences/status")
+def get_vectornet_gbif_occurrence_status():
+    init_vector_surveillance_db()
+    with connect() as conn:
+        row=conn.execute("SELECT * FROM sync_log WHERE source='VECTORNET_GBIF_OCCURRENCES' ORDER BY id DESC LIMIT 1").fetchone()
+        total=conn.execute("SELECT COUNT(*) AS c FROM vector_occurrences").fetchone()["c"]
+        by_species=[dict(r) for r in conn.execute("SELECT scientific_name, COUNT(*) AS count FROM vector_occurrences GROUP BY scientific_name ORDER BY count DESC").fetchall()]
+    return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row), "total_occurrences": total, "by_species": by_species}
 
 @app.get("/vector-species")
 def get_vector_species(leishmaniasis:bool=Query(False), group:str=Query("all"), focus:str=Query("all"), limit:int=Query(200,ge=1,le=1000)):
