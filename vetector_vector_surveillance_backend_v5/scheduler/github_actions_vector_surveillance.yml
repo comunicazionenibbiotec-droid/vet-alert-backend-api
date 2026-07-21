@@ -1,0 +1,56 @@
+name: vetector-vector-surveillance-import
+
+on:
+  schedule:
+    - cron: "25 2 * * 1"   # VectorNet / GBIF weekly, Monday 02:25 UTC
+    - cron: "15 3 * * *"   # CNS WNV daily during vector season
+  workflow_dispatch:
+    inputs:
+      run_vectornet:
+        type: boolean
+        default: true
+      run_cns_wnv:
+        type: boolean
+        default: true
+
+jobs:
+  import-vectornet:
+    if: github.event_name == 'schedule' || inputs.run_vectornet == true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vetector_vector_surveillance_v5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r importers/requirements.txt
+      - name: Import VectorNet / GBIF occurrences
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          VECTORNET_PUBLISHER_KEY: ${{ vars.VECTORNET_PUBLISHER_KEY }}
+          VECTORNET_LIMIT_PER_SPECIES: "500"
+        run: python importers/import_vectornet_gbif.py
+      - name: Rebuild aggregated vector layers
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: psql "$DATABASE_URL" -f importers/rebuild_vector_layers_from_occurrences.sql
+
+  import-cns-wnv:
+    if: github.event_name == 'schedule' || inputs.run_cns_wnv == true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vetector_vector_surveillance_v5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r importers/requirements.txt
+      - name: Import CNS WNV prevention areas
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PROVINCE_CENTROIDS_JSON: data/province_centroids_italy_minimal.json
+        run: python importers/import_cns_wnv_v5.py
