@@ -225,9 +225,219 @@ def populate_demo_365(count=280):
         r=upsert_event(row); ins+=r=="inserted"; upd+=r=="updated"
     log_sync("demo_365","success",f"Demo 365 populated count={count}",count,ins,upd,now_iso()); return {"status":"success","inserted":ins,"updated":upd,"count":count}
 
+
+# --- v6 FastAPI/SQLite vector surveillance endpoints ---
+LEISHMANIASIS_VECTOR_SPECIES = [
+    {
+        "id": "phlebotomus_perniciosus",
+        "scientific_name": "Phlebotomus perniciosus",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "known_or_primary_vector",
+        "priority": 1,
+        "notes": "High priority for the leishmaniasis pilot in Italy.",
+        "source": "ECDC VectorNet / GBIF / literature",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_perfiliewi",
+        "scientific_name": "Phlebotomus perfiliewi",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "known_or_suspected_vector",
+        "priority": 2,
+        "notes": "Priority sand fly species included in ECDC phlebotomine maps.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_neglectus",
+        "scientific_name": "Phlebotomus neglectus",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "known_or_suspected_vector",
+        "priority": 3,
+        "notes": "Priority sand fly species for leishmaniasis context.",
+        "source": "ECDC VectorNet / literature",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_ariasi",
+        "scientific_name": "Phlebotomus ariasi",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "known_or_suspected_vector",
+        "priority": 4,
+        "notes": "Priority sand fly species included in ECDC phlebotomine maps.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_mascitii",
+        "scientific_name": "Phlebotomus mascitii",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "possible_vector_or_presence_indicator",
+        "priority": 5,
+        "notes": "Use as context layer until expert veterinary validation.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_papatasi",
+        "scientific_name": "Phlebotomus papatasi",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania spp. / phleboviruses",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "vector_relevance_mediterranean",
+        "priority": 6,
+        "notes": "Relevant for Mediterranean vector surveillance context.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_sergenti",
+        "scientific_name": "Phlebotomus sergenti",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania tropica",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "vector_relevance_mediterranean",
+        "priority": 7,
+        "notes": "Monitor for broader leishmaniasis context.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+    {
+        "id": "phlebotomus_tobbi",
+        "scientific_name": "Phlebotomus tobbi",
+        "common_group": "sand_fly",
+        "pathogen_focus": "Leishmania infantum",
+        "is_leishmaniasis_vector": 1,
+        "vector_status": "vector_relevance_mediterranean",
+        "priority": 8,
+        "notes": "Monitor for wider Mediterranean context.",
+        "source": "ECDC VectorNet",
+        "source_url": "https://www.ecdc.europa.eu/en/disease-vectors/surveillance-and-disease-data/phlebotomine-maps",
+    },
+]
+
+def init_vector_surveillance_db():
+    with connect() as conn:
+        conn.execute("""CREATE TABLE IF NOT EXISTS vector_species_catalog(
+            id TEXT PRIMARY KEY,
+            scientific_name TEXT NOT NULL,
+            common_group TEXT NOT NULL,
+            pathogen_focus TEXT,
+            is_leishmaniasis_vector INTEGER DEFAULT 0,
+            vector_status TEXT,
+            priority INTEGER DEFAULT 100,
+            notes TEXT,
+            source TEXT,
+            source_url TEXT,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS vector_occurrences(
+            id TEXT PRIMARY KEY,
+            scientific_name TEXT NOT NULL,
+            common_group TEXT,
+            pathogen_focus TEXT,
+            occurrence_status TEXT,
+            event_date TEXT,
+            year INTEGER,
+            country TEXT DEFAULT 'Italy',
+            region TEXT,
+            province TEXT,
+            municipality TEXT,
+            locality TEXT,
+            lat REAL,
+            lon REAL,
+            coordinate_uncertainty_m REAL,
+            source TEXT,
+            source_dataset TEXT,
+            source_url TEXT,
+            license TEXT,
+            confidence_score INTEGER DEFAULT 70,
+            raw_payload TEXT,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )""")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_vector_occurrences_species ON vector_occurrences(scientific_name)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_vector_occurrences_focus ON vector_occurrences(pathogen_focus)")
+        conn.commit()
+
+def seed_leishmaniasis_vector_species():
+    with connect() as conn:
+        for row in LEISHMANIASIS_VECTOR_SPECIES:
+            conn.execute("""INSERT INTO vector_species_catalog(
+                id, scientific_name, common_group, pathogen_focus,
+                is_leishmaniasis_vector, vector_status, priority,
+                notes, source, source_url, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET
+                scientific_name=excluded.scientific_name,
+                common_group=excluded.common_group,
+                pathogen_focus=excluded.pathogen_focus,
+                is_leishmaniasis_vector=excluded.is_leishmaniasis_vector,
+                vector_status=excluded.vector_status,
+                priority=excluded.priority,
+                notes=excluded.notes,
+                source=excluded.source,
+                source_url=excluded.source_url,
+                updated_at=CURRENT_TIMESTAMP""", (
+                row["id"], row["scientific_name"], row["common_group"], row["pathogen_focus"],
+                row["is_leishmaniasis_vector"], row["vector_status"], row["priority"],
+                row["notes"], row["source"], row["source_url"]
+            ))
+        conn.commit()
+
+def _vector_occurrence_to_public(row, distance_km=None):
+    out = {
+        "id": row.get("id"),
+        "scientific_name": row.get("scientific_name"),
+        "common_group": row.get("common_group"),
+        "pathogen_focus": row.get("pathogen_focus"),
+        "occurrence_status": row.get("occurrence_status"),
+        "event_date": row.get("event_date"),
+        "year": row.get("year"),
+        "country": row.get("country"),
+        "region": row.get("region"),
+        "province": row.get("province"),
+        "municipality": row.get("municipality"),
+        "locality": row.get("locality"),
+        "lat": row.get("lat"),
+        "lon": row.get("lon"),
+        "coordinate_uncertainty_m": row.get("coordinate_uncertainty_m"),
+        "source": row.get("source"),
+        "source_dataset": row.get("source_dataset"),
+        "source_url": row.get("source_url"),
+        "license": row.get("license"),
+        "confidence_score": row.get("confidence_score"),
+    }
+    if distance_km is not None:
+        out["distance_km"] = round(distance_km, 2)
+    return out
+
+def _layer_matches_vector_filters(layer, species="all", focus="all", leishmaniasis=False):
+    species_l = str(species or "all").lower().strip()
+    focus_l = str(focus or "all").lower().strip()
+    hay = " ".join(str(layer.get(k, "")) for k in ["label", "scientific_name", "data_type", "notes", "source", "display_source"]).lower()
+    if species_l and species_l != "all":
+        if species_l not in str(layer.get("scientific_name") or layer.get("label") or "").lower():
+            return False
+    if focus_l and focus_l != "all" and focus_l not in hay:
+        return False
+    if leishmaniasis and "leish" not in hay and "phlebotomus" not in hay:
+        return False
+    return True
+# --- end v6 vector endpoints support ---
+
 @app.on_event("startup")
 def startup():
-    init_db(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events(); sync_myvbdmap_events()
+    init_db(); init_vector_surveillance_db(); seed_leishmaniasis_vector_species(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events(); sync_myvbdmap_events()
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
         scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.start()
@@ -380,11 +590,11 @@ def get_territorial_layers_public_status():
     return {"status":"ok","csv":csv_status,"refresh":status}
 
 @app.get("/territorial-layers")
-def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None)):
+def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None),species:str=Query("all"),focus:str=Query("all"),leishmaniasis:bool=Query(False)):
     layers=load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
     out=filter_territorial_layers(layers, lat=lat, lon=lon, radius_km=radius_km, category=category, days=days, source=source, distance_fn=haversine_km, parse_date_fn=parse_date)
-    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days}
-
+    out=[layer for layer in out if _layer_matches_vector_filters(layer, species=species, focus=focus, leishmaniasis=leishmaniasis)]
+    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis}
 @app.get("/territorial-layers/export")
 def export_territorial_layers(category:str=Query("all"),format:str=Query("csv")):
     layers=filter_territorial_layers(load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH), category=category, distance_fn=haversine_km, parse_date_fn=parse_date)
@@ -536,6 +746,54 @@ def demo_populate_365(count:int=Query(280,ge=1,le=2000)): return populate_demo_3
 @app.post("/demo/purge")
 def demo_purge(older_than_days: int | None = Query(None, ge=1, le=3650)):
     with connect() as conn: return purge_demo_events_sqlite(conn, table_name="events", older_than_days=older_than_days)
+
+
+@app.get("/vector-species")
+def get_vector_species(leishmaniasis:bool=Query(False), group:str=Query("all"), focus:str=Query("all"), limit:int=Query(200,ge=1,le=1000)):
+    init_vector_surveillance_db()
+    seed_leishmaniasis_vector_species()
+    group_l=str(group or "all").lower().strip()
+    focus_l=str(focus or "all").lower().strip()
+    where=[]; params=[]
+    if leishmaniasis:
+        where.append("is_leishmaniasis_vector=1")
+    if group_l and group_l!="all":
+        where.append("LOWER(common_group)=?"); params.append(group_l)
+    if focus_l and focus_l!="all":
+        where.append("LOWER(COALESCE(pathogen_focus,'')) LIKE ?"); params.append(f"%{focus_l}%")
+    sql="SELECT * FROM vector_species_catalog"
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    sql += " ORDER BY priority ASC, scientific_name ASC LIMIT ?"; params.append(limit)
+    with connect() as conn:
+        rows=[dict(r) for r in conn.execute(sql, params).fetchall()]
+    for r in rows:
+        r["is_leishmaniasis_vector"] = bool(r.get("is_leishmaniasis_vector"))
+    return {"query":{"leishmaniasis":leishmaniasis,"group":group,"focus":focus,"limit":limit},"count":len(rows),"species":rows}
+
+@app.get("/vector-occurrences")
+def get_vector_occurrences(lat:float|None=Query(None), lon:float|None=Query(None), radius_km:float=Query(100,ge=1,le=2000), species:str=Query("all"), group:str=Query("all"), focus:str=Query("all"), leishmaniasis:bool=Query(False), limit:int=Query(1000,ge=1,le=5000)):
+    init_vector_surveillance_db()
+    species_l=str(species or "all").lower().strip()
+    group_l=str(group or "all").lower().strip()
+    focus_l=str(focus or "all").lower().strip()
+    with connect() as conn:
+        rows=[dict(r) for r in conn.execute("SELECT * FROM vector_occurrences ORDER BY COALESCE(event_date,'' ) DESC, COALESCE(year,0) DESC").fetchall()]
+    out=[]
+    for row in rows:
+        if species_l and species_l!="all" and species_l not in str(row.get("scientific_name","")).lower(): continue
+        if group_l and group_l!="all" and group_l != str(row.get("common_group","")).lower(): continue
+        hay=f"{row.get('scientific_name','')} {row.get('pathogen_focus','')} {row.get('common_group','')}".lower()
+        if focus_l and focus_l!="all" and focus_l not in hay: continue
+        if leishmaniasis and "leish" not in hay and "phlebotomus" not in hay: continue
+        distance=None
+        if lat is not None and lon is not None:
+            if row.get("lat") is None or row.get("lon") is None: continue
+            distance=haversine_km(lat, lon, float(row["lat"]), float(row["lon"]))
+            if distance > radius_km: continue
+        out.append(_vector_occurrence_to_public(row, distance))
+        if len(out) >= limit: break
+    return {"query":{"lat":lat,"lon":lon,"radius_km":radius_km,"species":species,"group":group,"focus":focus,"leishmaniasis":leishmaniasis,"limit":limit},"count":len(out),"occurrences":out}
 
 @app.get("/official-events")
 def get_official_events(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(200,ge=1,le=2000),days:int=Query(365,ge=1,le=3650),animal_filter:str=Query("all"),source:str|None=Query(None)):
