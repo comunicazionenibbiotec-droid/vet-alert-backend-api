@@ -1,6 +1,6 @@
 {
   "version": "v160-benv-multidisease-reports",
-  "generated_at": "2026-07-21T10:40:01.407006Z",
+  "generated_at": "2026-07-22T10:52:32.910689Z",
   "input_dir": "data/raw/benv_exports",
   "input_files": [
     "data/raw/benv_exports/agalassia_contagiosa_2026_italia.xlsx",

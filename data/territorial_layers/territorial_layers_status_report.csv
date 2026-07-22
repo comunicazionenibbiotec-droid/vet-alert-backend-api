@@ -1,4 +1,4 @@
 category,rows,sources,regions,provinces,locations,period_start_min,period_end_max,status,interpretation
 parasites,205,IZS_BENV:205,7,0,70,2026-01-05,2026-07-03,official_or_curated_active_if_rows_present,BENV-derived or curated parasitic context; not prevalence estimate
-vectors,107,VECTORNET_CURATED:107,11,18,18,2026-01-01,2026-07-21,curated_active,presence/distribution context; not a clinical case count
+vectors,107,VECTORNET_CURATED:107,11,18,18,2026-01-01,2026-07-22,curated_active,presence/distribution context; not a clinical case count
 west_nile,27,ECDC_CNS_WNV:3; CNS_WNV:14; AVIS_CNS_WNV:10,8,27,27,2026-06-10,2026-07-16,surveillance_context_active,province-level surveillance/prevention context; not individual veterinary diagnosis
