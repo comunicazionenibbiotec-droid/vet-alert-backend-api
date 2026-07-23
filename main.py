@@ -590,6 +590,7 @@ def get_cities(include_hidden: bool = False):
     if not include_hidden:
         cities = [c for c in cities if not isinstance(c, dict) or c.get("show_in_menu", True) is not False]
     return {"cities": cities}
+
 @app.get("/sync/log")
 def get_sync_log(limit:int=Query(50,ge=1,le=200)):
     with connect() as conn: rows=conn.execute("SELECT * FROM sync_log ORDER BY id DESC LIMIT ?",(limit,)).fetchall()
@@ -1098,6 +1099,26 @@ def run_piem_liguria_genus_vector_import(x_sync_token:str|None=Header(default=No
         raise
     except Exception as e:
         log_sync("GBIF_PIEMONTE_LIGURIA_GENUS_VECTORS","error",str(e),0,0,0,started)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/sync/territorial-layers/pilot-municipal-layers/run")
+def run_pilot_municipal_vector_layers(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    try:
+        p=subprocess.run([sys.executable,"scripts/build_pilot_municipal_vector_layers_v239.py"],capture_output=True,text=True,timeout=int(os.getenv("PILOT_MUNICIPAL_LAYER_TIMEOUT_SECONDS","300")))
+        if p.returncode!=0:
+            log_sync("PILOT_MUNICIPAL_VECTOR_LAYERS","error",(p.stderr or p.stdout)[-1000:],0,0,0,started)
+            raise HTTPException(status_code=500, detail=(p.stderr or p.stdout)[-4000:])
+        try: result=json.loads(p.stdout)
+        except Exception: result={"stdout":p.stdout[-4000:]}
+        log_sync("PILOT_MUNICIPAL_VECTOR_LAYERS","success","Pilot municipal vector context layers built",int(result.get("inserted",0) or 0)+int(result.get("updated",0) or 0),int(result.get("inserted",0) or 0),int(result.get("updated",0) or 0),started)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_sync("PILOT_MUNICIPAL_VECTOR_LAYERS","error",str(e),0,0,0,started)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/territorial-layers/status")
