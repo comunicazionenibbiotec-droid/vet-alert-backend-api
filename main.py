@@ -1121,6 +1121,26 @@ def run_pilot_municipal_vector_layers(x_sync_token:str|None=Header(default=None)
         log_sync("PILOT_MUNICIPAL_VECTOR_LAYERS","error",str(e),0,0,0,started)
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/sync/territorial-layers/real-city-sources/run")
+def run_real_city_source_vector_import(x_sync_token:str|None=Header(default=None)):
+    require_sync_token(x_sync_token)
+    started=now_iso()
+    try:
+        p=subprocess.run([sys.executable,"scripts/import_real_city_vector_occurrences_v240.py"],capture_output=True,text=True,timeout=int(os.getenv("REAL_CITY_IMPORT_TIMEOUT_SECONDS","3600")))
+        if p.returncode!=0:
+            log_sync("REAL_CITY_GBIF_VECTOR_IMPORT","error",(p.stderr or p.stdout)[-1000:],0,0,0,started)
+            raise HTTPException(status_code=500, detail=(p.stderr or p.stdout)[-4000:])
+        try: result=json.loads(p.stdout)
+        except Exception: result={"stdout":p.stdout[-4000:]}
+        log_sync("REAL_CITY_GBIF_VECTOR_IMPORT","success","Real city-centered GBIF vector occurrences imported and pilot context purged",int(result.get("candidate_rows",0) or 0),int(result.get("inserted",0) or 0),int(result.get("updated",0) or 0),started)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_sync("REAL_CITY_GBIF_VECTOR_IMPORT","error",str(e),0,0,0,started)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/territorial-layers/status")
 def get_territorial_layers_public_status():
     status_path="data/territorial_layers/refresh_status.json"
