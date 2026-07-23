@@ -921,7 +921,7 @@ def run_territorial_radius_normalization(x_sync_token:str|None=Header(default=No
     require_sync_token(x_sync_token)
     started=now_iso()
     try:
-        p=subprocess.run([sys.executable,"scripts/normalize_territorial_layers_radius_v231.py"],capture_output=True,text=True,timeout=int(os.getenv("TERRITORIAL_NORMALIZE_TIMEOUT_SECONDS","300")))
+        p=subprocess.run([sys.executable,"scripts/normalize_territorial_layers_radius_v232.py"],capture_output=True,text=True,timeout=int(os.getenv("TERRITORIAL_NORMALIZE_TIMEOUT_SECONDS","300")))
         if p.returncode!=0:
             log_sync("TERRITORIAL_RADIUS_NORMALIZE","error",(p.stderr or p.stdout)[-1000:],0,0,0,started)
             raise HTTPException(status_code=500, detail=(p.stderr or p.stdout)[-4000:])
@@ -1010,6 +1010,52 @@ def _decorate_territorial_output(rows):
     return out
 # --- end v231 territorial output normalization ---
 
+
+# --- v232 forced territorial output fields ---
+def _v232_has_location(row):
+    return any(str(row.get(k,"") or "").strip() for k in ["municipality","comune","city","locality","location"])
+def _v232_group(row):
+    labels={"sand_flies","ticks","mosquitoes_other_vectors","parasites","west_nile"}
+    explicit=str(row.get("ui_group") or row.get("subcategory") or "").strip()
+    if explicit in labels: return explicit
+    t=" ".join(str(row.get(k,"") or "") for k in ["category","label","scientific_name","data_type","source","display_source","notes","note"]).lower()
+    cat=str(row.get("category","") or "").lower()
+    if cat=="west_nile" or "west nile" in t or "wnv" in t or "usutu" in t: return "west_nile"
+    if cat in ("parasites","parasite") or any(x in t for x in ["giardia","toxocara","ancylostoma","dirofilaria","echinococcus","parasite","parassit"]): return "parasites"
+    if any(x in t for x in ["phlebotomus","phlebotominae","phlebotomine","sand fly","sandfly","flebotom","leish"]): return "sand_flies"
+    if any(x in t for x in ["ixodes","dermacentor","hyalomma","rhipicephalus","ornithodoros","amblyomma","tick","zecc"]): return "ticks"
+    if cat in ("vectors","vector"): return "mosquitoes_other_vectors"
+    return cat or "mosquitoes_other_vectors"
+def _v232_precision(row, g=None):
+    g = g or _v232_group(row)
+    expl=" ".join(str(row.get(k,"") or "").lower() for k in ["localization_precision","aggregation_level","precision","area_level","data_type","count_label"])
+    if any(x in expl for x in ["occurrence_point","real precise","point occurrence","coordinate / puntuale"]): return "coordinate / puntuale"
+    if g == "west_nile":
+        if "region" in expl or (str(row.get("region","") or "").strip() and not str(row.get("province","") or "").strip()): return "regionale"
+        return "provinciale"
+    if g in ("sand_flies","ticks","mosquitoes_other_vectors","parasites") and _v232_has_location(row): return "comunale"
+    if "region" in expl: return "regionale"
+    if "prov" in expl: return "provinciale"
+    if "comun" in expl or "municip" in expl: return "comunale"
+    if _v232_has_location(row): return "comunale"
+    if str(row.get("province","") or "").strip(): return "provinciale"
+    if str(row.get("region","") or "").strip(): return "regionale"
+    return "territoriale"
+def _v232_count(row):
+    raw=row.get("count") or row.get("case_count") or row.get("value") or 1
+    try: return max(1,int(float(str(raw).replace(",","."))))
+    except Exception: return 1
+def _v232_decorate_layers(rows):
+    labels={"sand_flies":"Flebotomi","ticks":"Zecche","mosquitoes_other_vectors":"Zanzare / altri vettori","parasites":"Parassiti","west_nile":"West Nile"}
+    out=[]
+    for r in rows or []:
+        x=dict(r); g=_v232_group(x); p=_v232_precision(x,g); rad=10 if p in ("coordinate / puntuale","comunale") else 25; n=_v232_count(x)
+        x["ui_group"]=g; x["ui_group_label"]=labels.get(g,g); x["subcategory"]=g
+        x["localization_precision"]=p; x["display_radius_km"]=rad; x["radius_km"]=rad; x["count"]=n; x["case_count"]=n
+        out.append(x)
+    return out
+# --- end v232 forced territorial output fields ---
+
 @app.get("/territorial-layers/status")
 def get_territorial_layers_public_status():
     status_path="data/territorial_layers/refresh_status.json"
@@ -1027,6 +1073,7 @@ def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None)
         vector_layers = vector_occurrence_layers_for_area(lat=lat, lon=lon, radius_km=radius_km, species=species, focus=focus, leishmaniasis=leishmaniasis, source=source)
         out.extend(vector_layers)
         vector_count = len(vector_layers)
+    out=_v232_decorate_layers(out)
     return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis,"vector_occurrence_layers":vector_count,"include_vector_occurrences":include_vector_occurrences}
 
 @app.get("/territorial-layers/vector-occurrences/status")
