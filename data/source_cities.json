@@ -1,136 +1,14 @@
 [
   {
-    "name": "Torino",
-    "lat": 45.0703,
-    "lon": 7.6869,
+    "name": "Alessandria",
+    "lat": 44.9073,
+    "lon": 8.6117,
     "region": "Piemonte",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Aosta",
-    "lat": 45.7376,
-    "lon": 7.3172,
-    "region": "Valle d'Aosta",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Milano",
-    "lat": 45.4642,
-    "lon": 9.19,
-    "region": "Lombardia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Trento",
-    "lat": 46.0748,
-    "lon": 11.1217,
-    "region": "Trentino-Alto Adige",
-    "area_type": "provincia_autonoma",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Bolzano",
-    "lat": 46.4983,
-    "lon": 11.3548,
-    "region": "Trentino-Alto Adige",
-    "area_type": "provincia_autonoma",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Venezia",
-    "lat": 45.4408,
-    "lon": 12.3155,
-    "region": "Veneto",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "poultry",
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Trieste",
-    "lat": 45.6495,
-    "lon": 13.7768,
-    "region": "Friuli-Venezia Giulia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Genova",
-    "lat": 44.4056,
-    "lon": 8.9463,
-    "region": "Liguria",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "Bologna",
-    "lat": 44.4949,
-    "lon": 11.3426,
-    "region": "Emilia-Romagna",
-    "area_type": "capoluogo_regione",
+    "area_type": "provincia_zootecnica",
     "priority_species": [
       "swine",
       "bovine",
-      "poultry"
-    ]
-  },
-  {
-    "name": "Firenze",
-    "lat": 43.7696,
-    "lon": 11.2558,
-    "region": "Toscana",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine",
-      "ovine"
-    ]
-  },
-  {
-    "name": "Perugia",
-    "lat": 43.1107,
-    "lon": 12.3908,
-    "region": "Umbria",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
+      "wildlife"
     ]
   },
   {
@@ -147,53 +25,15 @@
     ]
   },
   {
-    "name": "Roma",
-    "lat": 41.9028,
-    "lon": 12.4964,
-    "region": "Lazio",
+    "name": "Aosta",
+    "lat": 45.7376,
+    "lon": 7.3172,
+    "region": "Valle d'Aosta",
     "area_type": "capoluogo_regione",
     "priority_species": [
-      "dog",
-      "cat",
-      "equine",
-      "ovine"
-    ]
-  },
-  {
-    "name": "L'Aquila",
-    "lat": 42.3498,
-    "lon": 13.3995,
-    "region": "Abruzzo",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Campobasso",
-    "lat": 41.5603,
-    "lon": 14.6627,
-    "region": "Molise",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Napoli",
-    "lat": 40.8518,
-    "lon": 14.2681,
-    "region": "Campania",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
       "bovine",
-      "buffalo"
+      "ovine",
+      "caprine"
     ]
   },
   {
@@ -209,14 +49,81 @@
     ]
   },
   {
-    "name": "Potenza",
-    "lat": 40.6404,
-    "lon": 15.8056,
-    "region": "Basilicata",
+    "name": "Bologna",
+    "lat": 44.4949,
+    "lon": 11.3426,
+    "region": "Emilia-Romagna",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "swine",
+      "bovine",
+      "poultry"
+    ]
+  },
+  {
+    "name": "Bolzano",
+    "lat": 46.4983,
+    "lon": 11.3548,
+    "region": "Trentino-Alto Adige",
+    "area_type": "provincia_autonoma",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ]
+  },
+  {
+    "name": "Brescia",
+    "lat": 45.5416,
+    "lon": 10.2118,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ]
+  },
+  {
+    "name": "Cagliari",
+    "lat": 39.2238,
+    "lon": 9.1217,
+    "region": "Sardegna",
     "area_type": "capoluogo_regione",
     "priority_species": [
       "ovine",
       "caprine",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Cairo Montenotte",
+    "lat": 44.3979,
+    "lon": 8.2778,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_center": true,
+    "notes": "Centro dello studio pilota vet.ector"
+  },
+  {
+    "name": "Campobasso",
+    "lat": 41.5603,
+    "lon": 14.6627,
+    "region": "Molise",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Carru",
+    "lat": 44.4791,
+    "lon": 7.8731,
+    "region": "Piemonte",
+    "area_type": "area_pilota_zootecnica",
+    "priority_species": [
       "bovine"
     ]
   },
@@ -233,28 +140,14 @@
     ]
   },
   {
-    "name": "Palermo",
-    "lat": 38.1157,
-    "lon": 13.3615,
-    "region": "Sicilia",
-    "area_type": "capoluogo_regione",
+    "name": "Cremona",
+    "lat": 45.1332,
+    "lon": 10.0227,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
     "priority_species": [
-      "dog",
-      "cat",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Cagliari",
-    "lat": 39.2238,
-    "lon": 9.1217,
-    "region": "Sardegna",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
+      "bovine",
+      "swine"
     ]
   },
   {
@@ -270,59 +163,62 @@
     ]
   },
   {
-    "name": "Carru",
-    "lat": 44.4791,
-    "lon": 7.8731,
-    "region": "Piemonte",
-    "area_type": "area_pilota_zootecnica",
+    "name": "Firenze",
+    "lat": 43.7696,
+    "lon": 11.2558,
+    "region": "Toscana",
+    "area_type": "capoluogo_regione",
     "priority_species": [
+      "dog",
+      "cat",
+      "bovine",
+      "ovine"
+    ]
+  },
+  {
+    "name": "Foggia",
+    "lat": 41.4622,
+    "lon": 15.5446,
+    "region": "Puglia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "poultry"
+    ]
+  },
+  {
+    "name": "Forli-Cesena",
+    "lat": 44.1391,
+    "lon": 12.2432,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry"
+    ]
+  },
+  {
+    "name": "Genova",
+    "lat": 44.4056,
+    "lon": 8.9463,
+    "region": "Liguria",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "wildlife"
+    ]
+  },
+  {
+    "name": "L'Aquila",
+    "lat": 42.3498,
+    "lon": 13.3995,
+    "region": "Abruzzo",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
       "bovine"
-    ]
-  },
-  {
-    "name": "Alessandria",
-    "lat": 44.9073,
-    "lon": 8.6117,
-    "region": "Piemonte",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "Pavia",
-    "lat": 45.1847,
-    "lon": 9.1582,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "Cremona",
-    "lat": 45.1332,
-    "lon": 10.0227,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Brescia",
-    "lat": 45.5416,
-    "lon": 10.2118,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
     ]
   },
   {
@@ -337,23 +233,14 @@
     ]
   },
   {
-    "name": "Parma",
-    "lat": 44.8015,
-    "lon": 10.3279,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
+    "name": "Milano",
+    "lat": 45.4642,
+    "lon": 9.19,
+    "region": "Lombardia",
+    "area_type": "capoluogo_regione",
     "priority_species": [
-      "swine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Reggio Emilia",
-    "lat": 44.6983,
-    "lon": 10.6312,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
+      "dog",
+      "cat",
       "bovine",
       "swine"
     ]
@@ -370,81 +257,16 @@
     ]
   },
   {
-    "name": "Ravenna",
-    "lat": 44.4184,
-    "lon": 12.2035,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
+    "name": "Napoli",
+    "lat": 40.8518,
+    "lon": 14.2681,
+    "region": "Campania",
+    "area_type": "capoluogo_regione",
     "priority_species": [
-      "poultry",
-      "swine"
-    ]
-  },
-  {
-    "name": "Forli-Cesena",
-    "lat": 44.1391,
-    "lon": 12.2432,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry"
-    ]
-  },
-  {
-    "name": "Verona",
-    "lat": 45.4384,
-    "lon": 10.9916,
-    "region": "Veneto",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry",
+      "dog",
+      "cat",
       "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Padova",
-    "lat": 45.4064,
-    "lon": 11.8768,
-    "region": "Veneto",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Vicenza",
-    "lat": 45.5455,
-    "lon": 11.5354,
-    "region": "Veneto",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "poultry"
-    ]
-  },
-  {
-    "name": "Foggia",
-    "lat": 41.4622,
-    "lon": 15.5446,
-    "region": "Puglia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "poultry"
-    ]
-  },
-  {
-    "name": "Sassari",
-    "lat": 40.7259,
-    "lon": 8.5557,
-    "region": "Sardegna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "ovine",
-      "caprine"
+      "buffalo"
     ]
   },
   {
@@ -467,6 +289,194 @@
     "priority_species": [
       "ovine",
       "caprine"
+    ]
+  },
+  {
+    "name": "Padova",
+    "lat": 45.4064,
+    "lon": 11.8768,
+    "region": "Veneto",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Palermo",
+    "lat": 38.1157,
+    "lon": 13.3615,
+    "region": "Sicilia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "ovine",
+      "caprine"
+    ]
+  },
+  {
+    "name": "Parma",
+    "lat": 44.8015,
+    "lon": 10.3279,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Pavia",
+    "lat": 45.1847,
+    "lon": 9.1582,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine",
+      "wildlife"
+    ]
+  },
+  {
+    "name": "Perugia",
+    "lat": 43.1107,
+    "lon": 12.3908,
+    "region": "Umbria",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ]
+  },
+  {
+    "name": "Potenza",
+    "lat": 40.6404,
+    "lon": 15.8056,
+    "region": "Basilicata",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Ravenna",
+    "lat": 44.4184,
+    "lon": 12.2035,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry",
+      "swine"
+    ]
+  },
+  {
+    "name": "Reggio Emilia",
+    "lat": 44.6983,
+    "lon": 10.6312,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ]
+  },
+  {
+    "name": "Roma",
+    "lat": 41.9028,
+    "lon": 12.4964,
+    "region": "Lazio",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "equine",
+      "ovine"
+    ]
+  },
+  {
+    "name": "Sassari",
+    "lat": 40.7259,
+    "lon": 8.5557,
+    "region": "Sardegna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine"
+    ]
+  },
+  {
+    "name": "Torino",
+    "lat": 45.0703,
+    "lon": 7.6869,
+    "region": "Piemonte",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Trento",
+    "lat": 46.0748,
+    "lon": 11.1217,
+    "region": "Trentino-Alto Adige",
+    "area_type": "provincia_autonoma",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ]
+  },
+  {
+    "name": "Trieste",
+    "lat": 45.6495,
+    "lon": 13.7768,
+    "region": "Friuli-Venezia Giulia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "bovine"
+    ]
+  },
+  {
+    "name": "Venezia",
+    "lat": 45.4408,
+    "lon": 12.3155,
+    "region": "Veneto",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "poultry",
+      "bovine",
+      "swine"
+    ]
+  },
+  {
+    "name": "Verona",
+    "lat": 45.4384,
+    "lon": 10.9916,
+    "region": "Veneto",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry",
+      "bovine",
+      "swine"
+    ]
+  },
+  {
+    "name": "Vicenza",
+    "lat": 45.5455,
+    "lon": 11.5354,
+    "region": "Veneto",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "poultry"
     ]
   }
 ]
