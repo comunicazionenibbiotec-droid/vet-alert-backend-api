@@ -1056,26 +1056,6 @@ def _v232_decorate_layers(rows):
     return out
 # --- end v232 forced territorial output fields ---
 
-
-@app.post("/sync/territorial-layers/piemonte-liguria/run")
-def run_piem_liguria_vector_import(x_sync_token:str|None=Header(default=None)):
-    require_sync_token(x_sync_token)
-    started=now_iso()
-    try:
-        p=subprocess.run([sys.executable,"scripts/import_gbif_piem_liguria_vectors_v234.py"],capture_output=True,text=True,timeout=int(os.getenv("REGION_IMPORT_TIMEOUT_SECONDS","2400")))
-        if p.returncode!=0:
-            log_sync("GBIF_PIEMONTE_LIGURIA_VECTORS","error",(p.stderr or p.stdout)[-1000:],0,0,0,started)
-            raise HTTPException(status_code=500, detail=(p.stderr or p.stdout)[-4000:])
-        try: result=json.loads(p.stdout)
-        except Exception: result={"stdout":p.stdout[-4000:]}
-        log_sync("GBIF_PIEMONTE_LIGURIA_VECTORS","success","Piemonte/Liguria vector occurrences imported",int(result.get("candidate_rows",0) or 0),int(result.get("inserted",0) or 0),int(result.get("updated",0) or 0),started)
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        log_sync("GBIF_PIEMONTE_LIGURIA_VECTORS","error",str(e),0,0,0,started)
-        raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/territorial-layers/status")
 def get_territorial_layers_public_status():
     status_path="data/territorial_layers/refresh_status.json"
