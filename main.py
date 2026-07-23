@@ -585,7 +585,11 @@ def health(): return {"status":"ok","time":now_iso(),"version":app.version,"sync
 @app.get("/demo/status")
 def get_demo_status(): return demo_status()
 @app.get("/cities")
-def get_cities(): return {"cities":load_json("data/source_cities.json")}
+def get_cities(include_hidden: bool = False):
+    cities = load_json("data/source_cities.json")
+    if not include_hidden:
+        cities = [c for c in cities if not isinstance(c, dict) or c.get("show_in_menu", True) is not False]
+    return {"cities": cities}
 @app.get("/sync/log")
 def get_sync_log(limit:int=Query(50,ge=1,le=200)):
     with connect() as conn: rows=conn.execute("SELECT * FROM sync_log ORDER BY id DESC LIMIT ?",(limit,)).fetchall()

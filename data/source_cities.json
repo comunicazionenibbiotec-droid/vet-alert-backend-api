@@ -1,52 +1,17 @@
 [
   {
-    "name": "Alessandria",
-    "lat": 44.9073,
-    "lon": 8.6117,
-    "region": "Piemonte",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "Ancona",
-    "lat": 43.6158,
-    "lon": 13.5189,
-    "region": "Marche",
+    "name": "Napoli",
+    "lat": 40.8518,
+    "lon": 14.2681,
+    "region": "Campania",
     "area_type": "capoluogo_regione",
     "priority_species": [
       "dog",
       "cat",
-      "ovine",
-      "poultry"
-    ]
-  },
-  {
-    "name": "Aosta",
-    "lat": 45.7376,
-    "lon": 7.3172,
-    "region": "Valle d'Aosta",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
       "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Bari",
-    "lat": 41.1171,
-    "lon": 16.8719,
-    "region": "Puglia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "poultry"
-    ]
+      "buffalo"
+    ],
+    "show_in_menu": true
   },
   {
     "name": "Bologna",
@@ -58,331 +23,8 @@
       "swine",
       "bovine",
       "poultry"
-    ]
-  },
-  {
-    "name": "Bolzano",
-    "lat": 46.4983,
-    "lon": 11.3548,
-    "region": "Trentino-Alto Adige",
-    "area_type": "provincia_autonoma",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Brescia",
-    "lat": 45.5416,
-    "lon": 10.2118,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Cagliari",
-    "lat": 39.2238,
-    "lon": 9.1217,
-    "region": "Sardegna",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Cairo Montenotte",
-    "lat": 44.3979,
-    "lon": 8.2778,
-    "province": "Savona",
-    "region": "Liguria",
-    "country": "Italy",
-    "pilot_center": true,
-    "notes": "Centro dello studio pilota vet.ector"
-  },
-  {
-    "name": "Campobasso",
-    "lat": 41.5603,
-    "lon": 14.6627,
-    "region": "Molise",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Carru",
-    "lat": 44.4791,
-    "lon": 7.8731,
-    "region": "Piemonte",
-    "area_type": "area_pilota_zootecnica",
-    "priority_species": [
-      "bovine"
-    ]
-  },
-  {
-    "name": "Catanzaro",
-    "lat": 38.9098,
-    "lon": 16.5877,
-    "region": "Calabria",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Cremona",
-    "lat": 45.1332,
-    "lon": 10.0227,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Cuneo",
-    "lat": 44.3845,
-    "lon": 7.5427,
-    "region": "Piemonte",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Firenze",
-    "lat": 43.7696,
-    "lon": 11.2558,
-    "region": "Toscana",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine",
-      "ovine"
-    ]
-  },
-  {
-    "name": "Foggia",
-    "lat": 41.4622,
-    "lon": 15.5446,
-    "region": "Puglia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "poultry"
-    ]
-  },
-  {
-    "name": "Forli-Cesena",
-    "lat": 44.1391,
-    "lon": 12.2432,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry"
-    ]
-  },
-  {
-    "name": "Genova",
-    "lat": 44.4056,
-    "lon": 8.9463,
-    "region": "Liguria",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "L'Aquila",
-    "lat": 42.3498,
-    "lon": 13.3995,
-    "region": "Abruzzo",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Mantova",
-    "lat": 45.1564,
-    "lon": 10.7914,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Milano",
-    "lat": 45.4642,
-    "lon": 9.19,
-    "region": "Lombardia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine",
-      "swine"
-    ]
-  },
-  {
-    "name": "Modena",
-    "lat": 44.6471,
-    "lon": 10.9252,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Napoli",
-    "lat": 40.8518,
-    "lon": 14.2681,
-    "region": "Campania",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine",
-      "buffalo"
-    ]
-  },
-  {
-    "name": "Nuoro",
-    "lat": 40.3202,
-    "lon": 9.3264,
-    "region": "Sardegna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Oristano",
-    "lat": 39.9038,
-    "lon": 8.5912,
-    "region": "Sardegna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Padova",
-    "lat": 45.4064,
-    "lon": 11.8768,
-    "region": "Veneto",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Palermo",
-    "lat": 38.1157,
-    "lon": 13.3615,
-    "region": "Sicilia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Parma",
-    "lat": 44.8015,
-    "lon": 10.3279,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Pavia",
-    "lat": 45.1847,
-    "lon": 9.1582,
-    "region": "Lombardia",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "swine",
-      "bovine",
-      "wildlife"
-    ]
-  },
-  {
-    "name": "Perugia",
-    "lat": 43.1107,
-    "lon": 12.3908,
-    "region": "Umbria",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "bovine",
-      "ovine",
-      "caprine"
-    ]
-  },
-  {
-    "name": "Potenza",
-    "lat": 40.6404,
-    "lon": 15.8056,
-    "region": "Basilicata",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "ovine",
-      "caprine",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Ravenna",
-    "lat": 44.4184,
-    "lon": 12.2035,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "poultry",
-      "swine"
-    ]
-  },
-  {
-    "name": "Reggio Emilia",
-    "lat": 44.6983,
-    "lon": 10.6312,
-    "region": "Emilia-Romagna",
-    "area_type": "provincia_zootecnica",
-    "priority_species": [
-      "bovine",
-      "swine"
-    ]
+    ],
+    "show_in_menu": true
   },
   {
     "name": "Roma",
@@ -395,18 +37,80 @@
       "cat",
       "equine",
       "ovine"
-    ]
+    ],
+    "show_in_menu": true
   },
   {
-    "name": "Sassari",
-    "lat": 40.7259,
-    "lon": 8.5557,
-    "region": "Sardegna",
-    "area_type": "provincia_zootecnica",
+    "name": "Genova",
+    "lat": 44.4056,
+    "lon": 8.9463,
+    "region": "Liguria",
+    "area_type": "capoluogo_regione",
     "priority_species": [
-      "ovine",
-      "caprine"
-    ]
+      "dog",
+      "cat",
+      "wildlife"
+    ],
+    "province": "Genova",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": true
+  },
+  {
+    "name": "Imperia",
+    "lat": 43.8897,
+    "lon": 8.0396,
+    "province": "Imperia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": true
+  },
+  {
+    "name": "La Spezia",
+    "lat": 44.1025,
+    "lon": 9.8241,
+    "province": "La Spezia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": true
+  },
+  {
+    "name": "Cairo Montenotte",
+    "lat": 44.3979,
+    "lon": 8.2778,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_center": true,
+    "notes": "Centro dello studio pilota vet.ector",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": true
+  },
+  {
+    "name": "Savona",
+    "lat": 44.3079,
+    "lon": 8.481,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": true
+  },
+  {
+    "name": "Milano",
+    "lat": 45.4642,
+    "lon": 9.19,
+    "region": "Lombardia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": true
   },
   {
     "name": "Torino",
@@ -418,43 +122,50 @@
       "dog",
       "cat",
       "bovine"
-    ]
+    ],
+    "show_in_menu": true
   },
   {
-    "name": "Trento",
-    "lat": 46.0748,
-    "lon": 11.1217,
-    "region": "Trentino-Alto Adige",
-    "area_type": "provincia_autonoma",
+    "name": "Alessandria",
+    "lat": 44.9073,
+    "lon": 8.6117,
+    "region": "Piemonte",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine",
+      "wildlife"
+    ],
+    "province": "Alessandria",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": true
+  },
+  {
+    "name": "Asti",
+    "lat": 44.9008,
+    "lon": 8.2065,
+    "province": "Asti",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": true
+  },
+  {
+    "name": "Cuneo",
+    "lat": 44.3845,
+    "lon": 7.5427,
+    "region": "Piemonte",
+    "area_type": "provincia_zootecnica",
     "priority_species": [
       "bovine",
       "ovine",
       "caprine"
-    ]
-  },
-  {
-    "name": "Trieste",
-    "lat": 45.6495,
-    "lon": 13.7768,
-    "region": "Friuli-Venezia Giulia",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "dog",
-      "cat",
-      "bovine"
-    ]
-  },
-  {
-    "name": "Venezia",
-    "lat": 45.4408,
-    "lon": 12.3155,
-    "region": "Veneto",
-    "area_type": "capoluogo_regione",
-    "priority_species": [
-      "poultry",
-      "bovine",
-      "swine"
-    ]
+    ],
+    "province": "Cuneo",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": true
   },
   {
     "name": "Verona",
@@ -466,7 +177,826 @@
       "poultry",
       "bovine",
       "swine"
-    ]
+    ],
+    "show_in_menu": true
+  },
+  {
+    "name": "L'Aquila",
+    "lat": 42.3498,
+    "lon": 13.3995,
+    "region": "Abruzzo",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Potenza",
+    "lat": 40.6404,
+    "lon": 15.8056,
+    "region": "Basilicata",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Catanzaro",
+    "lat": 38.9098,
+    "lon": 16.5877,
+    "region": "Calabria",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Forli-Cesena",
+    "lat": 44.1391,
+    "lon": 12.2432,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Modena",
+    "lat": 44.6471,
+    "lon": 10.9252,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Parma",
+    "lat": 44.8015,
+    "lon": 10.3279,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Ravenna",
+    "lat": 44.4184,
+    "lon": 12.2035,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry",
+      "swine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Reggio Emilia",
+    "lat": 44.6983,
+    "lon": 10.6312,
+    "region": "Emilia-Romagna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Trieste",
+    "lat": 45.6495,
+    "lon": 13.7768,
+    "region": "Friuli-Venezia Giulia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Arenzano",
+    "lat": 44.405,
+    "lon": 8.683,
+    "province": "Genova",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Chiavari",
+    "lat": 44.3177,
+    "lon": 9.3224,
+    "province": "Genova",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Lavagna",
+    "lat": 44.3091,
+    "lon": 9.3422,
+    "province": "Genova",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Rapallo",
+    "lat": 44.3496,
+    "lon": 9.227,
+    "province": "Genova",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Sestri Levante",
+    "lat": 44.2732,
+    "lon": 9.3968,
+    "province": "Genova",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Diano Marina",
+    "lat": 43.9109,
+    "lon": 8.0807,
+    "province": "Imperia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Sanremo",
+    "lat": 43.8173,
+    "lon": 7.7772,
+    "province": "Imperia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Ventimiglia",
+    "lat": 43.7912,
+    "lon": 7.6076,
+    "province": "Imperia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Sarzana",
+    "lat": 44.1117,
+    "lon": 9.9605,
+    "province": "La Spezia",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Alassio",
+    "lat": 44.0039,
+    "lon": 8.1671,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Albenga",
+    "lat": 44.049,
+    "lon": 8.213,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Altare",
+    "lat": 44.3367,
+    "lon": 8.3454,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Bormida",
+    "lat": 44.278,
+    "lon": 8.2327,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Carcare",
+    "lat": 44.3568,
+    "lon": 8.2906,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Cengio",
+    "lat": 44.3896,
+    "lon": 8.2099,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Cosseria",
+    "lat": 44.3674,
+    "lon": 8.2352,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Dego",
+    "lat": 44.4439,
+    "lon": 8.3076,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Finale Ligure",
+    "lat": 44.1695,
+    "lon": 8.3446,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Loano",
+    "lat": 44.1278,
+    "lon": 8.2574,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Mallare",
+    "lat": 44.2943,
+    "lon": 8.2969,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Millesimo",
+    "lat": 44.365,
+    "lon": 8.2045,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Osiglia",
+    "lat": 44.2819,
+    "lon": 8.1997,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Pallare",
+    "lat": 44.327,
+    "lon": 8.2769,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Plodio",
+    "lat": 44.3565,
+    "lon": 8.2449,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Roccavignale",
+    "lat": 44.3611,
+    "lon": 8.1904,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Val Bormida - studio pilota",
+    "show_in_menu": false
+  },
+  {
+    "name": "Vado Ligure",
+    "lat": 44.2695,
+    "lon": 8.4335,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Varazze",
+    "lat": 44.359,
+    "lon": 8.576,
+    "province": "Savona",
+    "region": "Liguria",
+    "country": "Italy",
+    "pilot_area": "Liguria",
+    "show_in_menu": false
+  },
+  {
+    "name": "Brescia",
+    "lat": 45.5416,
+    "lon": 10.2118,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Cremona",
+    "lat": 45.1332,
+    "lon": 10.0227,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Mantova",
+    "lat": 45.1564,
+    "lon": 10.7914,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Pavia",
+    "lat": 45.1847,
+    "lon": 9.1582,
+    "region": "Lombardia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "swine",
+      "bovine",
+      "wildlife"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Ancona",
+    "lat": 43.6158,
+    "lon": 13.5189,
+    "region": "Marche",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "ovine",
+      "poultry"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Campobasso",
+    "lat": 41.5603,
+    "lon": 14.6627,
+    "region": "Molise",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Carru",
+    "lat": 44.4791,
+    "lon": 7.8731,
+    "region": "Piemonte",
+    "area_type": "area_pilota_zootecnica",
+    "priority_species": [
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Acqui Terme",
+    "lat": 44.6755,
+    "lon": 8.4693,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Casale Monferrato",
+    "lat": 45.1334,
+    "lon": 8.4525,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Novi Ligure",
+    "lat": 44.762,
+    "lon": 8.7878,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Ovada",
+    "lat": 44.6377,
+    "lon": 8.6469,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Tortona",
+    "lat": 44.8978,
+    "lon": 8.864,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Valenza",
+    "lat": 45.012,
+    "lon": 8.6432,
+    "province": "Alessandria",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Canelli",
+    "lat": 44.7218,
+    "lon": 8.2923,
+    "province": "Asti",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Nizza Monferrato",
+    "lat": 44.7743,
+    "lon": 8.3578,
+    "province": "Asti",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Villanova d'Asti",
+    "lat": 44.9428,
+    "lon": 7.9367,
+    "province": "Asti",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Alba",
+    "lat": 44.7009,
+    "lon": 8.0357,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Bra",
+    "lat": 44.6978,
+    "lon": 7.8556,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Carrù",
+    "lat": 44.4797,
+    "lon": 7.8747,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Ceva",
+    "lat": 44.3852,
+    "lon": 8.035,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Fossano",
+    "lat": 44.5509,
+    "lon": 7.7257,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Mondovì",
+    "lat": 44.3898,
+    "lon": 7.8207,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Saluzzo",
+    "lat": 44.6445,
+    "lon": 7.4931,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Savigliano",
+    "lat": 44.6487,
+    "lon": 7.6579,
+    "province": "Cuneo",
+    "region": "Piemonte",
+    "country": "Italy",
+    "pilot_area": "Basso Piemonte",
+    "show_in_menu": false
+  },
+  {
+    "name": "Bari",
+    "lat": 41.1171,
+    "lon": 16.8719,
+    "region": "Puglia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "poultry"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Foggia",
+    "lat": 41.4622,
+    "lon": 15.5446,
+    "region": "Puglia",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "poultry"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Cagliari",
+    "lat": 39.2238,
+    "lon": 9.1217,
+    "region": "Sardegna",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "ovine",
+      "caprine",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Nuoro",
+    "lat": 40.3202,
+    "lon": 9.3264,
+    "region": "Sardegna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Oristano",
+    "lat": 39.9038,
+    "lon": 8.5912,
+    "region": "Sardegna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Sassari",
+    "lat": 40.7259,
+    "lon": 8.5557,
+    "region": "Sardegna",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Palermo",
+    "lat": 38.1157,
+    "lon": 13.3615,
+    "region": "Sicilia",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Firenze",
+    "lat": 43.7696,
+    "lon": 11.2558,
+    "region": "Toscana",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "dog",
+      "cat",
+      "bovine",
+      "ovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Bolzano",
+    "lat": 46.4983,
+    "lon": 11.3548,
+    "region": "Trentino-Alto Adige",
+    "area_type": "provincia_autonoma",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Trento",
+    "lat": 46.0748,
+    "lon": 11.1217,
+    "region": "Trentino-Alto Adige",
+    "area_type": "provincia_autonoma",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Perugia",
+    "lat": 43.1107,
+    "lon": 12.3908,
+    "region": "Umbria",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Aosta",
+    "lat": 45.7376,
+    "lon": 7.3172,
+    "region": "Valle d'Aosta",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "bovine",
+      "ovine",
+      "caprine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Padova",
+    "lat": 45.4064,
+    "lon": 11.8768,
+    "region": "Veneto",
+    "area_type": "provincia_zootecnica",
+    "priority_species": [
+      "poultry",
+      "bovine"
+    ],
+    "show_in_menu": false
+  },
+  {
+    "name": "Venezia",
+    "lat": 45.4408,
+    "lon": 12.3155,
+    "region": "Veneto",
+    "area_type": "capoluogo_regione",
+    "priority_species": [
+      "poultry",
+      "bovine",
+      "swine"
+    ],
+    "show_in_menu": false
   },
   {
     "name": "Vicenza",
@@ -477,6 +1007,7 @@
     "priority_species": [
       "bovine",
       "poultry"
-    ]
+    ],
+    "show_in_menu": false
   }
 ]
