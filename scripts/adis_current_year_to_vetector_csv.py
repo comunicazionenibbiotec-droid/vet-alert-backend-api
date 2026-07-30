@@ -3,14 +3,18 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
+import io
 import json
 import os
 import re
 import sys
 import urllib.request
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+from html import unescape
 
 CSV_FIELDS = [
     "external_id", "source", "disease", "disease_it", "diagnosis_status",
@@ -71,22 +75,75 @@ def write_csv(path: Path, rows: List[Dict[str, str]]) -> None:
             w.writerow({k: row.get(k, "") for k in CSV_FIELDS})
 
 
-def fetch_text(url: str) -> str:
+def fetch_response(url: str) -> Tuple[bytes, Dict[str, str]]:
+    """Download the ADIS public report as bytes.
+
+    ADIS can return a PDF for this endpoint. Returning bytes lets the parser
+    detect and decode PDF, gzip, zip/xlsx, or plain text instead of corrupting
+    binary content by decoding it as UTF-8 too early.
+    """
     req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 vet.ector ADIS CSV automation (+https://vet.ector.nibbiotec.com)",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept": "application/pdf,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, identity",
     })
     with urllib.request.urlopen(req, timeout=60) as resp:
-        return resp.read().decode("utf-8", errors="replace")
+        headers = {str(k).lower(): str(v) for k, v in resp.headers.items()}
+        return resp.read(), headers
 
+
+def _decode_text_bytes(data: bytes, headers: Optional[Dict[str, str]] = None) -> str:
+    headers = headers or {}
+    encoding = headers.get("content-encoding", "").lower()
+    if encoding == "gzip" or data[:2] == b"\x1f\x8b":
+        try:
+            data = gzip.decompress(data)
+        except Exception:
+            pass
+    for enc in ("utf-8", "latin-1"):
+        try:
+            return data.decode(enc)
+        except Exception:
+            continue
+    return data.decode("utf-8", errors="replace")
+
+
+def _extract_pdf_text(data: bytes) -> str:
+    try:
+        from pypdf import PdfReader
+    except Exception as exc:
+        raise RuntimeError("ADIS returned PDF but Python package 'pypdf' is not installed. Add pypdf>=4.0.0 to requirements.txt.") from exc
+    reader = PdfReader(io.BytesIO(data))
+    pages = []
+    for page in reader.pages:
+        try:
+            pages.append(page.extract_text() or "")
+        except Exception:
+            pages.append("")
+    return "\n".join(pages)
+
+
+def response_to_text(data: bytes, headers: Optional[Dict[str, str]] = None) -> Tuple[str, str]:
+    """Return (text, parser_mode) for a downloaded ADIS response."""
+    headers = headers or {}
+    content_type = headers.get("content-type", "").lower()
+    data = data or b""
+    if data.startswith(b"%PDF") or "pdf" in content_type:
+        return _extract_pdf_text(data), "pdf"
+    if data[:2] == b"\x1f\x8b" or headers.get("content-encoding", "").lower() == "gzip":
+        return _decode_text_bytes(data, headers), "gzip_text"
+    if zipfile.is_zipfile(io.BytesIO(data)):
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            names = "\n".join(z.namelist()[:100])
+        return "ZIP/XLSX response detected. Contained files:\n" + names, "zip"
+    return _decode_text_bytes(data, headers), "text"
 
 def strip_tags(html: str) -> str:
     # Remove scripts/styles first, then HTML tags. This is deliberately simple/best-effort.
     html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.I | re.S)
     html = re.sub(r"<style\b[^>]*>.*?</style>", " ", html, flags=re.I | re.S)
     text = re.sub(r"<[^>]+>", " ", html)
-    text = re.sub(r"&nbsp;", " ", text)
-    text = re.sub(r"&amp;", "&", text)
+    text = unescape(text)
     text = re.sub(r"\s+", " ", text)
     return text
 
@@ -189,11 +246,20 @@ def main() -> int:
     raw_text = ""
     contexts_detected = 0
 
+    response_content_type = ""
+    response_size = 0
+    parser_mode = ""
+    raw_snapshot_path = out_dir / "adis_last_response_raw.bin"
+
     try:
-        html = fetch_text(args.url)
+        payload, headers = fetch_response(args.url)
+        response_content_type = headers.get("content-type", "")
+        response_size = len(payload)
         preview_path.parent.mkdir(parents=True, exist_ok=True)
-        preview_path.write_text(html[:20000], encoding="utf-8")
-        raw_text = strip_tags(html)
+        raw_snapshot_path.write_bytes(payload)
+        extracted_text, parser_mode = response_to_text(payload, headers)
+        preview_path.write_text(extracted_text[:50000], encoding="utf-8", errors="replace")
+        raw_text = strip_tags(extracted_text)
         rows, skipped = parse_best_effort(raw_text, args.country, args.url)
         contexts_detected = len(re.findall(r"\bIT-[A-Z0-9]+-2026-\d{5}\b", raw_text))
     except Exception as exc:
@@ -219,8 +285,13 @@ def main() -> int:
         "url": args.url,
         "country": args.country,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "response_content_type": response_content_type,
+        "response_size": response_size,
+        "parser_mode": parser_mode,
+        "raw_snapshot_path": str(raw_snapshot_path),
         "contexts_detected": contexts_detected,
         "rows_generated": len(rows),
+        "max_observation_date": max([r.get("observation_date", "") for r in rows if r.get("observation_date")], default=""),
         "existing_rows_before": len(existing),
         "rows_skipped": len(skipped),
         "skipped_sample": skipped[:20],
