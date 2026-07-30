@@ -13,7 +13,7 @@ class IzsBenvCsvConnector:
 
     Expected normalized CSV columns:
     external_id,source,disease,disease_it,diagnosis_status,species,animal_group,
-    observation_date,report_date,country,region,location,lat,lon,url_source,notes
+    observation_date,report_date,suspected_date,confirmed_date,extinction_date,event_status,is_active,country,region,location,lat,lon,url_source,notes
 
     Priority order:
     1. IZS_BENV_REMOTE_CSV_URL if configured

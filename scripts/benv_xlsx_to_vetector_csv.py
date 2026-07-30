@@ -14,7 +14,9 @@ import pandas as pd
 
 OUTPUT_COLUMNS = [
     "external_id", "source", "disease", "disease_it", "diagnosis_status", "species", "animal_group",
-    "observation_date", "report_date", "country", "region", "location", "lat", "lon", "url_source", "notes"
+    "observation_date", "report_date",
+    "suspected_date", "confirmed_date", "extinction_date", "event_status", "is_active",
+    "country", "region", "location", "lat", "lon", "url_source", "notes"
 ]
 
 GEOCODING_REPORT_COLUMNS = [
@@ -282,6 +284,19 @@ def read_benv_xlsx(path: Path, disease_override: Optional[str], centroids):
         confirm_date = parse_date(r.get("Data conferma"))
         suspect_date = parse_date(r.get("Data sospetto"))
         extinction_date = parse_date(r.get("Data estinzione"))
+        event_date = confirm_date or suspect_date
+        if extinction_date:
+            event_status = "Estinto"
+            is_active = "false"
+        elif confirm_date:
+            event_status = "Confermato / attivo"
+            is_active = "true"
+        elif suspect_date:
+            event_status = "Sospetto"
+            is_active = "true"
+        else:
+            event_status = "Data non disponibile"
+            is_active = ""
         tipo = norm(r.get("Tipo focolaio"))
         stato = norm(r.get("Stato sanitario"))
         sierotipo = norm(r.get("Sierotipo")) if "Sierotipo" in df.columns else ""
@@ -291,7 +306,10 @@ def read_benv_xlsx(path: Path, disease_override: Optional[str], centroids):
         notes = (
             f"Official BENV/IZS table export; disease filter: {disease_it}; original BENV ID {original_id}; "
             f"tipo focolaio: {tipo}; stato sanitario: {stato}; provincia: {raw_provincia}; "
-            f"data sospetto: {suspect_date or 'not available'}; data estinzione: {extinction_date or 'not available'}; "
+            f"data sospetto: {suspect_date or 'not available'}; "
+            f"data conferma: {confirm_date or 'not available'}; "
+            f"data estinzione: {extinction_date or 'not available'}; "
+            f"stato evento: {event_status}; is_active: {is_active or 'not available'}; "
             f"sierotipo: {sierotipo or 'not specified'}; geocoding level: {matched_level}; {coord_note}."
         )
 
@@ -306,8 +324,13 @@ def read_benv_xlsx(path: Path, disease_override: Optional[str], centroids):
             "diagnosis_status": "Confermato",
             "species": species,
             "animal_group": species_group,
-            "observation_date": confirm_date or suspect_date,
+            "observation_date": event_date,
             "report_date": confirm_date or suspect_date,
+            "suspected_date": suspect_date,
+            "confirmed_date": confirm_date,
+            "extinction_date": extinction_date,
+            "event_status": event_status,
+            "is_active": is_active,
             "country": "Italy",
             "region": raw_regione.title(),
             "location": location,
@@ -499,7 +522,7 @@ def main() -> int:
         animal_counts[row.get("animal_group", "unknown")] = animal_counts.get(row.get("animal_group", "unknown"), 0) + 1
 
     metadata = {
-        "version": "v160-benv-multidisease-reports",
+        "version": "v250-benv-event-lifecycle-dates",
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "input_dir": str(input_dir),
         "input_files": [str(f) for f in files],

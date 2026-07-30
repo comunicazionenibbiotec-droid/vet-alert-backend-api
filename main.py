@@ -199,9 +199,47 @@ def matches_animal_filter(row, animal_filter):
 
 def compute_risk_score(status,distance_km,observation_date):
     s=(status or "").lower(); status_score=1.0 if "conferm" in s or "confirm" in s else 0.65 if "sosp" in s or "suspect" in s else .4; obs=parse_date(observation_date); days_old=max(0,(datetime.now(timezone.utc).date()-obs).days) if obs else 15; distance_score=max(0,1-min(distance_km,100)/100); recency_score=max(0,1-min(days_old,30)/30); return round((.45*status_score+.30*distance_score+.25*recency_score)*100,1)
+def _raw_payload_dict(row):
+    raw = row.get("raw_payload") if isinstance(row, dict) else None
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw.strip():
+        try:
+            payload = json.loads(raw)
+            return payload if isinstance(payload, dict) else {}
+        except Exception:
+            return {}
+    return {}
+
+
+def _event_lifecycle_value(row, payload, key):
+    value = row.get(key) if isinstance(row, dict) else None
+    if value not in (None, ""):
+        return value
+    return payload.get(key) or ""
+
+
 def row_to_public_event(row,distance_km):
+    payload = _raw_payload_dict(row)
     disease_it=row.get("disease_it") or row.get("disease"); status=row.get("diagnosis_status") or "Confermato"
-    return {"id":row.get("external_id") or row.get("id"),"external_id":row.get("external_id"),"disease":disease_it,"disease_original":row.get("disease"),"diagnosis_status":status,"species":row.get("species"),"animal_group":row.get("animal_group"),"observation_date":row.get("observation_date"),"report_date":row.get("report_date") or row.get("observation_date"),"lat":row.get("lat"),"lon":row.get("lon"),"location":row.get("location"),"region":row.get("region"),"country":row.get("country"),"source":row.get("source"),"source_type":row.get("source_type"),"report_type":row.get("report_type"),"url_source":row.get("url_source",""),"distance_km":round(distance_km,2),"risk_score":compute_risk_score(status,distance_km,row.get("observation_date"))}
+    suspected_date = _event_lifecycle_value(row, payload, "suspected_date")
+    confirmed_date = _event_lifecycle_value(row, payload, "confirmed_date")
+    extinction_date = _event_lifecycle_value(row, payload, "extinction_date")
+    event_status = _event_lifecycle_value(row, payload, "event_status")
+    is_active = _event_lifecycle_value(row, payload, "is_active")
+    if not event_status:
+        if extinction_date:
+            event_status = "Estinto"
+        elif confirmed_date:
+            event_status = "Confermato / attivo"
+        elif suspected_date:
+            event_status = "Sospetto"
+    if not is_active and extinction_date:
+        is_active = "false"
+    elif not is_active and (confirmed_date or suspected_date):
+        is_active = "true"
+    return {"id":row.get("external_id") or row.get("id"),"external_id":row.get("external_id"),"disease":disease_it,"disease_original":row.get("disease"),"diagnosis_status":status,"species":row.get("species"),"animal_group":row.get("animal_group"),"observation_date":row.get("observation_date"),"report_date":row.get("report_date") or row.get("observation_date"),"suspected_date":suspected_date,"confirmed_date":confirmed_date,"extinction_date":extinction_date,"event_status":event_status,"is_active":is_active,"lat":row.get("lat"),"lon":row.get("lon"),"location":row.get("location"),"region":row.get("region"),"country":row.get("country"),"source":row.get("source"),"source_type":row.get("source_type"),"report_type":row.get("report_type"),"url_source":row.get("url_source",""),"distance_km":round(distance_km,2),"risk_score":compute_risk_score(status,distance_km,row.get("observation_date"))}
+
 def all_event_rows():
     with connect() as conn:
         rows=[dict(r) for r in conn.execute("SELECT * FROM events").fetchall()]
