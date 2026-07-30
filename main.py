@@ -1152,6 +1152,282 @@ def _v232_decorate_layers(rows):
     return out
 # --- end v232 forced territorial output fields ---
 
+# --- v252 territorial layer clustering for home map labels ---
+TERRITORIAL_CLUSTER_LABELS = {
+    "sand_flies": "Flebotomi",
+    "ticks": "Zecche",
+    "mosquitoes_other_vectors": "Zanzare",
+    "parasites": "Parassiti",
+    "west_nile": "West Nile",
+}
+
+TERRITORIAL_TTL_DAYS = {
+    "sand_flies": 180,
+    "ticks": 180,
+    "mosquitoes_other_vectors": 180,
+    "parasites": 180,
+    "west_nile": 180,
+}
+
+def _cluster_slug(value):
+    text = str(value or "").strip().lower()
+    text = re.sub(r"[^a-z0-9àèéìòù]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    return text or "unknown"
+
+def _cluster_clean_location(value):
+    text = str(value or "").strip()
+    text = re.sub(r"^Provincia di\s+", "", text, flags=re.I).strip()
+    return text
+
+def _cluster_date_value(row):
+    for key in ("last_seen_date", "event_date", "observation_date", "report_date", "period_end", "period_start", "updated_at"):
+        d = parse_date(row.get(key))
+        if d:
+            return d
+    year = str(row.get("year") or "").strip()
+    if re.fullmatch(r"\d{4}", year):
+        try:
+            return datetime(int(year), 12, 31, tzinfo=timezone.utc).date()
+        except Exception:
+            return None
+    return None
+
+def _cluster_iso_date(d):
+    return d.isoformat() if d else ""
+
+def _cluster_display_date(d):
+    if not d:
+        return ""
+    return d.strftime("%d/%m/%y")
+
+def _cluster_valid_until(last_seen, group):
+    if not last_seen:
+        return None
+    ttl = TERRITORIAL_TTL_DAYS.get(group, 180)
+    return last_seen + timedelta(days=ttl)
+
+def _cluster_temporal_status(last_seen, group):
+    if not last_seen:
+        return "unknown"
+    today = datetime.now(timezone.utc).date()
+    age = (today - last_seen).days
+    valid_until = _cluster_valid_until(last_seen, group)
+    if age <= 30:
+        return "recent"
+    if valid_until and today <= valid_until:
+        return "valid"
+    if age <= 365:
+        return "stale"
+    return "historical"
+
+def _cluster_element_label(row):
+    for key in ("scientific_name", "label"):
+        value = str(row.get(key) or "").strip()
+        if value:
+            return value
+    return "Elemento territoriale"
+
+def _cluster_element_key(row):
+    return _cluster_slug(_cluster_element_label(row))
+
+def _cluster_municipality_name(row):
+    for key in ("municipality", "comune", "city", "locality", "location"):
+        value = _cluster_clean_location(row.get(key))
+        if value:
+            return value
+    return "xxx"
+
+def _cluster_province_key(row):
+    province = _cluster_clean_location(row.get("province"))
+    if province:
+        return province
+    # Do not merge non-province records with province records by accident.
+    return "missing"
+
+def _cluster_source_label(row):
+    return str(row.get("display_source") or row.get("source") or "Fonte non specificata").strip()
+
+def _cluster_disease_relevance(row):
+    text = " ".join(str(row.get(k, "") or "") for k in ["label", "scientific_name", "data_type", "category", "notes", "source"]).lower()
+    out = []
+    if "phlebotomus" in text or "flebot" in text or "leish" in text:
+        out.extend(["Leishmaniosi", "Leishmania infantum"])
+    if any(x in text for x in ["ixodes", "rhipicephalus", "dermacentor", "hyalomma", "tick", "zecc"]):
+        out.extend(["Malattie trasmesse da zecche", "Borreliosi/Anaplasmosi/Ehrlichiosi, se pertinenti"])
+    if any(x in text for x in ["aedes", "culex", "anopheles", "mosquito", "zanzar", "culicoides"]):
+        out.extend(["Malattie trasmesse da vettori", "West Nile / Usutu / arbovirosi, se pertinenti"])
+    if "west nile" in text or "wnv" in text:
+        out.append("West Nile virus")
+    if any(x in text for x in ["giardia", "toxocara", "ancylostoma", "dirofilaria", "echinococcus", "parasite", "parassit"]):
+        out.append("Parassitosi animali")
+    seen = []
+    for item in out:
+        if item and item not in seen:
+            seen.append(item)
+    return seen
+
+def _cluster_animal_relevance(row):
+    text = " ".join(str(row.get(k, "") or "") for k in ["label", "scientific_name", "data_type", "category", "notes", "source"]).lower()
+    out = []
+    if "leish" in text or "phlebotomus" in text:
+        out.extend(["Cane", "Mammiferi sensibili"])
+    if "west nile" in text or "wnv" in text:
+        out.extend(["Equidi", "Avifauna", "Uomo"])
+    if any(x in text for x in ["tick", "zecc", "ixodes", "rhipicephalus"]):
+        out.extend(["Cane", "Ruminanti", "Equidi", "Fauna selvatica"])
+    if any(x in text for x in ["parasite", "parassit", "giardia", "toxocara", "ancylostoma"]):
+        out.extend(["Cane", "Gatto", "Animali da compagnia"])
+    if not out and str(row.get("category") or "") == "vectors":
+        out.extend(["Animali sensibili", "Uomo, se zoonosi pertinente"])
+    seen = []
+    for item in out:
+        if item and item not in seen:
+            seen.append(item)
+    return seen
+
+def _cluster_weight(row):
+    try:
+        return max(1, int(float(str(row.get("case_count") or row.get("count") or 1).replace(",", "."))))
+    except Exception:
+        return 1
+
+def _cluster_can_join(cluster, row, cluster_distance_km):
+    if cluster["ui_group"] != row.get("ui_group"):
+        return False
+    if cluster["element_key"] != _cluster_element_key(row):
+        return False
+    if cluster["province_key"] != _cluster_province_key(row):
+        return False
+    try:
+        d = haversine_km(float(cluster["lat"]), float(cluster["lon"]), float(row["lat"]), float(row["lon"]))
+        return d <= float(cluster_distance_km)
+    except Exception:
+        return False
+
+def _cluster_new(row, idx):
+    g = row.get("ui_group") or _v232_group(row)
+    elabel = _cluster_element_label(row)
+    ekey = _cluster_element_key(row)
+    province_key = _cluster_province_key(row)
+    w = _cluster_weight(row)
+    last_seen = _cluster_date_value(row)
+    source = _cluster_source_label(row)
+    mun = _cluster_municipality_name(row)
+    return {
+        "type": "territorial_cluster",
+        "cluster_index": idx,
+        "ui_group": g,
+        "ui_group_label": TERRITORIAL_CLUSTER_LABELS.get(g, UI_GROUP_LABELS.get(g, g)),
+        "element_key": ekey,
+        "element_label": elabel,
+        "province_key": province_key,
+        "province": "" if province_key == "missing" else province_key,
+        "region": row.get("region") or "",
+        "lat": float(row.get("lat")),
+        "lon": float(row.get("lon")),
+        "_lat_weighted_sum": float(row.get("lat")) * w,
+        "_lon_weighted_sum": float(row.get("lon")) * w,
+        "_weight_sum": w,
+        "count": w,
+        "sources": [source] if source else [],
+        "municipalities": [{
+            "name": mun,
+            "province": "" if province_key == "missing" else province_key,
+            "region": row.get("region") or "",
+            "last_seen_date": _cluster_iso_date(last_seen),
+            "display_date": _cluster_display_date(last_seen),
+        }],
+        "disease_relevance": _cluster_disease_relevance(row),
+        "animal_relevance": _cluster_animal_relevance(row),
+        "items": [row],
+        "max_last_seen_date": _cluster_iso_date(last_seen),
+        "min_last_seen_date": _cluster_iso_date(last_seen),
+        "_max_last_seen_obj": last_seen,
+        "_min_last_seen_obj": last_seen,
+    }
+
+def _cluster_add(cluster, row):
+    w = _cluster_weight(row)
+    cluster["_lat_weighted_sum"] += float(row.get("lat")) * w
+    cluster["_lon_weighted_sum"] += float(row.get("lon")) * w
+    cluster["_weight_sum"] += w
+    cluster["lat"] = cluster["_lat_weighted_sum"] / cluster["_weight_sum"]
+    cluster["lon"] = cluster["_lon_weighted_sum"] / cluster["_weight_sum"]
+    cluster["count"] += w
+    source = _cluster_source_label(row)
+    if source and source not in cluster["sources"]:
+        cluster["sources"].append(source)
+    last_seen = _cluster_date_value(row)
+    mun = _cluster_municipality_name(row)
+    province_key = _cluster_province_key(row)
+    muni_key = (mun.lower(), _cluster_iso_date(last_seen), province_key.lower())
+    existing = {(m.get("name", "").lower(), m.get("last_seen_date", ""), (m.get("province") or "").lower()) for m in cluster["municipalities"]}
+    if muni_key not in existing:
+        cluster["municipalities"].append({
+            "name": mun,
+            "province": "" if province_key == "missing" else province_key,
+            "region": row.get("region") or "",
+            "last_seen_date": _cluster_iso_date(last_seen),
+            "display_date": _cluster_display_date(last_seen),
+        })
+    for key, values in (("disease_relevance", _cluster_disease_relevance(row)), ("animal_relevance", _cluster_animal_relevance(row))):
+        for value in values:
+            if value not in cluster[key]:
+                cluster[key].append(value)
+    cluster["items"].append(row)
+    if last_seen:
+        if not cluster.get("_max_last_seen_obj") or last_seen > cluster["_max_last_seen_obj"]:
+            cluster["_max_last_seen_obj"] = last_seen
+            cluster["max_last_seen_date"] = _cluster_iso_date(last_seen)
+        if not cluster.get("_min_last_seen_obj") or last_seen < cluster["_min_last_seen_obj"]:
+            cluster["_min_last_seen_obj"] = last_seen
+            cluster["min_last_seen_date"] = _cluster_iso_date(last_seen)
+
+def cluster_territorial_layers(rows, cluster_distance_km=10, days=365, include_items=False, include_undated=True):
+    clusters = []
+    today = datetime.now(timezone.utc).date()
+    cutoff = today - timedelta(days=int(days)) if days else None
+    for raw in rows or []:
+        row = dict(raw)
+        row = apply_ui_group(row)
+        last_seen = _cluster_date_value(row)
+        if cutoff and last_seen and last_seen < cutoff:
+            continue
+        if cutoff and not last_seen and not include_undated:
+            continue
+        joined = False
+        for cluster in clusters:
+            if _cluster_can_join(cluster, row, cluster_distance_km):
+                _cluster_add(cluster, row)
+                joined = True
+                break
+        if not joined:
+            clusters.append(_cluster_new(row, len(clusters) + 1))
+    final = []
+    for idx, c in enumerate(clusters, start=1):
+        c["id"] = f"territorial-cluster-{c['ui_group']}-{c['element_key']}-{_cluster_slug(c['province_key'])}-{idx:03d}"
+        c["label_collapsed"] = f"{c['ui_group_label']} ({c['count']})"
+        c["radius_km"] = 10 if c.get("ui_group") != "west_nile" else 25
+        max_seen = c.get("_max_last_seen_obj")
+        min_seen = c.get("_min_last_seen_obj")
+        c["valid_until"] = _cluster_iso_date(_cluster_valid_until(max_seen, c.get("ui_group")))
+        c["temporal_status"] = _cluster_temporal_status(max_seen, c.get("ui_group"))
+        c["municipalities"].sort(key=lambda m: (m.get("name") or "", m.get("last_seen_date") or ""))
+        c["sources"].sort()
+        if not include_items:
+            c.pop("items", None)
+        for private_key in ["_lat_weighted_sum", "_lon_weighted_sum", "_weight_sum", "_max_last_seen_obj", "_min_last_seen_obj", "province_key", "cluster_index"]:
+            c.pop(private_key, None)
+        final.append(c)
+    final.sort(key=lambda c: (c.get("ui_group_label", ""), c.get("element_label", ""), c.get("province", ""), -(c.get("count") or 0)))
+    group_counts = {}
+    for c in final:
+        group_counts[c.get("ui_group")] = group_counts.get(c.get("ui_group"), 0) + int(c.get("count") or 0)
+    return final, group_counts
+# --- end v252 territorial layer clustering ---
+
+
 
 @app.post("/sync/territorial-layers/piemonte-liguria/run")
 def run_piem_liguria_vector_import(x_sync_token:str|None=Header(default=None)):
@@ -1251,6 +1527,78 @@ def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None)
         vector_count = len(vector_layers)
     out=_v232_decorate_layers(out)
     return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis,"vector_occurrence_layers":vector_count,"include_vector_occurrences":include_vector_occurrences}
+
+@app.get("/territorial-layers/clusters")
+def get_territorial_layer_clusters(
+    lat: float | None = Query(None),
+    lon: float | None = Query(None),
+    radius_km: float = Query(100, ge=1, le=2000),
+    category: str = Query("all"),
+    days: int = Query(365, ge=1, le=3650),
+    source: str | None = Query(None),
+    species: str = Query("all"),
+    focus: str = Query("all"),
+    leishmaniasis: bool = Query(False),
+    include_vector_occurrences: bool = Query(True),
+    cluster_distance_km: float = Query(10, ge=0.1, le=100),
+    include_items: bool = Query(False),
+    include_undated: bool = Query(True),
+):
+    """Return territorial-context layers grouped for home-map labels.
+
+    Grouping rule: same ui_group + same element + same province + centroid distance
+    within cluster_distance_km. Records in different provinces are never merged,
+    even when their centroids are closer than cluster_distance_km.
+    """
+    layers = load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
+    out = filter_territorial_layers(
+        layers,
+        lat=lat,
+        lon=lon,
+        radius_km=radius_km,
+        category=category,
+        days=days,
+        source=source,
+        distance_fn=haversine_km,
+        parse_date_fn=parse_date,
+    )
+    out = [layer for layer in out if _layer_matches_vector_filters(layer, species=species, focus=focus, leishmaniasis=leishmaniasis)]
+    vector_count = 0
+    if include_vector_occurrences and str(category or "all").lower() in ("all", "vectors"):
+        vector_layers = vector_occurrence_layers_for_area(
+            lat=lat,
+            lon=lon,
+            radius_km=radius_km,
+            species=species,
+            focus=focus,
+            leishmaniasis=leishmaniasis,
+            source=source,
+        )
+        out.extend(vector_layers)
+        vector_count = len(vector_layers)
+    out = _v232_decorate_layers(out)
+    clusters, group_counts = cluster_territorial_layers(
+        out,
+        cluster_distance_km=cluster_distance_km,
+        days=days,
+        include_items=include_items,
+        include_undated=include_undated,
+    )
+    return {
+        "count": len(clusters),
+        "clusters": clusters,
+        "group_counts": group_counts,
+        "source_records": len(out),
+        "source_file": TERRITORIAL_LAYERS_CSV_PATH,
+        "category": category,
+        "days": days,
+        "species": species,
+        "focus": focus,
+        "leishmaniasis": leishmaniasis,
+        "cluster_distance_km": cluster_distance_km,
+        "vector_occurrence_layers": vector_count,
+        "include_vector_occurrences": include_vector_occurrences,
+    }
 
 @app.get("/territorial-layers/vector-occurrences/status")
 def get_territorial_vector_occurrence_layer_status():
