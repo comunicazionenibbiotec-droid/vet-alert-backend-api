@@ -1,6 +1,6 @@
 {
   "version": "v170-data-sources-status",
-  "generated_at": "2026-07-30T10:51:52.210810+00:00",
+  "generated_at": "2026-07-30T10:53:32.296600+00:00",
   "official_events": {
     "adis": {
       "key": "ADIS",
@@ -10,7 +10,7 @@
         "exists": true,
         "path": "data/official_sources/adis_events.csv",
         "size_bytes": 269504,
-        "modified_at": "2026-07-30T10:51:40.823541+00:00"
+        "modified_at": "2026-07-30T10:53:31.990223+00:00"
       },
       "top_diseases": [
         [
@@ -91,7 +91,7 @@
         "exists": true,
         "path": "data/official_sources/wahis_events.csv",
         "size_bytes": 964,
-        "modified_at": "2026-07-30T10:51:40.829291+00:00"
+        "modified_at": "2026-07-30T10:53:31.995904+00:00"
       },
       "top_diseases": [
         [
@@ -123,7 +123,7 @@
         "exists": true,
         "path": "data/official_sources/izs_benv_events.csv",
         "size_bytes": 958254,
-        "modified_at": "2026-07-30T10:51:51.807253+00:00"
+        "modified_at": "2026-07-30T10:53:31.994904+00:00"
       },
       "top_diseases": [
         [
@@ -250,7 +250,7 @@
       "exists": true,
       "path": "data/territorial_layers/territorial_layers.csv",
       "size_bytes": 241405,
-      "modified_at": "2026-07-30T10:51:52.075271+00:00"
+      "modified_at": "2026-07-30T10:53:32.005904+00:00"
     },
     "categories": {
       "vectors": 107,
@@ -383,7 +383,7 @@
         "exists": true,
         "path": "public_html/data/diseases.json",
         "size_bytes": 103793,
-        "modified_at": "2026-07-30T10:51:40.841110+00:00"
+        "modified_at": "2026-07-30T10:53:32.008393+00:00"
       },
       "status": "active"
     },
@@ -412,7 +412,7 @@
         "exists": true,
         "path": "data/official_sources/benv_refresh_metadata.json",
         "size_bytes": 3088,
-        "modified_at": "2026-07-30T10:51:51.820019+00:00"
+        "modified_at": "2026-07-30T10:53:31.990916+00:00"
       },
       "content": {
         "version": "v160-benv-multidisease-reports",
@@ -499,7 +499,7 @@
         "exists": true,
         "path": "data/territorial_layers/refresh_status.json",
         "size_bytes": 1295,
-        "modified_at": "2026-07-30T10:51:52.076856+00:00"
+        "modified_at": "2026-07-30T10:53:32.004904+00:00"
       },
       "content": {
         "version": "v164-territorial-legacy-schema-compatibility",
@@ -562,7 +562,7 @@
         "exists": true,
         "path": "data/territorial_layers/territorial_layers_status_report.json",
         "size_bytes": 3652,
-        "modified_at": "2026-07-30T10:51:52.150033+00:00"
+        "modified_at": "2026-07-30T10:53:32.005904+00:00"
       },
       "content": {
         "version": "v165-territorial-quality-status-report",
@@ -683,7 +683,7 @@
         "exists": true,
         "path": "data/official_sources/benv_backend_sync_status.json",
         "size_bytes": 398,
-        "modified_at": "2026-07-30T10:51:40.824244+00:00"
+        "modified_at": "2026-07-30T10:53:31.990916+00:00"
       },
       "content": {
         "version": "v161-backend-sync-trigger",
