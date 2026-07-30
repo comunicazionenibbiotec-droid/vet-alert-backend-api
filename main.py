@@ -1439,7 +1439,7 @@ def _cluster_group_summaries(clusters):
     out.sort(key=lambda x: ((x.get("min_distance_km") if x.get("min_distance_km") is not None else 999999), _cluster_status_rank(x.get("temporal_status")), x.get("label", "")))
     return out
 
-def cluster_territorial_layers(rows, cluster_distance_km=10, days=365, include_items=False, include_undated=True, lat=None, lon=None, view="home", max_clusters_per_group=None):
+def cluster_territorial_layers(rows, cluster_distance_km=10, days=365, include_items=False, include_undated=True, lat=None, lon=None, view="home", max_clusters_per_group=None, query_radius_km=None):
     clusters = []
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=int(days)) if days else None
@@ -1473,6 +1473,22 @@ def cluster_territorial_layers(rows, cluster_distance_km=10, days=365, include_i
                 c["distance_km"] = None
         else:
             c["distance_km"] = None
+        # v254: keep source-layer radius intersection metadata for the cluster.
+        try:
+            item_source_radii = [float(item.get("source_radius_km", item.get("radius_km", 0)) or 0) for item in c.get("items", [])]
+            source_radius_max = max(item_source_radii) if item_source_radii else 0.0
+        except Exception:
+            source_radius_max = 0.0
+        c["source_radius_km_max"] = round(source_radius_max, 2)
+        if c.get("distance_km") is not None:
+            query_radius = float(query_radius_km) if query_radius_km is not None else 0.0
+            c["within_center_radius"] = bool(c["distance_km"] <= query_radius)
+            c["intersects_search_area"] = bool(c["distance_km"] <= (query_radius + source_radius_max))
+            c["overlap_margin_km"] = round((query_radius + source_radius_max) - float(c["distance_km"]), 2)
+        else:
+            c["within_center_radius"] = None
+            c["intersects_search_area"] = None
+            c["overlap_margin_km"] = None
         c["municipalities"].sort(key=lambda m: (m.get("name") or "", m.get("last_seen_date") or ""))
         c["sources"].sort()
         if not include_items:
@@ -1502,6 +1518,81 @@ def cluster_territorial_layers(rows, cluster_distance_km=10, days=365, include_i
         group_counts[c.get("ui_group")] = group_counts.get(c.get("ui_group"), 0) + int(c.get("count") or 0)
     return final, group_counts, _cluster_group_summaries(final)
 # --- end v253 territorial layer clustering ---
+# --- v254 territorial radius-intersection filtering for contextual layers ---
+def _v254_float(value, default=None):
+    try:
+        if value is None or str(value).strip() == "":
+            return default
+        return float(str(value).replace(",", "."))
+    except Exception:
+        return default
+
+def _v254_layer_radius_km(row):
+    radius = _v254_float(row.get("radius_km"), None)
+    if radius is None:
+        radius = _v254_float(row.get("display_radius_km"), None)
+    if radius is None:
+        return 0.0
+    return max(0.0, float(radius))
+
+def _v254_layer_date(row):
+    try:
+        return _cluster_date_value(row)
+    except Exception:
+        for key in ("last_seen_date", "event_date", "observation_date", "report_date", "period_end", "period_start", "updated_at"):
+            d = parse_date(row.get(key))
+            if d:
+                return d
+    return None
+
+def _v254_filter_territorial_layers(rows, lat=None, lon=None, radius_km=100, category="all", days=365, source=None, include_radius_intersection=True):
+    out = []
+    category_l = str(category or "all").lower().strip()
+    source_l = str(source or "").lower().strip()
+    cutoff = None
+    if days:
+        cutoff = datetime.now(timezone.utc).date() - timedelta(days=int(days))
+    for raw in rows or []:
+        row = dict(raw)
+        row_category = str(row.get("category") or "").lower().strip()
+        if category_l and category_l != "all" and row_category != category_l:
+            try:
+                if _v232_group(row) != category_l and vetector_ui_group(row) != category_l:
+                    continue
+            except Exception:
+                continue
+        if source_l:
+            hay_source = " ".join(str(row.get(k, "") or "") for k in ("source", "display_source", "url_source", "notes")).lower()
+            if source_l not in hay_source:
+                continue
+        d = _v254_layer_date(row)
+        if cutoff and d and d < cutoff:
+            continue
+        if lat is not None and lon is not None:
+            try:
+                row_lat = float(row.get("lat"))
+                row_lon = float(row.get("lon"))
+                distance = haversine_km(float(lat), float(lon), row_lat, row_lon)
+            except Exception:
+                continue
+            layer_radius = _v254_layer_radius_km(row)
+            within_center_radius = distance <= float(radius_km)
+            intersects_search_area = distance <= (float(radius_km) + layer_radius)
+            if include_radius_intersection:
+                if not intersects_search_area:
+                    continue
+            else:
+                if not within_center_radius:
+                    continue
+            row["distance_km"] = round(distance, 2)
+            row["source_radius_km"] = round(layer_radius, 2)
+            row["within_center_radius"] = bool(within_center_radius)
+            row["intersects_search_area"] = bool(intersects_search_area)
+            row["overlap_margin_km"] = round((float(radius_km) + layer_radius) - distance, 2)
+        out.append(row)
+    return out
+# --- end v254 territorial radius-intersection filtering ---
+
 
 
 
@@ -1592,9 +1683,9 @@ def get_territorial_layers_public_status():
     return {"status":"ok","csv":csv_status,"refresh":status}
 
 @app.get("/territorial-layers")
-def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None),species:str=Query("all"),focus:str=Query("all"),leishmaniasis:bool=Query(False),include_vector_occurrences:bool=Query(True)):
+def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None),radius_km:float=Query(100,ge=1,le=2000),category:str=Query("all"),days:int=Query(365,ge=1,le=3650),source:str|None=Query(None),species:str=Query("all"),focus:str=Query("all"),leishmaniasis:bool=Query(False),include_vector_occurrences:bool=Query(True),include_radius_intersection:bool=Query(True)):
     layers=load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
-    out=filter_territorial_layers(layers, lat=lat, lon=lon, radius_km=radius_km, category=category, days=days, source=source, distance_fn=haversine_km, parse_date_fn=parse_date)
+    out=_v254_filter_territorial_layers(layers, lat=lat, lon=lon, radius_km=radius_km, category=category, days=days, source=source, include_radius_intersection=include_radius_intersection)
     out=[layer for layer in out if _layer_matches_vector_filters(layer, species=species, focus=focus, leishmaniasis=leishmaniasis)]
     vector_count = 0
     if include_vector_occurrences and str(category or "all").lower() in ("all", "vectors"):
@@ -1602,7 +1693,7 @@ def get_territorial_layers(lat:float|None=Query(None),lon:float|None=Query(None)
         out.extend(vector_layers)
         vector_count = len(vector_layers)
     out=_v232_decorate_layers(out)
-    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis,"vector_occurrence_layers":vector_count,"include_vector_occurrences":include_vector_occurrences}
+    return {"count":len(out),"layers":out,"source_file":TERRITORIAL_LAYERS_CSV_PATH,"category":category,"days":days,"species":species,"focus":focus,"leishmaniasis":leishmaniasis,"vector_occurrence_layers":vector_count,"include_vector_occurrences":include_vector_occurrences,"include_radius_intersection":include_radius_intersection}
 
 @app.get("/territorial-layers/clusters")
 def get_territorial_layer_clusters(
@@ -1621,10 +1712,11 @@ def get_territorial_layer_clusters(
     include_undated: bool = Query(True),
     view: str = Query("home"),
     max_clusters_per_group: int = Query(10, ge=1, le=200),
+    include_radius_intersection: bool = Query(True),
 ):
     """Return territorial-context layers grouped for home/master map labels."""
     layers = load_territorial_layers(TERRITORIAL_LAYERS_CSV_PATH)
-    out = filter_territorial_layers(
+    out = _v254_filter_territorial_layers(
         layers,
         lat=lat,
         lon=lon,
@@ -1632,8 +1724,7 @@ def get_territorial_layer_clusters(
         category=category,
         days=days,
         source=source,
-        distance_fn=haversine_km,
-        parse_date_fn=parse_date,
+        include_radius_intersection=include_radius_intersection,
     )
     out = [layer for layer in out if _layer_matches_vector_filters(layer, species=species, focus=focus, leishmaniasis=leishmaniasis)]
     vector_count = 0
@@ -1660,6 +1751,7 @@ def get_territorial_layer_clusters(
         lon=lon,
         view=view,
         max_clusters_per_group=max_clusters_per_group,
+        query_radius_km=radius_km,
     )
     return {
         "count": len(clusters),
@@ -1678,6 +1770,7 @@ def get_territorial_layer_clusters(
         "max_clusters_per_group": max_clusters_per_group,
         "vector_occurrence_layers": vector_count,
         "include_vector_occurrences": include_vector_occurrences,
+        "include_radius_intersection": include_radius_intersection,
     }
 
 @app.get("/territorial-layers/vector-occurrences/status")
