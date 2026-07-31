@@ -1,19 +1,19 @@
 {
   "version": "v165-territorial-quality-status-report",
-  "generated_at": "2026-07-30T10:51:52.149811+00:00",
+  "generated_at": "2026-07-31T11:35:57.059518+00:00",
   "input": "data/territorial_layers/territorial_layers.csv",
-  "rows_total": 339,
+  "rows_total": 348,
   "categories": {
     "parasites": {
-      "rows": 205,
+      "rows": 214,
       "sources": {
-        "IZS_BENV": 205
+        "IZS_BENV": 214
       },
       "regions_count": 7,
       "provinces_count": 0,
-      "locations_count": 70,
+      "locations_count": 73,
       "period_start_min": "2026-01-05",
-      "period_end_max": "2026-07-03",
+      "period_end_max": "2026-07-22",
       "status": "official_or_curated_active_if_rows_present",
       "interpretation": "BENV-derived or curated parasitic context; not prevalence estimate",
       "recommended_display": "one aggregated circle per area/category; use source note in popup"
@@ -27,7 +27,7 @@
       "provinces_count": 18,
       "locations_count": 18,
       "period_start_min": "2026-01-01",
-      "period_end_max": "2026-07-30",
+      "period_end_max": "2026-07-31",
       "status": "curated_active",
       "interpretation": "presence/distribution context; not a clinical case count",
       "recommended_display": "one aggregated circle per area/category; opacity by evidence count"
@@ -51,7 +51,7 @@
   },
   "refresh_status": {
     "version": "v164-territorial-legacy-schema-compatibility",
-    "generated_at": "2026-07-30T10:51:52.063069+00:00",
+    "generated_at": "2026-07-31T11:35:56.976259+00:00",
     "sources": [
       {
         "path": "data/territorial_layers/mosquito_alert_layers.csv",
@@ -77,7 +77,7 @@
       {
         "path": "data/territorial_layers/benv_parasite_layers.csv",
         "exists": true,
-        "rows": 205,
+        "rows": 214,
         "skipped": 0,
         "status": "success"
       },
@@ -97,10 +97,10 @@
       }
     ],
     "output": "data/territorial_layers/territorial_layers.csv",
-    "rows_total": 339,
+    "rows_total": 348,
     "categories": {
       "vectors": 107,
-      "parasites": 205,
+      "parasites": 214,
       "west_nile": 27
     }
   },

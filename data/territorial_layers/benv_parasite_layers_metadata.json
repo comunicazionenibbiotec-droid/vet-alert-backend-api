@@ -2,19 +2,19 @@
   "status": "success",
   "source": "data/official_sources/izs_benv_events.csv",
   "output": "data/territorial_layers/benv_parasite_layers.csv",
-  "rows": 205,
+  "rows": 214,
   "by_disease": {
     "Echinococcus spp.": 190,
-    "Leishmania infantum": 15
+    "Leishmania infantum": 24
   },
   "by_region": {
     "Sardegna": 183,
     "Lazio": 5,
     "Abruzzo": 1,
     "Friuli Venezia Giulia": 1,
-    "Toscana": 7,
+    "Toscana": 16,
     "Veneto": 6,
     "Lombardia": 2
   },
-  "generated_at": "2026-07-30T10:51:52.031073Z"
+  "generated_at": "2026-07-31T11:35:56.946088Z"
 }

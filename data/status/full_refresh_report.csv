@@ -11,12 +11,12 @@ step,diseases_validate_public_html,success,True,0,
 step,data_sources_status,success,False,0,
 official_events,adis,value,,,474
 official_events,wahis,value,,,2
-official_events,izs_benv,value,,,1615
-territorial_layers,total,value,,,339
+official_events,izs_benv,value,,,2021
+territorial_layers,total,value,,,348
 territorial_layers,mosquito_alert_layers,value,,,0
 territorial_layers,vectornet_gbif_layers,value,,,34
 territorial_layers,extended_vector_layers,value,,,73
-territorial_layers,benv_parasite_layers,value,,,205
+territorial_layers,benv_parasite_layers,value,,,214
 territorial_layers,west_nile_surveillance,value,,,27
 territorial_layers,esccap_parasites,value,,,0
 catalogs,diseases_public_html,value,,,42
