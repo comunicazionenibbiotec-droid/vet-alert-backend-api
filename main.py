@@ -2076,3 +2076,253 @@ def create_user_suspect(report:UserReport):
 @app.post("/user-reports/positive")
 def create_user_positive(report:UserReport):
     payload=report.model_dump(); payload["external_id"]=f"USER-POSITIVE-{int(datetime.now(timezone.utc).timestamp())}"; payload["diagnosis_status"]="Test rapido positivo"; payload["source_type"]="user"; payload["report_type"]="user_positive"; payload["source"]=payload.get("source") or "Leggi test rapido"; payload["observation_date"]=payload.get("observation_date") or datetime.now(timezone.utc).date().isoformat(); r=upsert_event(payload); return {"status":r,"event":payload}
+
+# --- v257 Master epidemiological intelligence analytics ---
+MASTER_DASHBOARD_TOKEN = os.getenv("MASTER_DASHBOARD_TOKEN", "").strip()
+
+def require_master_token(x_master_token):
+    """Protect Master endpoints when MASTER_DASHBOARD_TOKEN is configured."""
+    if MASTER_DASHBOARD_TOKEN and x_master_token != MASTER_DASHBOARD_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid or missing Master token")
+
+def _master_date(row):
+    return parse_date(row.get("observation_date") or row.get("report_date") or row.get("date"))
+
+def _master_disease(row):
+    return str(row.get("disease_it") or row.get("disease") or "Patologia non specificata").strip()
+
+def _master_source_bucket(row):
+    source = str(row.get("source") or "").lower()
+    report_type = str(row.get("report_type") or "").lower()
+    status = str(row.get("diagnosis_status") or "").lower()
+    source_type = str(row.get("source_type") or "").lower()
+    if "demo" in source:
+        return "demo"
+    if "adis" in source:
+        return "adis"
+    if "wahis" in source:
+        return "wahis"
+    if "benv" in source or "izs" in source or source_type == "official":
+        return "official"
+    if "vet" in report_type or "veterinar" in source or "validat" in status:
+        return "veterinarian_validated"
+    if "positive" in report_type or "rapid" in report_type or "positivo" in status:
+        return "rapid_test_positive"
+    return "user_suspect"
+
+def _master_rows(days=365, disease=None, include_aggregate=True):
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=int(days))
+    disease_l = str(disease or "").strip().lower()
+    rows = []
+    with connect() as conn:
+        rows.extend(dict(r) for r in conn.execute("SELECT * FROM events").fetchall())
+        rows.extend(dict(r) for r in conn.execute("SELECT * FROM official_events").fetchall())
+    out = []
+    for row in rows:
+        d = _master_date(row)
+        if not d or d < cutoff:
+            continue
+        bucket = _master_source_bucket(row)
+        if bucket == "demo":
+            continue
+        if not include_aggregate and bucket in {"adis", "wahis"}:
+            continue
+        name = _master_disease(row)
+        if disease_l and disease_l not in name.lower():
+            continue
+        x = dict(row)
+        x["_date"] = d
+        x["_disease"] = name
+        x["_bucket"] = bucket
+        out.append(x)
+    return out
+
+def _master_month_key(d):
+    return f"{d.year:04d}-{d.month:02d}"
+
+def _master_month_label(key):
+    names = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"]
+    year, month = [int(x) for x in key.split("-")]
+    return f"{names[month-1]} {year}"
+
+def _master_month_keys(days=365):
+    cutoff = datetime.now(timezone.utc).date() - timedelta(days=int(days))
+    today = datetime.now(timezone.utc).date()
+    year, month = cutoff.year, cutoff.month
+    keys = []
+    while (year, month) <= (today.year, today.month):
+        keys.append(f"{year:04d}-{month:02d}")
+        month += 1
+        if month == 13:
+            year += 1
+            month = 1
+    return keys
+
+def _master_linear_fit(values):
+    n = len(values)
+    if n < 2:
+        return {"slope": 0.0, "intercept": float(values[0] if values else 0), "r2": 0.0, "predicted": float(values[0] if values else 0)}
+    xs = list(range(n))
+    mx = sum(xs) / n
+    my = sum(values) / n
+    den = sum((x-mx)**2 for x in xs)
+    slope = sum((x-mx)*(y-my) for x,y in zip(xs,values)) / den if den else 0.0
+    intercept = my - slope*mx
+    fitted = [intercept+slope*x for x in xs]
+    ss_res = sum((y-f)**2 for y,f in zip(values,fitted))
+    ss_tot = sum((y-my)**2 for y in values)
+    r2 = 1.0-ss_res/ss_tot if ss_tot else (1.0 if ss_res == 0 else 0.0)
+    return {"slope": slope, "intercept": intercept, "r2": max(0.0,min(1.0,r2)), "predicted": max(0.0, intercept+slope*n)}
+
+def _master_exponential_fit(values):
+    pairs = [(i,float(v)) for i,v in enumerate(values) if float(v) > 0]
+    if len(pairs) < 3:
+        return {"growth_rate": 0.0, "r2": 0.0, "predicted": 0.0, "usable_months": len(pairs)}
+    xs = [x for x,_ in pairs]
+    ys = [math.log(y) for _,y in pairs]
+    n = len(xs); mx=sum(xs)/n; my=sum(ys)/n
+    den=sum((x-mx)**2 for x in xs)
+    slope=sum((x-mx)*(y-my) for x,y in zip(xs,ys))/den if den else 0.0
+    intercept=my-slope*mx
+    fit=[intercept+slope*x for x in xs]
+    ss_res=sum((y-f)**2 for y,f in zip(ys,fit)); ss_tot=sum((y-my)**2 for y in ys)
+    r2=1.0-ss_res/ss_tot if ss_tot else (1.0 if ss_res == 0 else 0.0)
+    return {"growth_rate": math.exp(slope)-1.0, "r2": max(0.0,min(1.0,r2)), "predicted": max(0.0,math.exp(intercept+slope*len(values))), "usable_months":n}
+
+def _master_trend(values):
+    linear = _master_linear_fit(values)
+    exponential = _master_exponential_fit(values)
+    nonzero = sum(1 for v in values if v > 0)
+    total = sum(values)
+    if len(values) < 3 or nonzero < 2 or total < 3:
+        kind, label, confidence = "insufficient", "Dati insufficienti", "low"
+    elif exponential["usable_months"] >= 6 and exponential["r2"] > linear["r2"] + 0.08 and exponential["growth_rate"] > 0.05:
+        kind, label = "exponential_growth", "Crescita compatibile con andamento esponenziale"
+        confidence = "high" if exponential["r2"] >= .8 else "moderate"
+    elif linear["slope"] > 0.25 and linear["r2"] >= .35:
+        kind, label = "linear_growth", "Crescita lineare"
+        confidence = "high" if linear["r2"] >= .8 else "moderate"
+    elif linear["slope"] < -0.25 and linear["r2"] >= .35:
+        kind, label = "linear_decline", "Diminuzione lineare"
+        confidence = "high" if linear["r2"] >= .8 else "moderate"
+    elif abs(linear["slope"]) <= 0.25:
+        kind, label, confidence = "stable", "Sostanzialmente stabile", "moderate"
+    else:
+        kind, label, confidence = "irregular", "Andamento irregolare", "low"
+    return {
+        "type": kind, "label": label, "confidence": confidence,
+        "linear": {k: round(v,4) for k,v in linear.items()},
+        "exponential": {k: round(v,4) if isinstance(v,float) else v for k,v in exponential.items()},
+        "months_with_cases": nonzero, "total_events": total,
+    }
+
+def _master_monthly(rows, days=365):
+    keys = _master_month_keys(days)
+    buckets = ["official","veterinarian_validated","rapid_test_positive","user_suspect","adis","wahis"]
+    monthly = {k: {"month":k,"label":_master_month_label(k),"total":0, **{b:0 for b in buckets}} for k in keys}
+    for row in rows:
+        key = _master_month_key(row["_date"])
+        if key not in monthly:
+            continue
+        monthly[key]["total"] += 1
+        monthly[key][row["_bucket"]] = monthly[key].get(row["_bucket"],0)+1
+    return [monthly[k] for k in keys]
+
+def _master_centroid(items):
+    pts=[]
+    for row in items:
+        try: pts.append((float(row.get("lat")),float(row.get("lon"))))
+        except Exception: pass
+    if not pts: return None
+    return {"lat":sum(p[0] for p in pts)/len(pts),"lon":sum(p[1] for p in pts)/len(pts),"count":len(pts)}
+
+def _master_geo_forecast(monthly_centroids):
+    """Indicative next-month centroid, available with at least two observed months."""
+    pts=[p for p in monthly_centroids if p.get("lat") is not None and p.get("lon") is not None]
+    if len(pts) < 2:
+        return None
+    xs=list(range(len(pts)))
+    lat_fit=_master_linear_fit([float(p["lat"]) for p in pts])
+    lon_fit=_master_linear_fit([float(p["lon"]) for p in pts])
+    pred_lat=max(-90.0,min(90.0,float(lat_fit["predicted"])))
+    pred_lon=max(-180.0,min(180.0,float(lon_fit["predicted"])))
+    reliability=(lat_fit["r2"]+lon_fit["r2"])/2
+    confidence="moderate" if len(pts)>=4 and reliability>=.45 else "low"
+    return {
+        "month":"next", "label":"Baricentro potenziale mese successivo",
+        "lat":round(pred_lat,6), "lon":round(pred_lon,6),
+        "method":"linear_centroid_extrapolation",
+        "months_used":len(pts), "confidence":confidence,
+        "model_r2":round(reliability,4),
+        "disclaimer":"Stima indicativa basata sullo spostamento dei baricentri osservati; non dimostra trasmissione e non è una previsione clinica.",
+    }
+
+def _master_geo(rows):
+    by_month={}
+    areas={}
+    for row in rows:
+        try: lat=float(row.get("lat")); lon=float(row.get("lon"))
+        except Exception: continue
+        m=_master_month_key(row["_date"])
+        by_month.setdefault(m,[]).append(row)
+        loc=str(row.get("location") or row.get("region") or "Area non specificata").strip()
+        key=(loc,round(lat,3),round(lon,3))
+        area=areas.setdefault(key,{"location":loc,"region":row.get("region") or "","lat":lat,"lon":lon,"count":0,"first_date":row["_date"].isoformat(),"last_date":row["_date"].isoformat()})
+        area["count"]+=1
+        area["first_date"]=min(area["first_date"],row["_date"].isoformat())
+        area["last_date"]=max(area["last_date"],row["_date"].isoformat())
+    centroids=[]
+    for month in sorted(by_month):
+        c=_master_centroid(by_month[month])
+        if c: centroids.append({"month":month,"label":_master_month_label(month),"lat":round(c["lat"],6),"lon":round(c["lon"],6),"count":c["count"]})
+    segments=[]
+    for a,b in zip(centroids,centroids[1:]):
+        segments.append({"from":a,"to":b,"distance_km":round(haversine_km(a["lat"],a["lon"],b["lat"],b["lon"]),2),"type":"observed_centroid_shift"})
+    forecast=_master_geo_forecast(centroids)
+    if forecast and centroids:
+        segments.append({"from":centroids[-1],"to":forecast,"distance_km":round(haversine_km(centroids[-1]["lat"],centroids[-1]["lon"],forecast["lat"],forecast["lon"]),2),"type":"indicative_forecast"})
+    area_list=sorted(areas.values(),key=lambda x:(x["first_date"],-x["count"]))
+    first=area_list[0] if area_list else None
+    return {"first_observed_area":first,"monthly_centroids":centroids,"movement_segments":segments,"forecast_next_month":forecast,"affected_areas":area_list}
+
+@app.get("/master/overview")
+def master_overview(days:int=Query(365,ge=30,le=3650),x_master_token:str|None=Header(default=None)):
+    require_master_token(x_master_token)
+    rows=_master_rows(days=days)
+    diseases=sorted({_master_disease(r) for r in rows})
+    point_rows=[r for r in rows if r["_bucket"] not in {"adis","wahis"}]
+    return {"period_days":days,"events_total":len(rows),"point_events":len(point_rows),"diseases":len(diseases),"municipalities":len({str(r.get('location') or '').strip() for r in point_rows if str(r.get('location') or '').strip()}),"regions":len({str(r.get('region') or '').strip() for r in point_rows if str(r.get('region') or '').strip()}),"sources":dict((b,sum(1 for r in rows if r['_bucket']==b)) for b in sorted({r['_bucket'] for r in rows}))}
+
+@app.get("/master/diseases")
+def master_diseases(days:int=Query(365,ge=30,le=3650),x_master_token:str|None=Header(default=None)):
+    require_master_token(x_master_token)
+    rows=_master_rows(days=days)
+    counts={}
+    for r in rows: counts[r["_disease"]]=counts.get(r["_disease"],0)+1
+    return {"period_days":days,"diseases":[{"disease":k,"count":v} for k,v in sorted(counts.items(),key=lambda kv:(-kv[1],kv[0]))]}
+
+@app.get("/master/disease-trends")
+def master_disease_trends(days:int=Query(365,ge=30,le=3650),disease:str|None=Query(None),x_master_token:str|None=Header(default=None)):
+    require_master_token(x_master_token)
+    rows=_master_rows(days=days,disease=disease)
+    if disease:
+        monthly=_master_monthly(rows,days)
+        values=[m["total"] for m in monthly]
+        return {"period_days":days,"disease":disease,"monthly":monthly,"trend":_master_trend(values)}
+    grouped={}
+    for r in rows: grouped.setdefault(r["_disease"],[]).append(r)
+    out=[]
+    for name,items in grouped.items():
+        monthly=_master_monthly(items,days); trend=_master_trend([m["total"] for m in monthly])
+        out.append({"disease":name,"monthly":monthly,"trend":trend})
+    out.sort(key=lambda x:(x["trend"]["type"]!="exponential_growth",x["trend"]["type"]!="linear_growth",-x["trend"]["total_events"],x["disease"]))
+    return {"period_days":days,"diseases":out}
+
+@app.get("/master/geographic-spread")
+def master_geographic_spread(days:int=Query(365,ge=30,le=3650),disease:str=Query(...),x_master_token:str|None=Header(default=None)):
+    require_master_token(x_master_token)
+    # Geographic arrows use point-like evidence only. Country aggregates remain in trend panels.
+    rows=_master_rows(days=days,disease=disease,include_aggregate=False)
+    return {"period_days":days,"disease":disease,**_master_geo(rows)}
+# --- end v257 Master epidemiological intelligence analytics ---
+
