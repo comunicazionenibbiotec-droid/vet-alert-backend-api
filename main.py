@@ -2257,103 +2257,20 @@ def _master_geo_forecast(monthly_centroids):
         "disclaimer":"Stima indicativa basata sullo spostamento dei baricentri osservati; non dimostra trasmissione e non è una previsione clinica.",
     }
 
-def _master_event_payload(row):
-    """Return one punctual Master event for branch/sequence reconstruction.
-
-    These records are not meant to be shown as individual markers on the
-    Master map. They are the atomic inputs used to infer independent starts,
-    consecutive signals, branch checkpoints, and perimeter areas.
-    """
-    try:
-        lat = float(row.get("lat"))
-        lon = float(row.get("lon"))
-    except Exception:
-        return None
-
-    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
-        return None
-
-    event_date = row.get("_date") or _master_date(row)
-    if not event_date:
-        return None
-
-    external_id = row.get("external_id") or row.get("id")
-    location = str(row.get("location") or row.get("municipality") or row.get("region") or "Area non specificata").strip()
-    species = str(row.get("species") or "").strip()
-    animal_group = str(row.get("animal_group") or "").strip()
-    source_bucket = row.get("_bucket") or _master_source_bucket(row)
-
-    return {
-        "id": str(external_id or f"master-event-{event_date.isoformat()}-{lat:.6f}-{lon:.6f}"),
-        "external_id": external_id,
-        "date": event_date.isoformat(),
-        "observation_date": row.get("observation_date") or row.get("report_date") or event_date.isoformat(),
-        "disease": row.get("_disease") or _master_disease(row),
-        "location": location,
-        "region": row.get("region") or "",
-        "country": row.get("country") or "Italy",
-        "lat": round(lat, 6),
-        "lon": round(lon, 6),
-        "species": species,
-        "animal_group": animal_group,
-        "source": row.get("source") or "",
-        "source_type": row.get("source_type") or "",
-        "report_type": row.get("report_type") or "",
-        "source_bucket": source_bucket,
-        "diagnosis_status": row.get("diagnosis_status") or "",
-    }
-
-
 def _master_geo(rows):
     by_month={}
     areas={}
-    events=[]
-    regions=set()
-    species_set=set()
-
     for row in rows:
-        event = _master_event_payload(row)
-        if not event:
-            continue
-
-        events.append(event)
-        if event.get("region"):
-            regions.add(str(event["region"]).strip())
-        if event.get("species"):
-            species_set.add(str(event["species"]).strip())
-
-        lat=float(event["lat"]); lon=float(event["lon"])
-        loc=event["location"]
-        event_date=parse_date(event["date"])
-        if not event_date:
-            continue
-
-        row_for_month=dict(row)
-        row_for_month["_date"]=event_date
-        by_month.setdefault(_master_month_key(event_date),[]).append(row_for_month)
-
+        try: lat=float(row.get("lat")); lon=float(row.get("lon"))
+        except Exception: continue
+        m=_master_month_key(row["_date"])
+        by_month.setdefault(m,[]).append(row)
+        loc=str(row.get("location") or row.get("region") or "Area non specificata").strip()
         key=(loc,round(lat,3),round(lon,3))
-        area=areas.setdefault(key,{
-            "location":loc,
-            "region":event.get("region") or "",
-            "lat":lat,
-            "lon":lon,
-            "count":0,
-            "first_date":event_date.isoformat(),
-            "last_date":event_date.isoformat(),
-            "species":[],
-            "sources":{},
-        })
+        area=areas.setdefault(key,{"location":loc,"region":row.get("region") or "","lat":lat,"lon":lon,"count":0,"first_date":row["_date"].isoformat(),"last_date":row["_date"].isoformat()})
         area["count"]+=1
-        area["first_date"]=min(area["first_date"],event_date.isoformat())
-        area["last_date"]=max(area["last_date"],event_date.isoformat())
-        if event.get("species") and event["species"] not in area["species"]:
-            area["species"].append(event["species"])
-        bucket=event.get("source_bucket") or "unknown"
-        area["sources"][bucket]=area["sources"].get(bucket,0)+1
-
-    events.sort(key=lambda x:(x.get("date") or "", x.get("id") or ""))
-
+        area["first_date"]=min(area["first_date"],row["_date"].isoformat())
+        area["last_date"]=max(area["last_date"],row["_date"].isoformat())
     centroids=[]
     for month in sorted(by_month):
         c=_master_centroid(by_month[month])
@@ -2366,25 +2283,7 @@ def _master_geo(rows):
         segments.append({"from":centroids[-1],"to":forecast,"distance_km":round(haversine_km(centroids[-1]["lat"],centroids[-1]["lon"],forecast["lat"],forecast["lon"]),2),"type":"indicative_forecast"})
     area_list=sorted(areas.values(),key=lambda x:(x["first_date"],-x["count"]))
     first=area_list[0] if area_list else None
-    return {
-        "first_observed_area":first,
-        "monthly_centroids":centroids,
-        "movement_segments":segments,
-        "forecast_next_month":forecast,
-        "affected_areas":area_list,
-        "events":events,
-        "events_count":len(events),
-        "regions_involved":sorted(r for r in regions if r),
-        "species_involved":sorted(s for s in species_set if s),
-        "sequence_parameters":{
-            "distance_threshold_km":25,
-            "time_threshold_days":30,
-            "priority_fast_window_days":15,
-            "checkpoint_size":10,
-            "branch_distance_km":25,
-            "recommended_owner":"backend-or-frontend-sequence-builder"
-        }
-    }
+    return {"first_observed_area":first,"monthly_centroids":centroids,"movement_segments":segments,"forecast_next_month":forecast,"affected_areas":area_list}
 
 @app.get("/master/overview")
 def master_overview(days:int=Query(365,ge=30,le=3650),x_master_token:str|None=Header(default=None)):
