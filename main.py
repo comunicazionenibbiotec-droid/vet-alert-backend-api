@@ -49,7 +49,7 @@ DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
 TERRITORIAL_LAYERS_CSV_PATH=os.getenv("TERRITORIAL_LAYERS_CSV_PATH","data/territorial_layers/territorial_layers.csv")
 WEST_NILE_CSV_PATH=os.getenv("WEST_NILE_CSV_PATH","data/territorial_layers/west_nile_surveillance.csv")
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.5-data-sources-status-v170")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.6-geocoding-db-fix-v266")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -704,6 +704,65 @@ def _run_local_script_json(script_args, timeout_seconds, sync_source, started_at
     except Exception:
         return {"stdout":p.stdout[-4000:]}
 
+
+
+def apply_geocoding_fixes_to_db():
+    """Apply municipal geocoding corrections from CSV report to SQLite tables.
+
+    This step updates both official_events and events after official CSV reloads,
+    so corrected municipal coordinates are not overwritten by the IZS/BENV sync.
+    """
+    started = now_iso()
+    script_path = os.getenv("GEOCODING_FIX_SCRIPT_PATH", "scripts/apply_geocoding_fix_report_v265.py")
+    report_path = os.getenv("GEOCODING_FIX_REPORT_PATH", "data/official_sources/geocoding_fix_report_v256.csv")
+    timeout = int(os.getenv("GEOCODING_FIX_APPLY_TIMEOUT_SECONDS", "600"))
+
+    if not os.path.exists(script_path):
+        message = f"Geocoding apply script not found: {script_path}"
+        log_sync("GEOCODING_FIX_APPLY", "error", message, 0, 0, 0, started)
+        raise HTTPException(status_code=500, detail=message)
+
+    if not os.path.exists(report_path):
+        message = f"Geocoding fix report not found: {report_path}"
+        log_sync("GEOCODING_FIX_APPLY", "error", message, 0, 0, 0, started)
+        raise HTTPException(status_code=500, detail=message)
+
+    result = _run_local_script_json(
+        [script_path, "--db", DB_PATH, "--report", report_path],
+        timeout,
+        "GEOCODING_FIX_APPLY",
+        started,
+    )
+
+    updated_official = int(result.get("updated_official_events", 0) or result.get("updated_official", 0) or 0)
+    updated_events = int(result.get("updated_events", 0) or 0)
+    considered = int(result.get("considered_changed_rows", 0) or result.get("changed_rows", 0) or 0)
+    skipped = int(result.get("skipped", 0) or 0)
+    total_updated = updated_official + updated_events
+
+    message = (
+        "Applied geocoding fixes to database; "
+        f"considered_changed_rows={considered}; "
+        f"updated_official_events={updated_official}; "
+        f"updated_events={updated_events}; skipped={skipped}"
+    )
+    log_sync("GEOCODING_FIX_APPLY", "success", message, considered, 0, total_updated, started)
+    out = dict(result)
+    out["status"] = out.get("status") or "success"
+    out["source"] = "GEOCODING_FIX_APPLY"
+    out["message"] = message
+    out["records_updated"] = total_updated
+    out["report_path"] = report_path
+    out["db_path"] = DB_PATH
+    return out
+
+
+@app.post("/sync/geocoding/apply-fixes")
+def run_geocoding_fix_apply(x_sync_token: str | None = Header(default=None)):
+    """Apply geocoding_fix_report_v256.csv corrections to the live SQLite DB."""
+    require_sync_token(x_sync_token)
+    return apply_geocoding_fixes_to_db()
+
 @app.post("/sync/safe-refresh/run")
 def run_safe_refresh_pipeline(mode:str=Query("light"), x_sync_token:str|None=Header(default=None)):
     require_sync_token(x_sync_token)
@@ -737,6 +796,7 @@ def run_safe_refresh_pipeline(mode:str=Query("light"), x_sync_token:str|None=Hea
             result["steps"]["wahis"] = sync_wahis_events()
             result["steps"]["izs_benv"] = sync_izs_benv_events()
             result["steps"]["official_demo"] = sync_official_events()
+            result["steps"]["apply_geocoding_fixes_to_db"] = apply_geocoding_fixes_to_db()
         result["finished_at"] = now_iso()
         log_sync("SAFE_REFRESH_PIPELINE","success",f"Safe refresh completed mode={mode}",0,0,0,started)
         return result
@@ -748,7 +808,7 @@ def run_safe_refresh_pipeline(mode:str=Query("light"), x_sync_token:str|None=Hea
 
 @app.get("/sync/status")
 def get_sync_status():
-    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","TERRITORIAL_LAYERS","MOSQUITO_ALERT_TERRITORIAL","VECTORNET_GBIF_TERRITORIAL","ISS_IZS_WNV_TERRITORIAL","TERRITORIAL_LAYERS_ALL"]
+    sources=["seed_data","OFFICIAL_DEMO","WAHIS_CSV","WAHIS_CSV_UPLOAD","ADIS_CSV","IZS_BENV_CSV","MYVBDMAP_CSV","demo_365","SAFE_REFRESH_PIPELINE","GEOCODING_FIX_APPLY","TERRITORIAL_LAYERS","MOSQUITO_ALERT_TERRITORIAL","VECTORNET_GBIF_TERRITORIAL","ISS_IZS_WNV_TERRITORIAL","TERRITORIAL_LAYERS_ALL"]
     out={}
     with connect() as conn:
         for source in sources:
