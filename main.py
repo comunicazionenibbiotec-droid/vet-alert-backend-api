@@ -49,7 +49,7 @@ DEMO_365_COUNT=int(os.getenv("DEMO_365_COUNT","280"))
 EARTH_RADIUS_KM=6371.0
 TERRITORIAL_LAYERS_CSV_PATH=os.getenv("TERRITORIAL_LAYERS_CSV_PATH","data/territorial_layers/territorial_layers.csv")
 WEST_NILE_CSV_PATH=os.getenv("WEST_NILE_CSV_PATH","data/territorial_layers/west_nile_surveillance.csv")
-app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.6-geocoding-db-fix-v266")
+app=FastAPI(title="vet.ector Veterinary Alert API", version="2.3.7-geocoding-master-events-v267")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 scheduler=BackgroundScheduler()
 
@@ -611,10 +611,10 @@ def sync_vectornet_gbif_occurrences(species_list=None, limit_per_species=None, m
 
 @app.on_event("startup")
 def startup():
-    init_db(); init_vector_surveillance_db(); seed_leishmaniasis_vector_species(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events(); sync_myvbdmap_events()
+    init_db(); init_vector_surveillance_db(); seed_leishmaniasis_vector_species(); sync_seed_data(); sync_official_events(); sync_wahis_events(); sync_adis_events(); sync_izs_benv_events_corrected(); sync_myvbdmap_events()
     if AUTO_POPULATE_DEMO_365: populate_demo_365(DEMO_365_COUNT)
     if ENABLE_SCHEDULER and not scheduler.running:
-        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.add_job(sync_vectornet_gbif_occurrences,"interval",hours=VECTORNET_SYNC_INTERVAL_HOURS,id="vectornet_gbif_occurrences_sync",replace_existing=True); scheduler.start()
+        scheduler.add_job(sync_official_events,"interval",hours=SYNC_INTERVAL_HOURS,id="official_sync",replace_existing=True); scheduler.add_job(sync_wahis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="wahis_csv_sync",replace_existing=True); scheduler.add_job(sync_adis_events,"interval",hours=SYNC_INTERVAL_HOURS,id="adis_csv_sync",replace_existing=True); scheduler.add_job(sync_izs_benv_events_corrected,"interval",hours=SYNC_INTERVAL_HOURS,id="izs_benv_csv_sync",replace_existing=True); scheduler.add_job(sync_myvbdmap_events,"interval",hours=SYNC_INTERVAL_HOURS,id="myvbdmap_csv_sync",replace_existing=True); scheduler.add_job(sync_vectornet_gbif_occurrences,"interval",hours=VECTORNET_SYNC_INTERVAL_HOURS,id="vectornet_gbif_occurrences_sync",replace_existing=True); scheduler.start()
 @app.on_event("shutdown")
 def shutdown():
     if scheduler.running: scheduler.shutdown(wait=False)
@@ -656,7 +656,7 @@ def get_adis_status():
     with connect() as conn: row=conn.execute("SELECT * FROM sync_log WHERE source LIKE 'ADIS%' ORDER BY id DESC LIMIT 1").fetchone()
     return {"status":"never_run" if row is None else "ok", "last_sync": None if row is None else dict(row)}
 @app.post("/sync/izs-benv/run")
-def run_izs_benv_sync(): return sync_izs_benv_events()
+def run_izs_benv_sync(): return sync_izs_benv_events_corrected()
 
 @app.get("/sync/izs-benv/status")
 def get_izs_benv_status():
@@ -756,6 +756,25 @@ def apply_geocoding_fixes_to_db():
     out["db_path"] = DB_PATH
     return out
 
+
+def sync_izs_benv_events_corrected():
+    """Sync IZS/BENV official events, then immediately re-apply municipal geocoding fixes.
+
+    This prevents the BENV/IZS reload from overwriting corrected municipal coordinates
+    with province-capital or fallback coordinates.
+    """
+    sync_result = sync_izs_benv_events()
+    try:
+        fix_result = apply_geocoding_fixes_to_db()
+    except Exception as exc:
+        # Do not hide the fact that BENV sync succeeded, but make the coordinate issue visible.
+        sync_result = dict(sync_result or {})
+        sync_result["geocoding_fix_status"] = "error"
+        sync_result["geocoding_fix_error"] = str(exc)
+        return sync_result
+    sync_result = dict(sync_result or {})
+    sync_result["geocoding_fix"] = fix_result
+    return sync_result
 
 @app.post("/sync/geocoding/apply-fixes")
 def run_geocoding_fix_apply(x_sync_token: str | None = Header(default=None)):
@@ -2378,11 +2397,81 @@ def master_disease_trends(days:int=Query(365,ge=30,le=3650),disease:str|None=Que
     out.sort(key=lambda x:(x["trend"]["type"]!="exponential_growth",x["trend"]["type"]!="linear_growth",-x["trend"]["total_events"],x["disease"]))
     return {"period_days":days,"diseases":out}
 
+def _master_event_payload(row):
+    try:
+        lat = float(row.get("lat"))
+        lon = float(row.get("lon"))
+    except Exception:
+        return None
+    d = row.get("_date") or _master_date(row)
+    if not d:
+        return None
+    payload = _raw_payload_dict(row)
+    return {
+        "id": row.get("external_id") or row.get("id"),
+        "external_id": row.get("external_id"),
+        "date": d.isoformat(),
+        "observation_date": row.get("observation_date") or d.isoformat(),
+        "report_date": row.get("report_date") or row.get("observation_date") or d.isoformat(),
+        "disease": row.get("_disease") or _master_disease(row),
+        "disease_original": row.get("disease"),
+        "location": row.get("location") or "",
+        "municipality": row.get("location") or "",
+        "region": row.get("region") or "",
+        "country": row.get("country") or "Italy",
+        "lat": lat,
+        "lon": lon,
+        "species": row.get("species") or "",
+        "animal_group": row.get("animal_group") or "",
+        "source": row.get("source") or "",
+        "source_type": row.get("source_type") or "",
+        "source_bucket": row.get("_bucket") or _master_source_bucket(row),
+        "report_type": row.get("report_type") or "",
+        "diagnosis_status": row.get("diagnosis_status") or "",
+        "geocoding_corrected": bool(row.get("geocoding_corrected")),
+        "geocoding_quality": row.get("geocoding_quality") or "",
+        "geocoding_shift_km": row.get("geocoding_shift_km"),
+    }
+
+def _master_event_payloads(rows):
+    events = []
+    for row in rows or []:
+        event = _master_event_payload(row)
+        if event is not None:
+            events.append(event)
+    events.sort(key=lambda e: (e.get("date") or "", e.get("external_id") or str(e.get("id") or "")))
+    return events
+
 @app.get("/master/geographic-spread")
 def master_geographic_spread(days:int=Query(365,ge=30,le=3650),disease:str=Query(...),x_master_token:str|None=Header(default=None)):
     require_master_token(x_master_token)
-    # Geographic arrows use point-like evidence only. Country aggregates remain in trend panels.
+    # Geographic spread uses point-like evidence only. Country aggregates remain in trend panels.
     rows=_master_rows(days=days,disease=disease,include_aggregate=False)
-    return {"period_days":days,"disease":disease,**_master_geo(rows)}
+    events=_master_event_payloads(rows)
+    regions=sorted({str(e.get("region") or "").strip() for e in events if str(e.get("region") or "").strip()})
+    species=sorted({str(e.get("species") or "").strip() for e in events if str(e.get("species") or "").strip()})
+    geo=_master_geo(rows)
+    return {
+        "period_days": days,
+        "disease": disease,
+        **geo,
+        "events": events,
+        "events_count": len(events),
+        "regions_involved": regions,
+        "species_involved": species,
+        "summary": {
+            "total_events": len(events),
+            "total_regions": len(regions),
+            "total_species": len(species),
+        },
+        "sequence_parameters": {
+            "distance_threshold_km": 25,
+            "time_threshold_days": 30,
+            "distance_weight": 0.65,
+            "time_weight": 0.35,
+            "checkpoint_step_events": 5,
+            "propagation_radius_km": 10,
+        },
+    }
 # --- end v257 Master epidemiological intelligence analytics ---
 
