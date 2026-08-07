@@ -1,6 +1,6 @@
 {
   "version": "v165-territorial-quality-status-report",
-  "generated_at": "2026-08-06T05:35:24.977531+00:00",
+  "generated_at": "2026-08-07T04:44:01.556810+00:00",
   "input": "data/territorial_layers/territorial_layers.csv",
   "rows_total": 348,
   "categories": {
@@ -27,7 +27,7 @@
       "provinces_count": 18,
       "locations_count": 18,
       "period_start_min": "2026-01-01",
-      "period_end_max": "2026-08-06",
+      "period_end_max": "2026-08-07",
       "status": "curated_active",
       "interpretation": "presence/distribution context; not a clinical case count",
       "recommended_display": "one aggregated circle per area/category; opacity by evidence count"
@@ -51,7 +51,7 @@
   },
   "refresh_status": {
     "version": "v164-territorial-legacy-schema-compatibility",
-    "generated_at": "2026-08-06T05:35:24.892508+00:00",
+    "generated_at": "2026-08-07T04:44:01.467968+00:00",
     "sources": [
       {
         "path": "data/territorial_layers/mosquito_alert_layers.csv",
