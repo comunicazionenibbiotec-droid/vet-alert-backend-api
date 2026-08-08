@@ -1,6 +1,6 @@
 {
   "version": "v164-territorial-legacy-schema-compatibility",
-  "generated_at": "2026-08-07T04:44:01.467968+00:00",
+  "generated_at": "2026-08-08T03:58:33.301375+00:00",
   "sources": [
     {
       "path": "data/territorial_layers/mosquito_alert_layers.csv",
@@ -26,7 +26,7 @@
     {
       "path": "data/territorial_layers/benv_parasite_layers.csv",
       "exists": true,
-      "rows": 214,
+      "rows": 24,
       "skipped": 0,
       "status": "success"
     },
@@ -46,10 +46,10 @@
     }
   ],
   "output": "data/territorial_layers/territorial_layers.csv",
-  "rows_total": 348,
+  "rows_total": 158,
   "categories": {
     "vectors": 107,
-    "parasites": 214,
+    "parasites": 24,
     "west_nile": 27
   }
 }

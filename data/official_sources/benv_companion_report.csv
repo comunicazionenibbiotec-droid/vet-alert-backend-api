@@ -1,4 +1,6 @@
 disease_it,disease,dog_events,cat_events,companion_total,total_events,regions,source_files
+Leptospirosi,Leptospirosi,32,0,32,51,Abruzzo; Friuli Venezia Giulia; Lazio; Lombardia; Marche; Puglia; Sardegna; Toscana; Umbria; Veneto,leptospirosi_2025_italia.xlsx; leptospirosi_2026_italia.xlsx
 Leishmaniosi,Leishmaniosis,24,0,24,24,Lombardia; Toscana; Veneto,leishmaniosi_2026_italia.xlsx
-Leptospirosi,Leptospirosi,13,0,13,20,Abruzzo; Friuli Venezia Giulia; Lazio; Lombardia; Sardegna; Toscana; Veneto,leptospirosi_2026_italia.xlsx
+Influenza aviaria ad alta patogenicita,Highly pathogenic avian influenza,0,1,1,153,Emilia Romagna; Friuli Venezia Giulia; Lombardia; Toscana; Umbria; Veneto,influenza_aviaria_pollame_2025_italia.xlsx; influenza_aviaria_pollame_2026_italia.xlsx; influenza_aviaria_selvaggina_2026_italia.xlsx
 Rabbia,Rabies,1,0,1,1,Veneto,rabbia_2026_italia.xlsx
+Tubercolosi bovina / MTBC,Mycobacterium tuberculosis complex,0,1,1,509,Abruzzo; Basilicata; Calabria; Campania; Emilia Romagna; Lazio; Lombardia; Marche; Molise; Piemonte; Puglia; Sardegna; Sicilia; Toscana; Trentino Alto Adige; Umbria; Veneto,paratubercolosi_2025_italia.xlsx; paratubercolosi_2026_italia.xlsx; tubercolosi_2025_italia.xlsx; tubercolosi_2026_italia.xlsx; tubercolosi_bovina_2025_italia.xlsx; tubercolosi_bovina_2026_italia.xlsx
