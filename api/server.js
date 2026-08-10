@@ -27,6 +27,7 @@ app.use(cors({
   }
 }));
 app.use(express.json({ limit: '2mb' }));
+app.use("/admin", adminOutbreaksRouter);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.get('/health', async (req, res, next) => {

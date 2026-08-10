@@ -1,0 +1,14 @@
+
+# Local env files with secrets
+env/backend-api.env
+env/importers.env
+
+# Database backups
+backup_before_benv_2025_2026_rebuild.sql
+backup_after_schema_init.sql
+backup_after_benv_2025_2026_import.sql
+backup_after_benv_field_backfill.sql
+backup_after_outbreak_branching_migration.sql
+backup_after_geolocation_fix_and_outbreak_rebuild.sql
+backup_after_final_alias_geolocation_and_rebuild.sql
+backup_after_final_coordinate_range_fix_and_rebuild.sql
