@@ -1,6 +1,6 @@
 {
   "version": "v170-data-sources-status",
-  "generated_at": "2026-09-18T07:37:46.702465+00:00",
+  "generated_at": "2026-09-19T07:32:57.597190+00:00",
   "official_events": {
     "adis": {
       "key": "ADIS",
@@ -10,7 +10,7 @@
         "exists": true,
         "path": "data/official_sources/adis_events.csv",
         "size_bytes": 269504,
-        "modified_at": "2026-09-18T07:37:33.884509+00:00"
+        "modified_at": "2026-09-19T07:32:44.378800+00:00"
       },
       "top_diseases": [
         [
@@ -91,7 +91,7 @@
         "exists": true,
         "path": "data/official_sources/wahis_events.csv",
         "size_bytes": 964,
-        "modified_at": "2026-09-18T07:37:33.899787+00:00"
+        "modified_at": "2026-09-19T07:32:44.395801+00:00"
       },
       "top_diseases": [
         [
@@ -123,7 +123,7 @@
         "exists": true,
         "path": "data/official_sources/izs_benv_events.csv",
         "size_bytes": 5379029,
-        "modified_at": "2026-09-18T07:37:46.161022+00:00"
+        "modified_at": "2026-09-19T07:32:56.970874+00:00"
       },
       "top_diseases": [
         [
@@ -252,7 +252,7 @@
       "exists": true,
       "path": "data/territorial_layers/territorial_layers.csv",
       "size_bytes": 101132,
-      "modified_at": "2026-09-18T07:37:46.580030+00:00"
+      "modified_at": "2026-09-19T07:32:57.459877+00:00"
     },
     "categories": {
       "vectors": 107,
@@ -379,7 +379,7 @@
         "exists": true,
         "path": "public_html/data/diseases.json",
         "size_bytes": 103793,
-        "modified_at": "2026-09-18T07:37:33.918152+00:00"
+        "modified_at": "2026-09-19T07:32:44.415851+00:00"
       },
       "status": "active"
     },
@@ -408,11 +408,11 @@
         "exists": true,
         "path": "data/official_sources/benv_refresh_metadata.json",
         "size_bytes": 5118,
-        "modified_at": "2026-09-18T07:37:46.217292+00:00"
+        "modified_at": "2026-09-19T07:32:57.034331+00:00"
       },
       "content": {
         "version": "v250-benv-event-lifecycle-dates",
-        "generated_at": "2026-09-18T07:37:46.217061Z",
+        "generated_at": "2026-09-19T07:32:57.033967Z",
         "input_dir": "data/raw/benv_exports",
         "input_files": [
           "data/raw/benv_exports/aethina_tumida_2025_italia.xlsx",
@@ -530,11 +530,11 @@
         "exists": true,
         "path": "data/territorial_layers/refresh_status.json",
         "size_bytes": 1293,
-        "modified_at": "2026-09-18T07:37:46.581123+00:00"
+        "modified_at": "2026-09-19T07:32:57.461481+00:00"
       },
       "content": {
         "version": "v164-territorial-legacy-schema-compatibility",
-        "generated_at": "2026-09-18T07:37:46.575282+00:00",
+        "generated_at": "2026-09-19T07:32:57.454881+00:00",
         "sources": [
           {
             "path": "data/territorial_layers/mosquito_alert_layers.csv",
@@ -593,11 +593,11 @@
         "exists": true,
         "path": "data/territorial_layers/territorial_layers_status_report.json",
         "size_bytes": 3648,
-        "modified_at": "2026-09-18T07:37:46.643679+00:00"
+        "modified_at": "2026-09-19T07:32:57.532668+00:00"
       },
       "content": {
         "version": "v165-territorial-quality-status-report",
-        "generated_at": "2026-09-18T07:37:46.643480+00:00",
+        "generated_at": "2026-09-19T07:32:57.532442+00:00",
         "input": "data/territorial_layers/territorial_layers.csv",
         "rows_total": 158,
         "categories": {
@@ -624,7 +624,7 @@
             "provinces_count": 18,
             "locations_count": 18,
             "period_start_min": "2026-01-01",
-            "period_end_max": "2026-09-18",
+            "period_end_max": "2026-09-19",
             "status": "curated_active",
             "interpretation": "presence/distribution context; not a clinical case count",
             "recommended_display": "one aggregated circle per area/category; opacity by evidence count"
@@ -648,7 +648,7 @@
         },
         "refresh_status": {
           "version": "v164-territorial-legacy-schema-compatibility",
-          "generated_at": "2026-09-18T07:37:46.575282+00:00",
+          "generated_at": "2026-09-19T07:32:57.454881+00:00",
           "sources": [
             {
               "path": "data/territorial_layers/mosquito_alert_layers.csv",
@@ -714,7 +714,7 @@
         "exists": true,
         "path": "data/official_sources/benv_backend_sync_status.json",
         "size_bytes": 398,
-        "modified_at": "2026-09-18T07:37:33.885787+00:00"
+        "modified_at": "2026-09-19T07:32:44.380800+00:00"
       },
       "content": {
         "version": "v161-backend-sync-trigger",
