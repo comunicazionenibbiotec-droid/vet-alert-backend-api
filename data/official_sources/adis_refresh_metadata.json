@@ -2,7 +2,7 @@
   "source": "ADIS",
   "url": "https://webgate.ec.europa.eu/tracesnt/adis/public/notification/outbreaks-current-year-report",
   "country": "Italy",
-  "generated_at": "2026-10-16T07:26:57.933344+00:00",
+  "generated_at": "2026-10-17T07:07:47.777742+00:00",
   "response_content_type": "application/pdf",
   "response_size": 546414,
   "parser_mode": "",
